@@ -784,7 +784,7 @@ success = { metric = "return", min = 450, text = "end up balancing the pole in t
 title = "PPO swings a pendulum up"
 env = "pendulum"
 racers = [{ recording = "ppo-pendulum" }]
-charts = ["return", "test", "kl"]
+charts = ["return", "test", "kl", "jitter-train"]
 film = [0, 3, 5, 10, 40]
 intro = "The motor is too weak to lift the pendulum straight up: it has to swing. Four workers play at once; every 512 of their steps, PPO takes ten clipped passes over the batch. The policy is a bell curve over the torque, and the critic learns what each angle and spin is worth. After every block of 5,000 steps the policy plays one test episode of 200 steps, from the same start every time; every step costs the angle from upright, the spin and the torque, so 0 is the best there is."
 success = { metric = "return", min = -250, text = "end up swinging it up and holding it, −250 or better per training episode" }
