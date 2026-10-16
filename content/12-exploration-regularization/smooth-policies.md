@@ -31,7 +31,7 @@ caps = { recording = "td3-pendulum-caps", name = "TD3 with CAPS" }
 :::
 
 ::: step {run = "plain", at = 11, map = "action"}
-**3,000 steps later: the same return, another controller.** At the top the torque now flips between −1.9 and +1.7 at every step, 99 flips in the last 100 steps: jitter 72. The return cannot tell, −115.7 both times. Pendulum charges only 0.001 × torque² per step, and flips that fast cancel before the pendulum can move. Nothing in the reward asks for calm, and on a motor this is heat and wear.
+**3,000 steps later: the same return, another controller.** At the top the torque now flips between −1.9 and +1.7 at every step, 99 flips in the last 100 steps: jitter 71. The return cannot tell, −115.7 both times. Pendulum charges only 0.001 × torque² per step, and flips that fast cancel before the pendulum can move. Nothing in the reward asks for calm, and on a motor this is heat and wear.
 :::
 
 ::: step {run = "caps", at = 13, map = "action", formula = 1}
@@ -43,7 +43,7 @@ caps = { recording = "td3-pendulum-caps", name = "TD3 with CAPS" }
 :::
 
 ::: step {run = "caps", at = 40, curves = ["plain", "caps"], metric = "jitter"}
-**Twenty seeds of each**, the test episodes' jitter averaged over the seeds. Plain TD3's climbs once the pendulum is held, from below 1 to between 15 and 20, as 8 of its 20 seeds come to chatter; with CAPS it stays near 1.
+**Twenty seeds of each**, the test episodes' jitter averaged over the seeds. Plain TD3's climbs once the pendulum is held, from below 1 to 16 on average over the second half, as 8 of its 20 seeds come to chatter; with CAPS it stays near 1.
 :::
 
 ::: step {run = "caps", at = 40, curves = ["plain", "caps"], metric = "test"}
@@ -73,7 +73,7 @@ Both are Euclidean distances, averaged over the batch. For DDPG and TD3, $L_\pi 
 
 On four Gym tasks with DDPG, TD3, SAC and PPO, every CAPS agent was smoother than its plain counterpart, at a small price in return where the smoother agent reached its goal more slowly. TD3 on Pendulum, for instance, went from a smoothness score of 43.9 to 5.92 (thousandths; lower is smoother), with an average return of −173 against −153. On a quadrotor drone, PPO with CAPS drew 4.9 A in flight against 22.9 A for the best previous neural controller, almost 80% less, and every agent it trained was safe to fly, where the earlier pipeline needed its controllers cherry-picked. Each term alone fell short: the temporal one left the motors noisy after the transfer to the real drone, the spatial one forced the commands into bands.
 
-The trainer of this guide has CAPS for DDPG and TD3. On Pendulum, over 20 seeds, plain TD3's test episodes jitter by 16 on average in the second half of training, and on 8 of the seeds by more than 10: the torque comes to jump by a third of its range or more at every step. With CAPS ($\knob{\lambda_T} = 0.1$, $\knob{\lambda_S} = 0.3$, $\knob\sigma = 0.05$) the jitter averages 1, and the pendulum is held up as well, near $-120$ per test episode either way, a little later: after 9,000 steps for half the seeds, against 7,500. Stronger weights went wrong in trials of three seeds: a temporal weight of 0.3, or a spatial one of 1, froze one seed at the start, its torque stuck at one end of the range (see the pitfalls).
+The trainer of this guide has CAPS for DDPG and TD3. On Pendulum, over 20 seeds, plain TD3's test episodes jitter by 16 on average in the second half of training, and on 8 of the seeds by more than 10: the torque comes to jump by a third of its range or more at every step. With CAPS ($\knob{\lambda_T} = 0.1$, $\knob{\lambda_S} = 0.3$, $\knob\sigma = 0.05$) the jitter averages 1, and the pendulum is held up nearly as well, near $-120$ per test episode either way, a little later: after 9,000 steps for half the seeds, against 7,500. Past the first 15,000 steps, 4 of CAPS's 600 test episodes fell below $-250$, against none of plain TD3's. Stronger weights went wrong in trials of three seeds: a temporal weight of 0.3, or a spatial one of 1, froze one seed at the start, its torque stuck at one end of the range (see the pitfalls).
 
 ::: example {#ex-caps} The two terms on one transition
 A batch holds the transition $s = (\cos\theta, \sin\theta, \dot\theta) = (0.98, 0.17, -1.0)$ to $s' = (0.99, 0.12, -1.1)$. The actor gives torque 1.6 in $s$ and $-0.4$ in $s'$: it switches hard between consecutive steps. With $\knob{\lambda_T} = 1$ the temporal term adds $|1.6 - (-0.4)| = 2$ to the loss, and its gradient pushes the two torques toward each other, with a pull of $\knob{\lambda_T}$ on each, whatever the size of the gap. If the critic's slope favors the switch more strongly than that, the switch survives; if not, it fades.

@@ -812,7 +812,7 @@
       act: { sym: "f", name: "activation" }, reward_scale: { sym: "c", name: "reward scale (rewards × c for learning)" },
       // the tools of continuous control (Part 12)
       noise_kind: { sym: "β", name: "color of the exploration noise" }, param_noise: { sym: "θ̃", name: "noise in the weights (0: off, 1: on)" },
-      sde: { sym: "gSDE", name: "state-dependent exploration (0: off, 1: on)" }, sde_freq: { sym: "n", name: "steps between new noise matrices (−1: once per batch)" },
+      sde: { sym: "gSDE", name: "state-dependent exploration (0: off, 1: on)" }, sde_freq: { sym: "n", name: "steps between new noise matrices" },
       log_std0: { sym: "ln σ₀", name: "starting log spread of the policy" }, caps_t: { sym: "λT", name: "CAPS: pull toward the next state's action" },
       caps_s: { sym: "λS", name: "CAPS: pull toward nearby states' actions" }, obs_norm: { sym: "z", name: "normalize observations (0: off, 1: on)" },
       weight_decay: { sym: "λ", name: "weight decay on the critics" }, squash: { sym: "tanh", name: "squash actions with tanh (0: clip)" } };
