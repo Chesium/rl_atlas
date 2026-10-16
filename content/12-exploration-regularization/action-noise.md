@@ -9,6 +9,8 @@ sources = [
   { text = "Uhlenbeck & Ornstein (1930), On the theory of the Brownian motion, Physical Review 36", url = "https://doi.org/10.1103/PhysRev.36.823" },
   { text = "Timmer & König (1995), On generating power law noise, Astronomy and Astrophysics 300", url = "https://ui.adsabs.harvard.edu/abs/1995A%26A...300..707T/abstract" },
   { text = "Dabney, Ostrovski & Barreto (2021), Temporally-extended ε-greedy exploration, ICLR", url = "https://arxiv.org/abs/2006.01782" },
+  { text = "Korenkevych, Mahmood, Vasan & Bergstra (2019), Autoregressive policies for continuous control deep reinforcement learning, IJCAI", url = "https://arxiv.org/abs/1903.11524" },
+  { text = "Ciosek, Vuong, Loftin & Hofmann (2019), Better exploration with optimistic actor-critic, NeurIPS", url = "https://arxiv.org/abs/1910.12807" },
   { text = "Raffin et al. (2021), Stable-Baselines3: reliable reinforcement learning implementations, JMLR (and the RL Zoo's tuned settings)", url = "https://jmlr.org/papers/v22/20-1364.html" },
   { text = "Towers et al. (2024), Gymnasium (MountainCarContinuous-v0)", url = "https://gymnasium.farama.org/environments/classic_control/mountain_car_continuous/" },
 ]
@@ -73,7 +75,7 @@ There is a trade-off. White noise explores *locally*: it tries actions near the 
 Eberhard et al. (2023) compared the colors as action noise for SAC and MPO across a wide range of benchmark tasks and found pink noise significantly better than white noise, Ornstein–Uhlenbeck noise and the other alternatives they tried; they recommend it as the default action noise for continuous control. The same choice fits DDPG and TD3, which their package also serves. The best color for one task can be redder or whiter; pink is the one that is rarely far from the best.
 
 ::: example {#ex-car-noise} Noise alone on the hill
-Drive the car with noise alone, the actor's action held at 0, at a spread of half the largest force. Over 400 episodes of 999 steps, white noise never reaches the flag: on average the car gets no higher than $x = -0.22$, the bottom of the valley being at $-0.52$. Ornstein–Uhlenbeck noise never reaches it either. Red noise reaches it in 11% of the episodes, pink noise in 39%. With the full force as the spread, white noise reaches it in 2% of the episodes, Ornstein–Uhlenbeck in 12%, red in 55% and pink in 72%. A learner can only learn the flag's worth from episodes that reach it.
+Drive the car with noise alone, the actor's action held at 0, at a spread of half the largest force. Over 400 episodes of 999 steps, white noise never reaches the flag: the furthest the car gets toward it averages $x = -0.22$, a third of the way from the valley's bottom ($-0.52$) to the flag ($0.45$). Ornstein–Uhlenbeck noise never reaches it either. Red noise reaches it in 11% of the episodes, pink noise in 39%. With the full force as the spread, white noise reaches it in 2% of the episodes, Ornstein–Uhlenbeck in 12%, red in 55% and pink in 72%. A learner can only learn the flag's worth from episodes that reach it.
 :::
 
 ### The noise's size {#scale}
@@ -92,7 +94,8 @@ DDPG, TD3 and SAC learn off-policy ([[on-off-policy]]): their critics learn the 
 - **Action repeat.** Hold each action for $k$ steps: DQN on Atari repeated each one for 4 frames, and agents learning from pixels on the DeepMind Control Suite repeat theirs 2 to 8 times. Fewer decisions, longer pushes, and smoother control ([[smooth-policies]]).
 - **Noise in the weights.** Perturb the actor's weights once per episode: the same state then gets the same exploratory action, consistently, for the whole episode ([[parameter-noise]]).
 - **Temporally extended ε-greedy.** For a list of actions: when exploring, repeat the random action for a random number of steps, drawn from a heavy-tailed distribution (Dabney et al., 2021).
-- **Optimism.** Push the exploration toward actions the critics disagree about, as the optimistic actor–critic does (Ciosek et al., 2019), or reward novelty directly ([[exploration-strategies]]).
+- **Autoregressive noise.** Replace each step's normal number with a smooth process whose every value is still a standard normal: the action is then a Gaussian given the last few states and actions, so PPO can learn with it too, and an Ornstein–Uhlenbeck process is its simplest case. The faster the control, the more per-step noise cancels out: on a real arm commanded 125 times a second, PPO with per-step noise learned nothing in five hours, and with this noise it learned in half of its runs (Korenkevych et al., 2019).
+- **Optimism.** Shift the exploring action toward where an optimistic estimate rises, the two critics' mean plus their disagreement, as the optimistic actor–critic does on top of SAC (Ciosek et al., 2019); or reward novelty directly ([[exploration-strategies]]).
 
 ### Historical remarks {#history}
 

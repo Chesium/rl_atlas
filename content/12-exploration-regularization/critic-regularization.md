@@ -17,6 +17,8 @@ sources = [
   { text = "Smith, Kostrikov & Levine (2022), A walk in the park: learning to walk in 20 minutes with model-free reinforcement learning", url = "https://arxiv.org/abs/2208.07860" },
   { text = "Ba, Kiros & Hinton (2016), Layer normalization", url = "https://arxiv.org/abs/1607.06450" },
   { text = "Miyato, Kataoka, Koyama & Yoshida (2018), Spectral normalization for generative adversarial networks, ICLR", url = "https://arxiv.org/abs/1802.05957" },
+  { text = "Gogianu, Berariu, Rosca, Clopath, Busoniu & Pascanu (2021), Spectral normalisation for deep reinforcement learning: an optimisation perspective, ICML", url = "https://arxiv.org/abs/2105.05246" },
+  { text = "Janner, Fu, Zhang & Levine (2019), When to trust your model: model-based policy optimization, NeurIPS", url = "https://arxiv.org/abs/1906.08253" },
   { text = "Loshchilov & Hutter (2019), Decoupled weight decay regularization, ICLR", url = "https://arxiv.org/abs/1711.05101" },
   { text = "Barth-Maron et al. (2018), Distributed distributional deterministic policy gradients, ICLR", url = "https://arxiv.org/abs/1804.08617" },
   { text = "Dohare, Hernandez-Garcia, Lan, Rahman, Mahmood & Sutton (2024), Loss of plasticity in deep continual learning, Nature 632", url = "https://www.nature.com/articles/s41586-024-07711-7" },
@@ -57,7 +59,7 @@ Batch normalization normalizes each unit over the batch instead, with running av
 
 ### Spectral normalization {#spectral}
 
-Spectral normalization divides each layer's weights by their largest singular value, so that no layer can stretch its input by more than a factor of one: the network's output changes at most as fast as its input (Miyato et al., 2018, for the discriminators of generative adversarial networks). Bjorck et al. (2021) traced why larger networks failed in actor–critics: the actor's gradient passes through the critic, as a generator's passes through its discriminator, and in deeper critics it exploded. With spectral normalization on the inner layers of both networks, the deeper networks trained stably and finally helped: a DDPG-based agent walking from pixels scored 477 with its usual network, 6 with a deeper one, and 740 with the deeper one normalized.
+Spectral normalization divides each layer's weights by their largest singular value, so that no layer can stretch its input by more than a factor of one: the network's output changes at most as fast as its input (Miyato et al., 2018, for the discriminators of generative adversarial networks). Bjorck et al. (2021) traced why larger networks failed in actor–critics: the actor's gradient passes through the critic, as a generator's passes through its discriminator, and in deeper critics it exploded. With spectral normalization on the inner layers of both networks, the deeper networks trained stably and finally helped: a DDPG-based agent walking from pixels scored 477 with its usual network, 6 with a deeper one, and 740 with the deeper one normalized. It helps value-based agents too: on 54 Atari games, spectral normalization on a single layer, the second to last, lifted C51 to the level of Rainbow, which adds five other improvements to it, while normalizing every layer hurt; most of the gain came back by merely rescaling the optimizer's steps, a sign that the normalization works through the optimization (Gogianu et al., 2021).
 
 ### Ensembles and dropout {#ensembles}
 
@@ -97,7 +99,7 @@ Small networks, two layers of 256 units, were the rule in continuous control for
 
 ### Historical remarks {#history}
 
-DDPG brought weight decay and batch normalization to the critic (Lillicrap et al., 2016), after DQN's target network; TD3 added the twin critics (Fujimoto et al., 2018). The push for sample efficiency after MBPO (Janner et al., 2019), a model-based method that took 20 updates per step, led to REDQ and DroQ in 2021, which reached it without a model. From 2022, work on why networks stop learning (primacy bias, dormant units, plasticity) and on scaling (spectral normalization, BRO, SimBa, CrossQ) made the critic's architecture a main lever of progress, next to the algorithm.
+DDPG brought weight decay and batch normalization to the critic (Lillicrap et al., 2016), after DQN's target network; TD3 added the twin critics (Fujimoto et al., 2018). The push for sample efficiency after MBPO (Janner et al., 2019), a model-based method whose policy took 20 to 40 updates per step, led to REDQ and DroQ in 2021, which reached it without a model. From 2022, work on why networks stop learning (primacy bias, dormant units, plasticity) and on scaling (spectral normalization, BRO, SimBa, CrossQ) made the critic's architecture a main lever of progress, next to the algorithm.
 
 ## Card
 
