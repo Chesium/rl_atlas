@@ -55,6 +55,12 @@ const CATALOG = {
   // function of the state (a new matrix every 8 steps).
   ...Object.fromEntries([["sac-car", "action-noise", "SAC", {}], ["sac-car-pink-noise", "action-noise", "SAC, pink noise", { noise_kind: "pink" }], ["sac-car-gsde", "gsde", "SAC with gSDE", { sde: true }]].map(([name, station, title, cfg]) => [name,
     { world: "mountain-car-continuous", learner: "ac", station, title, steps: 30000, block: 750, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true, cfg: { algo: "sac", ...cfg } }])),
+  // TD3 on the car with noise in its weights (Plappert et al., 2018): the perturbation adapts until the actions move by 0.5,
+  // the white noise's spread. Unnormalized, the speed (±0.07) is a twentieth of the position's range, so a perturbed actor
+  // barely reacts to it; with the observations normalized, as in the paper, it can find the swing.
+  ...Object.fromEntries([["td3-car-param-noise", "TD3, noise in the weights", {}], ["td3-car-param-noise-norm", "TD3, noise in the weights, normalized inputs", { obs_norm: true }]].map(([name, title, cfg]) => [name,
+    { world: "mountain-car-continuous", learner: "ac", station: "parameter-noise", title, steps: 40000, block: 1000, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true,
+      cfg: { algo: "td3", noise: 0.5, param_noise: true, ...cfg } }])),
   // TD3 on Pendulum with CAPS's two terms. The temporal weight 0.1 and the spatial 0.3 (σ = 0.05): in trials, a temporal
   // weight of 0.3 or a spatial one of 1 froze some seeds at the start (every torque at one end of tanh), and a spatial
   // weight of 0.05 smoothed less.
@@ -75,7 +81,7 @@ const SWEEPS = {
   "td3-pendulum": { delay: [1, 2, 4, 8], policy_noise: [0.0, 0.2, 0.5, 1.0] },
   "sac-pendulum": { alpha: ["auto", 0.01, 0.05, 0.2, 1.0], tau: [0.001, 0.005, 0.02, 0.1] },
   // Part 12: the colors are the recordings themselves (their first 10 seeds), so only the spreads train anew
-  "td3-car-white-noise": { noise_kind: ["white", "ou", "pink", "red"], noise: [0.2, 0.5, 1.0] },
+  "td3-car-white-noise": { noise_kind: ["white", "ou", "pink", "red"], noise: [0.2, 0.5, 1.0], obs_norm: [0, 1] },
   "td3-car-pink-noise": { noise: [0.2, 0.5, 1.0] },
   "sac-car": { noise_kind: ["white", "pink"], sde: [0, 1] },
 };

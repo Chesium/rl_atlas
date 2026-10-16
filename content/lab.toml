@@ -832,12 +832,12 @@ success = { metric = "test", min = 90, text = "end up reaching the flag in the t
 [parameter-noise-car]
 title = "Noise on the actions or in the weights"
 env = "mountain-car-continuous"
-racers = [{ recording = "td3-car-white-noise", name = "noise on the actions" }, { recording = "td3-car-param-noise", name = "noise in the weights" }]
+racers = [{ recording = "td3-car-white-noise", name = "noise on the actions" }, { recording = "td3-car-param-noise", name = "noise in the weights" }, { recording = "td3-car-param-noise-norm", name = "weights, inputs normalized" }]
 charts = ["test", "return", "jitter-train"]
 film = [0, 5, 10, 20, 40]
 seeds = true
 fixed = ["noise_kind"]
-intro = "TD3 twice on the hill, from the same seeds. One adds white noise to every action. The other perturbs the actor's weights at the start of each episode and acts with the perturbed copy, with no other noise; every 50 steps it compares the copy's actions with the actor's and grows or shrinks the perturbation toward a target distance. After every block of 1,000 steps the unperturbed actor plays one test episode, from the same start."
+intro = "TD3 three times on the hill, from the same seeds. The first adds white noise to every action. The second perturbs the actor's weights at the start of each episode and acts with the perturbed copy, with no other noise; every 50 steps it compares the copy's actions with the actor's and grows or shrinks the perturbation until they differ by 0.5, the white noise's spread. The third does the same with its observations normalized, each by its running mean and spread, as the method's authors did: the car's speed never exceeds 0.07, a twentieth of the range of its position. After every block of 1,000 steps the unperturbed actor plays one test episode, from the same start."
 success = { metric = "test", min = 90, text = "end up reaching the flag in the test episodes, 90 or more" }
 
 [gsde-car]
