@@ -179,3 +179,12 @@ test("Part 12's tools: every option runs, and a seed is the same run every time"
   const jumps = ["white", "pink", "red"].map((kind) => deep.run(car({ algo: "td3", noise_kind: kind, noise: 0.5, start: 0, batch: 8 }), 1).jitterTrain[0]);
   assert.ok(jumps[0] > jumps[1] && jumps[1] > jumps[2], `white ${jumps[0]}, pink ${jumps[1]}, red ${jumps[2]}`);
 });
+
+test("the page's Worker trains with this trainer: app/deep-worker.js is lab/deep/ as built (python build.py)", () => {
+  const fs = require("node:fs"), path = require("node:path");
+  const names = fs.readFileSync(path.join(__dirname, "../build.py"), "utf8").match(/^DEEP_WORKER = \[([^\]]*)\]/m)[1].match(/"([\w-]+)"/g).map((s) => s.slice(1, -1));
+  const want = names.map((n) => fs.readFileSync(path.join(__dirname, "../lab/deep", `${n}.js`), "utf8")).join("\n");
+  const sandbox = {};
+  new Function("globalThis", fs.readFileSync(path.join(__dirname, "../app/deep-worker.js"), "utf8"))(sandbox);
+  assert.ok(sandbox.RL.deepWorker === want, "app/deep-worker.js differs from lab/deep/: run python build.py");
+});
