@@ -6432,7 +6432,9 @@ globalThis.RL.sweeps = {"a2c-cartpole":{"name":"a2c-cartpole","world":"cartpole"
   LEARNERS.ac = {
     rule: (rec) => (rec.config?.algo === "sac"
       ? "\\boldsymbol\\theta \\leftarrow \\boldsymbol\\theta + \\alp\\,\\nabla_{\\boldsymbol\\theta}\\Big(\\min_i \\val{\\hat q_i(s, a_{\\boldsymbol\\theta})} - \\alpha \\ln \\pol{\\pi(a_{\\boldsymbol\\theta} \\mid s)}\\Big)"
-      : "\\boldsymbol\\theta \\leftarrow \\boldsymbol\\theta + \\alp\\,\\nabla_a \\val{\\hat q(s, a)}\\big|_{a = \\pol{\\mu(s)}}\\,\\nabla_{\\boldsymbol\\theta}\\pol{\\mu(s, \\boldsymbol\\theta)}"),
+      : rec.config?.caps_t || rec.config?.caps_s // CAPS: the actor also pays for its torques' distances (Mysore et al., 2021)
+        ? "\\boldsymbol\\theta \\leftarrow \\boldsymbol\\theta + \\alp\\,\\nabla_{\\boldsymbol\\theta}\\big(\\val{\\hat q(s, \\pol{\\mu(s)})} - \\knob{\\lambda_T}\\|\\pol{\\mu(s)} - \\pol{\\mu(s')}\\| - \\knob{\\lambda_S}\\|\\pol{\\mu(s)} - \\pol{\\mu(\\bar s)}\\|\\big)"
+        : "\\boldsymbol\\theta \\leftarrow \\boldsymbol\\theta + \\alp\\,\\nabla_a \\val{\\hat q(s, a)}\\big|_{a = \\pol{\\mu(s)}}\\,\\nabla_{\\boldsymbol\\theta}\\pol{\\mu(s, \\boldsymbol\\theta)}"),
     numbers: (ev) => `\\pol{\\mu(s)} = ${fmt(ev.x[0], 2)} \\qquad \\text{spread } ${fmt(ev.x[1], 2)} \\qquad \\val{\\hat q(s, \\mu(s))} = ${fmt(ev.x[2])}`,
     note: (ev, env) => `Step ${ev.k + 1} of the test episode · the actor chose <b>a ${env.actionWord || "torque"} of ${fmt(ev.a, 2)}</b> (no exploration in a test)`,
   };
