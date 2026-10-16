@@ -564,6 +564,20 @@ def compile_content(problems: Problems) -> dict:
         for ref in entry["storyIn"]:
             if not entries.get(ref, {}).get("story"):
                 problems.error(f"content/{eid}.md", f"story_in names '{ref}', which has no story")
+        # a story's runs: the recordings they play must exist, and every step must name runs the story has
+        if not entry["story"]:
+            continue
+        runs = entry["story"]["config"].get("runs", {})
+        for name, run in runs.items():
+            if isinstance(run, dict) and run.get("recording") and run["recording"] not in recordings:
+                problems.error(f"content/{eid}.md", f"story run '{name}' plays recording '{run['recording']}', which is not in content/recordings/")
+        for k, step in enumerate(entry["story"]["steps"], 1):
+            st = step["state"]
+            for name in [st.get("run")] + list(st.get("curves", [])):
+                if name and name not in runs:
+                    problems.error(f"content/{eid}.md", f"story step {k} names run '{name}', which [story.runs] lacks")
+            if st.get("curves") and all(isinstance(runs.get(n), dict) and runs[n].get("recording") for n in st["curves"]) and st.get("metric", "optimal") not in RECORDED_CHARTS:
+                problems.error(f"content/{eid}.md", f"story step {k} charts '{st.get('metric', 'optimal')}' from recordings (one of: {', '.join(sorted(RECORDED_CHARTS))})")
     for pid, preset in presets.items():
         for algo in sorted({r["algorithm"] for r in preset["racers"]}):
             if not entries.get(RUNNABLE_CONCEPTS.get(algo, algo), {}).get("pseudocode"):

@@ -56,16 +56,21 @@ const CATALOG = {
   ...Object.fromEntries([["sac-car", "action-noise", "SAC", {}], ["sac-car-pink-noise", "action-noise", "SAC, pink noise", { noise_kind: "pink" }], ["sac-car-gsde", "gsde", "SAC with gSDE", { sde: true }]].map(([name, station, title, cfg]) => [name,
     { world: "mountain-car-continuous", learner: "ac", station, title, steps: 30000, block: 750, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true, cfg: { algo: "sac", ...cfg } }])),
   // TD3 on the car with noise in its weights (Plappert et al., 2018): the perturbation adapts until the actions move by 0.5,
-  // the white noise's spread. Unnormalized, the speed (±0.07) is a twentieth of the position's range, so a perturbed actor
-  // barely reacts to it; with the observations normalized, as in the paper, it can find the swing.
+  // the white noise's spread. Unnormalized, the speed (never beyond ±0.07, while the position ranges over 1.8) barely
+  // moves a perturbed actor; with the observations normalized, as in the paper, it can find the swing.
   ...Object.fromEntries([["td3-car-param-noise", "TD3, noise in the weights", {}], ["td3-car-param-noise-norm", "TD3, noise in the weights, normalized inputs", { obs_norm: true }]].map(([name, title, cfg]) => [name,
     { world: "mountain-car-continuous", learner: "ac", station: "parameter-noise", title, steps: 40000, block: 1000, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true,
       cfg: { algo: "td3", noise: 0.5, param_noise: true, ...cfg } }])),
   // TD3 on Pendulum with CAPS's two terms. The temporal weight 0.1 and the spatial 0.3 (σ = 0.05): in trials, a temporal
   // weight of 0.3 or a spatial one of 1 froze some seeds at the start (every torque at one end of tanh), and a spatial
   // weight of 0.05 smoothed less.
-  "td3-pendulum-caps": { world: "pendulum", learner: "ac", station: "smooth-policies", title: "TD3 with CAPS", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true,
+  // Shown at seed 6, as is TD3 without CAPS below: there plain TD3 holds the pendulum up, then comes to flip its torque
+  // between the ends of the range at almost every step, while CAPS stays calm (TD3's own recording shows seed 1, smooth).
+  "td3-pendulum-caps": { world: "pendulum", learner: "ac", station: "smooth-policies", title: "TD3 with CAPS", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), shown: 6, jitter: true,
     cfg: { algo: "td3", reward_scale: 0.1, caps_t: 0.1, caps_s: 0.3 } },
+  // TD3 on Pendulum again for that race: the same runs as td3-pendulum, shown at seed 6.
+  "td3-pendulum-jitter": { world: "pendulum", learner: "ac", station: "smooth-policies", title: "TD3", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), shown: 6, jitter: true,
+    cfg: { algo: "td3", reward_scale: 0.1 } },
 };
 // The knobs each recording's sweep tries, its own value among them. target_every = 0: no target network; buffer = 128
 // (the batch size): no replay, each batch is the latest experience.
@@ -79,6 +84,7 @@ const SWEEPS = {
     log_std0: [-1, 0, 1], squash: [0, 1], obs_norm: [0, 1], sde: [0, 1] },
   "ddpg-pendulum": { tau: [0.001, 0.005, 0.02, 0.1], noise: [0.0, 0.1, 0.3, 0.6], reward_scale: [0.01, 0.1, 1.0], weight_decay: [0, 0.001, 0.01] },
   "td3-pendulum": { delay: [1, 2, 4, 8], policy_noise: [0.0, 0.2, 0.5, 1.0] },
+  "td3-pendulum-jitter": { delay: [1, 2, 4, 8], policy_noise: [0.0, 0.2, 0.5, 1.0] }, // td3-pendulum's runs, cached
   "sac-pendulum": { alpha: ["auto", 0.01, 0.05, 0.2, 1.0], tau: [0.001, 0.005, 0.02, 0.1] },
   // Part 12: the colors are the recordings themselves (their first 10 seeds), so only the spreads train anew
   "td3-car-white-noise": { noise_kind: ["white", "ou", "pink", "red"], noise: [0.2, 0.5, 1.0], obs_norm: [0, 1] },

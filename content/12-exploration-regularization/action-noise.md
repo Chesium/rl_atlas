@@ -31,7 +31,33 @@ sacpink = { recording = "sac-car-pink-noise", name = "SAC, pink noise" }
 
 ## Story
 
-STORY
+::: step {run = "white", at = 0, map = "action"}
+**A car in a valley, and an engine weaker than the slope.** The force runs from −1 to 1; every step costs 0.1 × force², the flag on the right pays 100, and the episode ends there or after 999 steps. Pushing toward the flag is not enough: the car must swing back and forth, a little higher each time. The map shows the actor's push for each position and speed. To swing, the push must follow the speed: right while the car moves right, left while it moves left.
+:::
+
+::: step {run = "white", at = 20, map = "value", formula = 1}
+**White noise: a fresh number at every step** (formula 1), of spread 0.5, half the largest force. In 20,000 steps of training, no episode of this seed reaches the flag: each costs about 24 in pushes and pays nothing. The critic learns exactly that, every state worth a little less than 0, and the actor learns to stand still: its test episode, played without noise, wobbles at the bottom of the valley.
+:::
+
+::: step {run = "pink", at = 5, map = "value", formula = 2}
+**Pink noise of the same spread, drawn one episode at a time** (formula 2, with β = 1): consecutive pushes agree for a while, so they add up. Within 5,000 steps a training episode reaches the flag, and the critic begins to rate the states that lead there above 0.
+:::
+
+::: step {run = "pink", at = 15, map = "action"}
+**The critic knows; the actor does not yet.** After 15,000 steps the critic rates the approach to the flag at up to 177. But the actor pushes right in every state, whatever the speed, and a push that ignores the speed cannot pump a swing: its test episode still wobbles at the bottom.
+:::
+
+::: step {run = "pink", at = 29, map = "action"}
+**After 29,000 steps** the actor pushes left in some of the states where the car rolls left. One swing back, then up: its test episode reaches the flag in 108 steps. By the end it follows the speed in 91% of the map, full force either way, and reaches the flag in 78.
+:::
+
+::: step {run = "pink", at = 40, curves = ["white", "ou", "pink", "red"], metric = "test"}
+**Twenty seeds of each.** With white noise, 1 seed ends up reaching the flag; with Ornstein–Uhlenbeck noise, 1; with red noise, 7; with pink noise, 18. In training, red and pink noise reach the flag on every seed, white noise on 2, and Ornstein–Uhlenbeck noise, which restarts from 0 at each episode and grows slowly, on 4. Red noise finds the flag as surely as pink, but it spends its spread on slow drifts and tries the pushes near the actor's own far less, and fewer of its learners end up at the flag.
+:::
+
+::: step {run = "pink", at = 40, curves = ["white", "ou", "pink", "red"], metric = "jitter-train"}
+**What a motor would feel.** How much the training pushes jump from one step to the next, typically: 11.6 with white noise, 2.6 with pink, 0.5 with red, 0.4 with Ornstein–Uhlenbeck. The colors that explore better are also the gentler ones ([[smooth-policies]]). [Race the four in the Lab](lab:action-noise-car).
+:::
 
 ## Textbook
 
@@ -72,7 +98,7 @@ Colored noise is drawn **one episode at a time** (Timmer & König, 1995): draw a
 
 There is a trade-off. White noise explores *locally*: it tries actions near the policy's own at every step, which is what fine control needs. Red noise travels *far*: it pushes one way long enough to reach distant states, but spends its variance on slow drifts and tries the actions around the policy's own much less. Pink noise does both at once, some of its power at every time scale.
 
-Eberhard et al. (2023) compared the colors as action noise for SAC and MPO across a wide range of benchmark tasks and found pink noise significantly better than white noise, Ornstein–Uhlenbeck noise and the other alternatives they tried; they recommend it as the default action noise for continuous control. The same choice fits DDPG and TD3, which their package also serves. The best color for one task can be redder or whiter; pink is the one that is rarely far from the best.
+Eberhard et al. (2023) compared the colors as action noise for SAC and MPO across a wide range of benchmark tasks and found pink noise significantly better than white noise, Ornstein–Uhlenbeck noise and the other alternatives they tried; they recommend it as the default action noise for continuous control. The same choice fits DDPG and TD3, which their package also serves. The best color for one task can be redder or whiter; pink is the one that is rarely far from the best. On continuous Mountain Car, over 20 seeds of 40,000 steps, TD3 ended up reaching the flag on 18 seeds with pink noise, on 7 with red noise, and on 1 each with white and with Ornstein–Uhlenbeck noise.
 
 ::: example {#ex-car-noise} Noise alone on the hill
 Drive the car with noise alone, the actor's action held at 0, at a spread of half the largest force. Over 400 episodes of 999 steps, white noise never reaches the flag: the furthest the car gets toward it averages $x = -0.22$, a third of the way from the valley's bottom ($-0.52$) to the flag ($0.45$). Ornstein–Uhlenbeck noise never reaches it either. Red noise reaches it in 11% of the episodes, pink noise in 39%. With the full force as the spread, white noise reaches it in 2% of the episodes, Ornstein–Uhlenbeck in 12%, red in 55% and pink in 72%. A learner can only learn the flag's worth from episodes that reach it.

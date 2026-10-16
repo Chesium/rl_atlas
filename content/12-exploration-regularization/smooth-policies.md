@@ -20,7 +20,7 @@ env = "pendulum"
 formula = '''\step{1}{L = -\hat{\mathbb E}\big[\val{\hat q(s, \pol{\mu(s)})}\big] + \knob{\lambda_T}\,\hat{\mathbb E}\,\big\|\pol{\mu(s)} - \pol{\mu(s')}\big\| \qquad} \step{2}{+\ \knob{\lambda_S}\,\hat{\mathbb E}\,\big\|\pol{\mu(s)} - \pol{\mu(\bar s)}\big\|, \quad \bar s \sim \mathcal N(s, \knob{\sigma}^2)}'''
 
 [story.runs]
-plain = { recording = "td3-pendulum", name = "TD3" }
+plain = { recording = "td3-pendulum-jitter", name = "TD3" }
 caps = { recording = "td3-pendulum-caps", name = "TD3 with CAPS" }
 +++
 
