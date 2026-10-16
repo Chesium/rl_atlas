@@ -86,7 +86,7 @@ Silver et al. also gave a form of critic whose slopes are guaranteed to give the
 
 ### Exploration from outside {#exploration}
 
-A deterministic policy does the same thing in the same state every time, so it never explores by itself. The behavior policy adds noise to its action: independent Gaussian noise, or noise correlated over time (an Ornstein–Uhlenbeck process) so that a push lasts long enough to matter in a physical system. The amount of noise is a knob, set by hand ([[exploration-strategies]]). [[sac]] goes the other way: it keeps a stochastic policy and makes its randomness part of the objective.
+A deterministic policy does the same thing in the same state every time, so it never explores by itself. The behavior policy adds noise to its action: independent Gaussian noise, or noise correlated over time, such as an Ornstein–Uhlenbeck process or pink noise, so that a push lasts long enough to matter in a physical system ([[action-noise]]). The amount of noise is a knob, set by hand ([[exploration-strategies]]). [[sac]] goes the other way: it keeps a stochastic policy and makes its randomness part of the objective.
 
 The two routes meet in one trick. Write a stochastic action as a deterministic function of the state and an independent noise, $a = \pol{\mu(s)} + \pol{\sigma(s)}\,\varepsilon$ with $\varepsilon \sim \mathcal N(0, 1)$, and the chain rule of \ref{dpg} applies to each sampled action, with the noise held fixed. This **reparameterization** gives stochastic policies a gradient through the critic's slope instead of through $\nabla \ln \pol\pi$, usually with much lower variance (Heess et al., 2015). SAC's actor learns this way.
 
