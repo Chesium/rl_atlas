@@ -57,6 +57,7 @@ Hover any colored symbol and every symbol of its kind lights up. The [Symbols pa
 - New to reinforcement learning: play [[be-the-agent]] for two minutes, then read Part 1 in order, from [[agent-environment]] to [[reward-design]].
 - Know the basics: go straight to [[sarsa]] and [[q-learning]], and race them in the Lab.
 - Training deep agents: read [[neural-networks]] and [[dqn]], and keep the Toolbox close: the [[hyperparameters|hyperparameter guide]], [[seeds]] and [[debugging|My agent doesn't learn]].
+- Controlling a robot, or anything with continuous actions: read [[td3]] and [[sac]], then follow [[control-recipe|the recipe for continuous control]] into the tools of Part 12: the noise that explores, smooth policies, regularized critics.
 - Looking for something specific: press `Ctrl K` and type its name.
 
 ### Shortcuts {#shortcuts}
