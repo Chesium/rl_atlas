@@ -11,5 +11,16 @@
   "prioritized-dqn-cartpole": "04c7fc2d955199d76bed7fc1385c3f9da8a28fdc",
   "sac-pendulum": "bc2627dc5790118d3dca452f723c50b8435f725a",
   "td3-pendulum": "17ca3be1c5062ad67ad577d9675335251f00eab7",
-  "trpo-cartpole": "1622d0bdc95757c02b2ab4979178327baab6b140"
+  "trpo-cartpole": "1622d0bdc95757c02b2ab4979178327baab6b140",
+  "sac-car-gsde": "0e085b32a46c928457fe48e32f94b08116143bc3",
+  "sac-car-pink-noise": "837efca5f2f2669f49133306e053d9269ad5e870",
+  "sac-car": "837efca5f2f2669f49133306e053d9269ad5e870",
+  "td3-car-ou-noise": "1de6b56a3fb77b68af447cf1d55e298a61863215",
+  "td3-car-param-noise-norm": "d20db2a9bcb3f9470f387a68720aa0775de951c9",
+  "td3-car-param-noise": "73444779df9447ef8d28265a08a6ff771b8a8292",
+  "td3-car-pink-noise": "7158e17a8d99b697afd117248e6b9a905137251a",
+  "td3-car-red-noise": "7158e17a8d99b697afd117248e6b9a905137251a",
+  "td3-car-white-noise": "1de6b56a3fb77b68af447cf1d55e298a61863215",
+  "td3-pendulum-caps": "f4a618b3ec0f2d9493d85b6df8ca4eb1046f9be2",
+  "td3-pendulum-jitter": "5e5a217e738dfbd770e37a4ab8681a8ecdfa1d12"
 }

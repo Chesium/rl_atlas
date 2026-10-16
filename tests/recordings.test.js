@@ -36,8 +36,9 @@ for (const file of fs.readdirSync(DIR).filter((f) => f.endsWith(".json")).sort()
   if (rec.trainer !== "lab/deep") continue;
   test(`${rec.name}: the first block of seed ${rec.shown} trains as recorded`, () => {
     const got = firstBlock(rec, true), curve = rec.curves.find((c) => c.seed === rec.shown);
-    assert.equal(got.train, curve.train[0], "the first block's training return");
-    assert.equal(got.test, curve.test[0], "the first test episode");
+    // as the recording keeps them: JSON writes −0 (a return rounded up to zero from below) as 0
+    assert.equal(plain(got.train), curve.train[0], "the first block's training return");
+    assert.equal(plain(got.test), curve.test[0], "the first test episode");
     const sum = crypto.createHash("sha1").update(JSON.stringify(plain(got.shot))).digest("hex");
     if (!renew) return assert.equal(sum, sums[rec.name], "the network after the first block (renew only after recording again)");
     assert.deepEqual(plain(firstBlock(rec, false).shot), rec.snapshots[1], "the recording's own snapshot after the first block");
