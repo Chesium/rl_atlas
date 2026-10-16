@@ -48,9 +48,9 @@ Before blaming the algorithm, check that it learns a task where the answer is kn
 
 The signature: the return stays flat, and the policy settles on doing as little as possible, because every action costs and nothing has paid yet. On continuous Mountain Car, TD3 with white noise learns to stand still ([[action-noise]]).
 
-- **For DDPG and TD3, colored noise**: pink noise, one sequence per episode, at the same spread as before. It costs nothing and is a good default (Eberhard et al., 2023). Ornstein–Uhlenbeck noise is the classic alternative, red noise the extreme one.
+- **For DDPG, TD3 and SAC, colored noise**: pink noise, one sequence per episode, at the same spread as before, or for SAC in place of its samples' normal numbers. It costs nothing and is a good default (Eberhard et al., 2023): on continuous Mountain Car it took TD3 from 1 seed of 20 to the flag to 18, and SAC from none to all 20 ([[action-noise]]). Ornstein–Uhlenbeck noise is the classic alternative, red noise the extreme one.
 - **Noise in the weights**: parameter noise explores with a consistent, slightly different policy each episode, provided the observations are normalized: on the car it found the flag only then ([[parameter-noise]]).
-- **For SAC, PPO and A2C, gSDE**: noise that is a function of the state, resampled every few steps (4 to 8), smooth and still a Gaussian ([[gsde]]).
+- **For PPO and A2C, gSDE**: noise that is a function of the state, resampled every few steps (4 to 8), smooth and still a Gaussian, so that on-policy methods can use it ([[gsde]]). SAC can use it too where the training must be gentle, on a robot: on the car it reached the flag on 12 seeds of 20, with the smoothest training forces of all.
 - **If the reward is truly sparse**, no noise is enough: shape the reward, add intrinsic rewards, or start from demonstrations ([[reward-design]], [[exploration-strategies]], [[imitation]]). If the task is to reach goals, store each missed episode again as a success at the place it did reach: hindsight experience replay taught DDPG to push and pick up objects from a reward for success alone ([[exploration-strategies]]).
 
 ### 4. If it learns, then falls apart: the critic {#critic}
@@ -74,7 +74,7 @@ The signature: the critic's values climb far above any return the agent has seen
 1. Actions in $[-1, 1]$, around a default pose, no wider than needed.
 2. Observations normalized; time-outs bootstrapped; a sensible control rate.
 3. A tuned default: PPO with many parallel environments, SAC or TD3 otherwise.
-4. Flat return, standing still: pink noise or parameter noise (TD3), gSDE (SAC, PPO).
+4. Flat return, standing still: pink noise (TD3, SAC), parameter noise with normalized inputs (TD3), gSDE (PPO, or SAC on hardware).
 5. Values running away: layer norm in the critic, twin critics, the reward's scale.
 6. Bound for hardware: measure the jitter, add CAPS or an action-rate penalty, randomize the world.
 
@@ -97,7 +97,7 @@ A mechanic checks the fuel and the tires before taking the engine apart. Most ca
 | Symptom | First things to try |
 | --- | --- |
 | nothing learns, on any seed | the setup: action scale, observation normalization, time-outs, the reward |
-| flat return, the agent stands still | pink or parameter noise (TD3), gSDE (SAC, PPO) |
+| flat return, the agent stands still | pink noise (TD3, SAC), parameter noise (TD3), gSDE (PPO, or SAC on hardware) |
 | learns, then collapses; values far above returns | layer norm in the critic, twin critics, the reward's scale |
 | works, but the actions jitter | CAPS, an action-rate penalty, a lower control rate |
 | works in simulation, fails on the robot | randomization, sensor noise, delays, memory, an actuator model |

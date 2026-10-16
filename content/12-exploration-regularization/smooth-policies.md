@@ -136,9 +136,9 @@ Repeat for each step:
 ### Check yourself {#check}
 
 ::: question
-Why can't the reward alone be trusted to produce smooth control, even with a penalty on action changes?
+A penalty on the change of action, added to the reward, also asks for smoothness. Why does CAPS get it more directly?
 ---
-It can, but indirectly: the penalty reaches the policy only through the critic, which must learn it along with everything else, and its weight competes with every other term of the reward. CAPS acts on the actor's outputs directly, where the smoothness is.
+The penalty reaches the policy only through the critic, which must learn it along with everything else, and its weight competes with every other term of the reward. CAPS acts on the actor's outputs directly, where the smoothness is.
 :::
 
 ::: question

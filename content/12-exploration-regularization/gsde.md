@@ -22,7 +22,33 @@ pink = { recording = "sac-car-pink-noise", name = "SAC, pink noise" }
 
 ## Story
 
-STORY
+::: step {run = "white", at = 40, map = "action"}
+**SAC on the hill.** SAC draws its force from a bell curve whose mean and spread the actor computes, with a fresh sample at every step: white noise, as TD3's ([[action-noise]]). On none of 20 seeds does a training episode reach the flag in 30,000 steps. The actor settles on standing still, and its spread narrows from 0.8 to 0.09.
+:::
+
+::: step {run = "sde", at = 0, formula = 1}
+**gSDE: noise that is a function of the state** (formula 1). The actor's last hidden layer, 64 numbers $\mathbf z(s)$ worked out from the car's position and speed, times a matrix of normal numbers drawn anew every 8 steps. While a matrix is held, the same state gets the same nudge, and nearby states nearby ones; each draw brings a new nudging function, and the actor learns how wide the draws should be.
+:::
+
+::: step {run = "sde", at = 10, map = "value"}
+**Smooth nudges reach the flag.** Within 5,250 steps a training episode of this seed gets there, and after 7,500 the critic rates the approach to the flag at up to 81. The actor's own push, though, depends on where the car is and not on how it moves, left on the left of the valley and right on the right, and a push like that cannot pump a swing ([[parameter-noise]]): its test episode stays at the bottom.
+:::
+
+::: step {run = "sde", at = 19, map = "action", formula = 2}
+**Still a bell curve.** For a given state, the force is the mean plus a weighted sum of normal numbers: a Gaussian whose spread depends on the state (formula 2), so SAC learns with it as with its own samples. After 14,250 steps the spread runs from 0.02 to 1.0 along the test episode, the bar under the car; the actor now pushes with the motion in most of the map, and the test reaches the flag in 187 steps.
+:::
+
+::: step {run = "pink", at = 6, map = "action"}
+**Pink noise in SAC's samples**: each episode's normal numbers replaced by pink ones, so that every force is still drawn from the actor's bell curve, but consecutive forces are related. This seed's training reaches the flag within 1,500 steps, its test after 4,500.
+:::
+
+::: step {run = "pink", at = 40, curves = ["white", "sde", "pink"], metric = "test"}
+**Twenty seeds of each.** SAC with its own samples: no seed ends up at the flag. With gSDE: 12, half of them within 15,750 steps. With pink noise: all 20, half within 6,375. A gSDE matrix lasts 8 steps, a ninth of the car's swing; pink noise keeps power at every time scale, the swing's included.
+:::
+
+::: step {run = "sde", at = 40, curves = ["white", "sde", "pink"], metric = "jitter-train"}
+**The smoothest of the three.** How much the training forces jump from step to step, once the first 1,000 random steps are over: 0.4 on average with gSDE, 1.0 with pink noise, and with SAC's own samples 15 at first, falling to 0.4 as its spread narrows on a policy that stands still. On a robot, smooth training is what gSDE is for. [Race the three in the Lab](lab:gsde-car).
+:::
 
 ## Textbook
 
@@ -52,6 +78,8 @@ $$C = 100 \times \mathbb E_t\Big[\Big(\frac{a_{t+1} - a_t}{\Delta a_{\max}}\Big)
 with $\Delta a_{\max}$ the width of the action range: 0 for a constant action, 100 for an action that jumps from one end of the range to the other at every step. Measured during training, it stands for the wear on a robot. The Lab charts it as **jitter**, for the test episodes and for the training episodes.
 
 On four PyBullet locomotion tasks with SAC, 10 runs of a million steps each, per-step noise cost 3.6 to 5.1 during training; gSDE with a new matrix every 8 steps cost 2.4 to 4.1 and scored as well or better on all four. Ornstein–Uhlenbeck and parameter noise were smoother still, but scored lower. For PPO the interval mattered most: drawn too rarely, the noise did not explore enough in long episodes; drawn every step, the old problems came back. PPO with gSDE beat PPO with per-step Gaussian noise on all four tasks.
+
+On continuous Mountain Car, over 20 seeds of 30,000 steps here, SAC with its own per-step samples never reached the flag, even in training. With gSDE, a new matrix every 8 steps, 12 seeds ended up reaching it, and its training forces were the smoothest of all: a jitter of 0.4 on average once its first random steps were over, against 1.0 with pink noise in SAC's samples, which reached the flag on all 20 seeds ([[action-noise]]).
 
 ### On real robots {#robots}
 

@@ -89,7 +89,6 @@ const SWEEPS = {
   // Part 12: the colors are the recordings themselves (their first 10 seeds), so only the spreads train anew
   "td3-car-white-noise": { noise_kind: ["white", "ou", "pink", "red"], noise: [0.2, 0.5, 1.0], obs_norm: [0, 1] },
   "td3-car-pink-noise": { noise: [0.2, 0.5, 1.0] },
-  "sac-car": { noise_kind: ["white", "pink"], sde: [0, 1] },
 };
 // Sweep values that set more than one knob: SAC's α is either tuned ("auto") or fixed.
 const SWEEP_AS = { alpha: (v) => (v === "auto" ? { auto_alpha: true } : { alpha: v, auto_alpha: false }) };
