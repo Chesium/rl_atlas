@@ -845,7 +845,7 @@ title = "SAC on a hill: white, pink or state-dependent noise"
 env = "mountain-car-continuous"
 racers = [{ recording = "sac-car", name = "SAC" }, { recording = "sac-car-pink-noise", name = "pink noise" }, { recording = "sac-car-gsde", name = "gSDE" }]
 charts = ["test", "return", "jitter-train"]
-film = [0, 2, 5, 10, 40]
+film = [0, 5, 10, 20, 40]
 seeds = true
 intro = "SAC draws its force from a bell curve whose mean and spread the actor computes, a fresh sample every step: white noise, as TD3's. Pink noise replaces the sample's normal numbers with pink ones, drawn one episode at a time; gSDE makes the noise a function of the state, through the actor's last hidden layer and a matrix of normal numbers drawn every 8 steps. The same car and seeds for all three. After every block of 750 steps the actor plays one test episode with its mean force, from the same start."
 success = { metric = "test", min = 90, text = "end up reaching the flag in the test episodes, 90 or more" }

@@ -34,12 +34,14 @@ The study's "most surprising finding" was the starting policy. Initialize the ne
 - **A small last layer.** Scaling the last layer's initial weights by 0.01 makes the initial means almost independent of the state: no state starts with a strong, arbitrary preference. That alone raised performance on Humanoid by 66%. This guide's PPO and A2C networks start that way (their last layer is scaled by 0.01; the actors of DDPG, TD3 and SAC by 0.1).
 - **A smallish spread.** With actions scaled to $[-1, 1]$, an initial $\pol\sigma$ of 0.5 did best on four tasks of five (Hopper preferred more). Too wide, and most early samples land outside the range and get clipped to its ends; too narrow, and the policy hardly explores before it commits.
 
+The best start depends on the task, and on Pendulum it was wider. In the PPO Lab's sweep, 10 seeds of 200,000 steps each, with the torque running from $-2$ to 2: starting at $\pol\sigma = 0.37$ ($\ln\pol\sigma = -1$), 9 seeds ended up holding the pendulum, but half of them took 70,000 steps to get there; at $\pol\sigma = 1$, this guide's default, 8 seeds, half within 35,000; at $\pol\sigma = 2.7$, all 10, half within 25,000, with training torques that jumped four times as much from step to step.
+
 ### Bounded actions: clip or squash {#bounds}
 
 A Gaussian sample can be any number; a motor accepts a range. Three ways to reconcile them:
 
 - **Clip** the sample before the world sees it, $\operatorname{clip}(a, -1, 1)$, and keep the unclipped $a$ for the update: PPO's default, and this guide's. The world treats every sample past the end alike, so the policy feels no difference between a mean at 1.2 and at 3.
-- **Squash** it, $a_{\text{world}} = \tanh(a)$ (times the largest action): SAC's choice, smooth everywhere. The density of a squashed sample gains a term, $-\ln(1 - \tanh^2 a)$, which SAC includes in its entropy ([[sac]]). For PPO the term cancels in the probability ratios and in the KL divergence, because both compare two densities at the same sample; only an entropy bonus would feel it. In the study, tanh did slightly better overall (30% better on HalfCheetah), perhaps mostly because it makes the first actions smaller.
+- **Squash** it, $a_{\text{world}} = \tanh(a)$ (times the largest action): SAC's choice, smooth everywhere. The density of a squashed sample gains a term, $-\ln(1 - \tanh^2 a)$, which SAC includes in its entropy ([[sac]]). For PPO the term cancels in the probability ratios and in the KL divergence, because both compare two densities at the same sample; only an entropy bonus would feel it. In the study, tanh did slightly better overall (30% better on HalfCheetah), perhaps mostly because it makes the first actions smaller. On Pendulum here the two did about as well: 9 seeds of 10 held the pendulum with tanh, 8 with clipping.
 - **A distribution with bounded support**, such as the Beta distribution on the interval (Chou et al., 2017), so that no probability is wasted past the ends.
 
 A squashed output can also get stuck. Where $\tanh$ is near $\pm 1$ its slope is near 0, and so is every gradient that passes through it: an actor whose outputs drift to the ends of the range may stop learning there. The DDPG of hindsight experience replay added the squares of the actor's outputs before the $\tanh$ to its loss, to keep them away from the ends (Andrychowicz et al., 2017).
@@ -47,7 +49,7 @@ A squashed output can also get stuck. Where $\tanh$ is near $\pm 1$ its slope is
 ### Scales {#scales}
 
 - **Actions in $[-1, 1]$.** Rescale each action dimension to the same range, as Stable-Baselines3's guide advises first: one initial spread then means the same for every joint, and the network's outputs stay of order one.
-- **Observations normalized.** "Always use observation normalization": in the study it was crucial on four tasks of five ([[normalization]]). A running mean and spread per input, then a clip at a few spreads.
+- **Observations normalized.** "Always use observation normalization": in the study it was crucial on four tasks of five ([[normalization]]). A running mean and spread per input, then a clip at a few spreads. Pendulum's spin runs to $\pm 8$ next to a cosine and a sine; normalized, PPO held the pendulum on all 10 seeds of the Lab's sweep, against 8.
 - **Rewards scaled** so that values stay moderate ([[normalization]]).
 
 ### Where Gaussian policies drift: bang-bang {#bang-bang}
