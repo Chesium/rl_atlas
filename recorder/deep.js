@@ -40,12 +40,21 @@ const CATALOG = {
     cfg: { algo: "ppo", workers: 8, steps: 128, epochs: 10, minibatch: 64, lr: 3e-4, clip: 0.2, lam: 0.95 } },
   "trpo-cartpole": { world: "cartpole", learner: "pg", station: "trpo", title: "TRPO", steps: 100000, block: 2500, seeds: SEEDS,
     cfg: { algo: "trpo", workers: 8, steps: 256, delta: 0.01, lam: 0.95, v_epochs: 10, minibatch: 64 } },
-  "ppo-pendulum": { world: "pendulum", learner: "pg", station: "ppo", title: "PPO", steps: 200000, block: 5000, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), shown: 2, // the typical seed (seed 1 fails)
+  "ppo-pendulum": { world: "pendulum", learner: "pg", station: "ppo", title: "PPO", steps: 200000, block: 5000, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), shown: 2, jitter: true, // the typical seed (seed 1 fails)
     cfg: { algo: "ppo", workers: 4, steps: 512, epochs: 10, minibatch: 64, lr: 1e-3, gamma: 0.9, lam: 0.95, reward_scale: 0.1 } },
   // Off-policy actor-critics for continuous actions (Part 11)
   "ddpg-pendulum": { world: "pendulum", learner: "ac", station: "ddpg", title: "DDPG", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), cfg: { algo: "ddpg", reward_scale: 0.1 } },
-  "td3-pendulum": { world: "pendulum", learner: "ac", station: "td3", title: "TD3", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), cfg: { algo: "td3", reward_scale: 0.1 } },
+  "td3-pendulum": { world: "pendulum", learner: "ac", station: "td3", title: "TD3", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true, cfg: { algo: "td3", reward_scale: 0.1 } },
   "sac-pendulum": { world: "pendulum", learner: "ac", station: "sac", title: "SAC", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), cfg: { algo: "sac", reward_scale: 0.1 } },
+  // The tools of continuous control (Part 12). jitter: every seed also keeps how much its actions jump from step to step.
+  // TD3 on continuous Mountain Car with exploration noise of four colors, all with the same spread, half the force.
+  ...Object.fromEntries([["white", "white noise"], ["ou", "Ornstein–Uhlenbeck noise"], ["pink", "pink noise"], ["red", "red noise"]].map(([kind, name]) => [`td3-car-${kind}-noise`,
+    { world: "mountain-car-continuous", learner: "ac", station: "action-noise", title: `TD3, ${name}`, steps: 40000, block: 1000, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true,
+      cfg: { algo: "td3", noise: 0.5, ...(kind === "white" ? {} : { noise_kind: kind }) } }])),
+  // SAC on the same car: its samples are white noise, unless pink noise replaces the normals, or gSDE makes the noise a
+  // function of the state (a new matrix every 8 steps).
+  ...Object.fromEntries([["sac-car", "action-noise", "SAC", {}], ["sac-car-pink-noise", "action-noise", "SAC, pink noise", { noise_kind: "pink" }], ["sac-car-gsde", "gsde", "SAC with gSDE", { sde: true }]].map(([name, station, title, cfg]) => [name,
+    { world: "mountain-car-continuous", learner: "ac", station, title, steps: 30000, block: 750, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true, cfg: { algo: "sac", ...cfg } }])),
 };
 // The knobs each recording's sweep tries, its own value among them. target_every = 0: no target network; buffer = 128
 // (the batch size): no replay, each batch is the latest experience.
@@ -55,10 +64,15 @@ const SWEEPS = {
   "a2c-cartpole": { lr: [3e-4, 1e-3, 3e-3, 1e-2], steps: [1, 5, 20] },
   "ppo-cartpole": { clip: [0.0, 0.1, 0.2, 0.3, 0.5], epochs: [1, 4, 10, 30], lr: [1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2] },
   "trpo-cartpole": { delta: [0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0] },
-  "ppo-pendulum": { lr: [3e-4, 1e-3, 3e-3], gamma: [0.9, 0.95, 0.99], clip: [0.0, 0.1, 0.2, 0.3, 0.5], epochs: [1, 4, 10, 30] },
-  "ddpg-pendulum": { tau: [0.001, 0.005, 0.02, 0.1], noise: [0.0, 0.1, 0.3, 0.6], reward_scale: [0.01, 0.1, 1.0] },
+  "ppo-pendulum": { lr: [3e-4, 1e-3, 3e-3], gamma: [0.9, 0.95, 0.99], clip: [0.0, 0.1, 0.2, 0.3, 0.5], epochs: [1, 4, 10, 30],
+    log_std0: [-1, 0, 1], squash: [0, 1], obs_norm: [0, 1], sde: [0, 1] },
+  "ddpg-pendulum": { tau: [0.001, 0.005, 0.02, 0.1], noise: [0.0, 0.1, 0.3, 0.6], reward_scale: [0.01, 0.1, 1.0], weight_decay: [0, 0.001, 0.01] },
   "td3-pendulum": { delay: [1, 2, 4, 8], policy_noise: [0.0, 0.2, 0.5, 1.0] },
   "sac-pendulum": { alpha: ["auto", 0.01, 0.05, 0.2, 1.0], tau: [0.001, 0.005, 0.02, 0.1] },
+  // Part 12: the colors are the recordings themselves (their first 10 seeds), so only the spreads train anew
+  "td3-car-white-noise": { noise_kind: ["white", "ou", "pink", "red"], noise: [0.2, 0.5, 1.0] },
+  "td3-car-pink-noise": { noise: [0.2, 0.5, 1.0] },
+  "sac-car": { noise_kind: ["white", "pink"], sde: [0, 1] },
 };
 // Sweep values that set more than one knob: SAC's α is either tuned ("auto") or fixed.
 const SWEEP_AS = { alpha: (v) => (v === "auto" ? { auto_alpha: true } : { alpha: v, auto_alpha: false }) };
@@ -114,7 +128,9 @@ async function sweep(name) {
   const spec = CATALOG[name], knobs = SWEEPS[name], seeds = spec.sweepSeeds || spec.seeds;
   const jobs = Object.entries(knobs).flatMap(([knob, values]) => values.flatMap((v) => seeds.map((seed) => ({ knob, v, seed }))));
   const setting = (knob, v) => (SWEEP_AS[knob] ? SWEEP_AS[knob](v) : { [knob]: typeof DEFAULTS[spec.learner][knob] === "boolean" ? !!v : v });
-  const results = await pool(jobs.map(({ knob, v, seed }) => ({ spec: { ...spec, cfg: { ...spec.cfg, ...setting(knob, v) } }, seed, snapshots: false })), `${name} sweep`);
+  // the recording's own value of a knob trains the recording's own settings: those runs are cached already
+  const specFor = (knob, v) => (v === current(spec, knob) ? spec : { ...spec, cfg: { ...spec.cfg, ...setting(knob, v) } });
+  const results = await pool(jobs.map(({ knob, v, seed }) => ({ spec: specFor(knob, v), seed, snapshots: false })), `${name} sweep`);
   const at = (knob, v, seed) => results[jobs.findIndex((j) => j.knob === knob && j.v === v && j.seed === seed)];
   const out = {
     name, world: spec.world, steps: spec.steps, block: spec.block, seeds, config: spec.cfg, trainer: "lab/deep",
@@ -122,6 +138,8 @@ async function sweep(name) {
       values, current: current(spec, knob),
       train: values.map((v) => seeds.map((s) => at(knob, v, s).train)),
       test: values.map((v) => seeds.map((s) => at(knob, v, s).test)),
+      // how much the actions jump from step to step, in the tests and the training episodes (recordings that keep it)
+      ...(spec.jitter && values.every((v) => seeds.every((s) => at(knob, v, s).jitter)) ? { jitter: values.map((v) => seeds.map((s) => at(knob, v, s).jitter)), jitterTrain: values.map((v) => seeds.map((s) => at(knob, v, s).jitterTrain)) } : {}),
     }])),
   };
   console.log(`${name} sweep: ${write(path.join(OUT, "sweeps", `${name}.json`), out)} KB`);

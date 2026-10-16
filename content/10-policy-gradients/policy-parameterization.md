@@ -156,6 +156,8 @@ Real actions are usually bounded (a steering wheel turns so far), and a Gaussian
 2. **Squash** the sample through a bounded function, such as $\tanh$, and correct the log-probability for the change of variable, as [[sac|soft actor–critic]] does.
 3. **Use a bounded distribution**, such as a Beta distribution rescaled to the action range. Chou, Maturana and Scherer (2017) found it learned faster than a clipped Gaussian, whose gradient is biased near the bounds.
 
+How these choices play out with networks, along with where the spread comes from and where it should start, is the subject of [[policy-spread]].
+
 ### Other parameterizations {#other}
 
 A continuous action range can be cut into bins and treated with a softmax, at the price of resolution and of ignoring that neighboring bins are alike. A **deterministic** policy $a = \pol{\mu(s, \boldsymbol\theta)}$ has no log-probability at all and needs a gradient of its own, through a learned action-value function ([[dpg]], [[ddpg]]). Mixtures, flows and other richer distributions appear in later work; the principle is always the same: a distribution that can be sampled and whose log-probability can be differentiated.

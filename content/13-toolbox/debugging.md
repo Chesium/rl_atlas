@@ -82,6 +82,7 @@ Some bugs let training run and simply make it worse:
 3. One seed, every number plotted.
 4. Several seeds: does it work often, or once?
 5. One knob at a time, on a log scale, from published values ([[hyperparameters]]).
+6. For continuous control, the checklist of [[control-recipe]]: setup, exploration, critic, smoothness.
 
 ## Card
 

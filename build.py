@@ -42,7 +42,7 @@ PRESET_KEYS = {"title", "env", "algorithms", "racers", "units", "runs", "charts"
 CHARTS = {"return", "steps", "optimal", "left", "delta", "error", "optimal-error", "match", "greedy", "ve", "weights",
           "policy-value", "right", "aim", "kl", "clipped", "deployed", "labels"}
 # What a preset of recorded runs (racers that name a recording) can chart: from the recordings, nothing is recomputed.
-RECORDED_CHARTS = {"return", "test", "steps", "loss", "td", "q", "eps", "kl", "clipped"}
+RECORDED_CHARTS = {"return", "test", "steps", "loss", "td", "q", "eps", "kl", "clipped", "jitter", "jitter-train"}
 RECORDINGS = CONTENT / "recordings"
 DEEP_WORKER = ["dmath", "nn", "worlds", "dqn", "pg", "ac", "record", "worker"]  # lab/deep/, in load order: the Worker's text
 MEASURES = {"error", "optimal-error", "match", "greedy", "ve", "policy-value", "right", "aim", "deployed"}
@@ -469,7 +469,7 @@ def compile_preset(pid: str, raw: dict, stations: dict, recordings: dict, proble
         if set(success) - {"metric", "min", "max", "window", "text"}:
             problems.error(where, f"success has unknown keys: {', '.join(sorted(set(success) - {'metric', 'min', 'max', 'window', 'text'}))}")
         if recorded:  # only the curves every seed of a recording kept can be judged over seeds
-            kept = {"return": "train", "test": "test", "q": "q"}
+            kept = {"return": "train", "test": "test", "q": "q", "jitter": "jitter", "jitter-train": "jitterTrain"}
             if metric not in kept:
                 problems.error(where, f"success judges '{metric}', which recordings do not keep for every seed (one of: {', '.join(kept)})")
             elif not all(kept[metric] in c for r in racers if r.get("recording") in recordings for c in recordings[r["recording"]]["curves"]):

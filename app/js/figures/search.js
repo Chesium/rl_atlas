@@ -1,4 +1,4 @@
-/* Figures of Part 13's search: how often Monte Carlo tree search, and flat Monte Carlo with the same number of random
+/* Figures of Part 14's search: how often Monte Carlo tree search, and flat Monte Carlo with the same number of random
    games, choose the one winning move of the tic-tac-toe position in the MCTS story, against the number of simulations.
    Computed live from lab/mcts.js when the figure scrolls into view. */
 (function (RL) {

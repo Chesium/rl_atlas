@@ -817,6 +817,48 @@ film = [0, 3, 4, 10, 40]
 intro = "The actor gives a mean torque and a spread, and the agent draws its torque from them; every reward comes with a bonus for the policy's randomness, weighted by α, which tunes itself toward a target. Two critics learn the reward and the randomness still to come, and the target takes the smaller. After every block of 1,500 steps the policy plays one test episode with its mean torque, from the same start every time; every step costs the angle from upright, the spin and the torque, so 0 is the best there is. The numbers show the spread the policy would draw with."
 success = { metric = "test", min = -250, text = "end up swinging it up and holding it in the test episodes, −250 or better" }
 
+# Part 12: the tools of continuous control. Continuous Mountain Car: the force is a number in [−1, 1], every step costs
+# 0.1 × force², the flag pays 100.
+[action-noise-car]
+title = "TD3 on a hill: four colors of noise"
+env = "mountain-car-continuous"
+racers = [{ recording = "td3-car-white-noise", name = "white" }, { recording = "td3-car-ou-noise", name = "Ornstein–Uhlenbeck" }, { recording = "td3-car-pink-noise", name = "pink" }, { recording = "td3-car-red-noise", name = "red" }]
+charts = ["test", "return", "jitter-train"]
+film = [0, 5, 10, 20, 40]
+seeds = true
+intro = "The engine is too weak to climb the hill: the car must swing back and forth to gain speed. Every step costs 0.1 × force², the flag pays 100, and an episode ends there or after 999 steps. TD3 four times, from the same seeds, with exploration noise of the same spread, half the largest force, in four colors: white, a fresh number every step; Ornstein–Uhlenbeck, pink and red, each drawn one episode at a time. After every block of 1,000 steps the actor plays one test episode without noise, from the same start: about 93 if it reaches the flag, about 0 if it learned to stand still."
+success = { metric = "test", min = 90, text = "end up reaching the flag in the test episodes, 90 or more" }
+
+[parameter-noise-car]
+title = "Noise on the actions or in the weights"
+env = "mountain-car-continuous"
+racers = [{ recording = "td3-car-white-noise", name = "noise on the actions" }, { recording = "td3-car-param-noise", name = "noise in the weights" }]
+charts = ["test", "return", "jitter-train"]
+film = [0, 5, 10, 20, 40]
+seeds = true
+fixed = ["noise_kind"]
+intro = "TD3 twice on the hill, from the same seeds. One adds white noise to every action. The other perturbs the actor's weights at the start of each episode and acts with the perturbed copy, with no other noise; every 50 steps it compares the copy's actions with the actor's and grows or shrinks the perturbation toward a target distance. After every block of 1,000 steps the unperturbed actor plays one test episode, from the same start."
+success = { metric = "test", min = 90, text = "end up reaching the flag in the test episodes, 90 or more" }
+
+[gsde-car]
+title = "SAC on a hill: white, pink or state-dependent noise"
+env = "mountain-car-continuous"
+racers = [{ recording = "sac-car", name = "SAC" }, { recording = "sac-car-pink-noise", name = "pink noise" }, { recording = "sac-car-gsde", name = "gSDE" }]
+charts = ["test", "return", "jitter-train"]
+film = [0, 2, 5, 10, 40]
+seeds = true
+intro = "SAC draws its force from a bell curve whose mean and spread the actor computes, a fresh sample every step: white noise, as TD3's. Pink noise replaces the sample's normal numbers with pink ones, drawn one episode at a time; gSDE makes the noise a function of the state, through the actor's last hidden layer and a matrix of normal numbers drawn every 8 steps. The same car and seeds for all three. After every block of 750 steps the actor plays one test episode with its mean force, from the same start."
+success = { metric = "test", min = 90, text = "end up reaching the flag in the test episodes, 90 or more" }
+
+[smooth-pendulum]
+title = "TD3 with and without CAPS"
+env = "pendulum"
+racers = [{ recording = "td3-pendulum", name = "TD3" }, { recording = "td3-pendulum-caps", name = "TD3 with CAPS" }]
+charts = ["test", "jitter", "jitter-train"]
+film = [0, 3, 6, 40]
+intro = "TD3 twice on the pendulum, from the same seeds. With CAPS, the actor's loss also pays for the distance between its torques in consecutive states, and between its torques in a state and in a slightly perturbed copy of it. Jitter measures how much the torque jumps from step to step: 100 × the mean of (change of torque / its range)², 0 for a constant torque, 100 for a jump across the whole range every step. After every block of 1,500 steps the actor plays one test episode without noise, from the same start; every step costs the angle from upright, the spin and the torque, so 0 is the best there is."
+success = { metric = "test", min = -250, text = "end up swinging it up and holding it in the test episodes, −250 or better" }
+
 [a2c-cartpole]
 title = "A2C balances a pole"
 env = "cartpole"

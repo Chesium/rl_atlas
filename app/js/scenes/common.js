@@ -279,6 +279,9 @@
     test: { label: "Test episode after each block: its return" },
     deployed: { label: "Return of the learned policy, played once from the start" },
     q: { label: (noun, learner) => (learner === "ac" ? "The critics' targets in each batch, on average" : "The largest Q-value in each batch, on average") },
+    // how much the action jumps from step to step: 100 × the mean of (Δa / the action range)²
+    jitter: { label: "Test episode: how much the action jumps from step to step", log: true },
+    "jitter-train": { label: "Training episodes: how much the action jumps from step to step", log: true },
   };
   function curves(host, cfg, runOf) {
     const cache = new Map();
@@ -319,7 +322,7 @@
         const seeds = names.map((n) => RL.lab.recordedCurves(RL.recordings[cfg.runs[n].recording]));
         // every seed kept its training returns (and in newer recordings its test returns), DQN's and the actor-critics'
         // their Q-values; anything else comes from the seed played back
-        const key = metric === "return" ? "train" : metric, all = names.every((n) => RL.recordings[cfg.runs[n].recording].curves.every((c) => c[key]));
+        const key = RL.lab.keptAs(metric), all = names.every((n) => RL.recordings[cfg.runs[n].recording].curves.every((c) => c[key]));
         chart.set(names.map((n, i) => ({ name: cfg.runs[n].name || n, color: `--s${i + 1}`, values: all ? RL.lab.recordedCurves(RL.recordings[cfg.runs[n].recording], key).mean : runOf(n).metrics[metric] })), refs);
         chart.playhead(first.units);
         status.textContent = all ? ` · average of ${seeds[0].seeds.length} seeds` : " · the seed played back";

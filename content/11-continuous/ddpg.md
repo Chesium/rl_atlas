@@ -78,7 +78,7 @@ The critic is updated first, as in the paper, so the actor climbs slopes that al
 
 ### Exploration {#exploration}
 
-The actor is deterministic, so the agent explores by adding noise to its action: $a = \pol{\mu(s)} + \epsilon$, clipped to the allowed range. The paper used noise correlated in time (an Ornstein–Uhlenbeck process); Fujimoto et al. (2018) found it brought no benefit over independent Gaussian noise, which is what the recording uses: a spread of 0.2, a tenth of the largest torque. Learning is off-policy, so the noise affects what the memory contains, not what the targets mean.
+The actor is deterministic, so the agent explores by adding noise to its action: $a = \pol{\mu(s)} + \epsilon$, clipped to the allowed range. The paper used noise correlated in time (an Ornstein–Uhlenbeck process); Fujimoto et al. (2018) found it brought no benefit over independent Gaussian noise, which is what the recording uses: a spread of 0.2, a tenth of the largest torque. Learning is off-policy, so the noise affects what the memory contains, not what the targets mean. On Pendulum that is enough. Where the body must be pushed one way for many steps, as in continuous Mountain Car, independent noise cancels out and never reaches the reward, while noise correlated in time, or noise in the actor's weights, does ([[action-noise]], [[parameter-noise]]).
 
 ### The recorded run {#recorded}
 

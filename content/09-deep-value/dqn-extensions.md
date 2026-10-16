@@ -78,7 +78,7 @@ This is prioritized sweeping ([[prioritized-sweeping]]) for a memory instead of 
 
 - **Multi-step returns.** The target sums $n$ rewards before bootstrapping, $n = 3$ in Rainbow, so news travels $n$ steps per update ([[n-step-td]]). The replayed steps came from an older policy and Rainbow does not correct for it; with small $n$ the error is tolerable.
 - **Distributional values.** Instead of the mean return, the network predicts its whole distribution, as probabilities over 51 fixed values, and learns it with a distributional Bellman update (Bellemare, Dabney & Munos, 2017). The greedy action still maximizes the mean, but learning the full shape gives the network richer targets.
-- **Noisy networks.** ε-greedy is replaced by learned noise in the weights of the last layers (Fortunato et al., 2018): the network decides how much to randomize, state by state, and the noise shrinks where it stops paying off.
+- **Noisy networks.** ε-greedy is replaced by learned noise in the weights of the last layers (Fortunato et al., 2018): the network decides how much to randomize, state by state, and the noise shrinks where it stops paying off ([[parameter-noise]] sets them beside other noise in the weights).
 
 Agent57 (Badia et al., 2020), which adds learned exploration bonuses, recurrent memory and a choice among many discount and exploration settings to this family, was the first to beat the human benchmark on all 57 Atari games, Montezuma's Revenge included.
 

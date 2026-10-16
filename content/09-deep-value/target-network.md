@@ -87,7 +87,7 @@ A target network makes the targets stable, not unbiased. The max over noisy esti
 
 ### Historical remarks {#history}
 
-Fitting a network or an ensemble of trees to fixed targets in batches came first (Ernst et al., 2005; Riedmiller, 2005). The first DQN (Mnih et al., 2013) computed its targets with the current weights; the 2015 version added the periodic copy, and in its ablations removing the copy lowered the score on all five games tested, though removing replay usually cost more. Lillicrap et al. (2016) used the soft copy, with $\tau = 0.001$, for continuous control. Van Hasselt et al. (2018) measured how often DQN's values diverge in practice, and found the target network among the ingredients that keep them bounded.
+Fitting a network or an ensemble of trees to fixed targets in batches came first (Ernst et al., 2005; Riedmiller, 2005). The first DQN (Mnih et al., 2013) computed its targets with the current weights; the 2015 version added the periodic copy, and in its ablations removing the copy lowered the score on all five games tested, though removing replay usually cost more. Lillicrap et al. (2016) used the soft copy, with $\tau = 0.001$, for continuous control. Van Hasselt et al. (2018) measured how often DQN's values diverge in practice, and found the target network among the ingredients that keep them bounded. It is not the only way: CrossQ (Bhatt et al., 2024) removed SAC's target networks altogether, keeping the critic stable with batch normalization instead ([[critic-regularization]]).
 
 ## Card
 

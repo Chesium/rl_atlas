@@ -277,6 +277,14 @@
 .pendview .goal { stroke: var(--rew); stroke-width: 2.5; stroke-linecap: round; }
 .pendview .bob { fill: var(--pol); stroke: var(--surface); stroke-width: 2; }
 .pendview .torque { fill: none; stroke: var(--val); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+/* Continuous Mountain Car (recorded runs): the valley from the side, the car, and the force on it */
+.hillview .ground { fill: var(--surface-3); }
+.hillview .ground-line { fill: none; stroke: var(--ink-2); stroke-width: 2; }
+.hillview .pole { stroke: var(--ink-2); stroke-width: 2; }
+.hillview .flag { fill: var(--rew); }
+.hillview .car-shell, .hillview .car-top { fill: var(--ink); }
+.hillview .wheel { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.hillview .force { fill: none; stroke: var(--val); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .knobs .rec-note { margin: 0; font-size: 13.5px; color: var(--ink-2); max-width: 52ch; }
 .knobs .rec-note.wide { flex-basis: 100%; max-width: 110ch; font-size: 12.5px; }
 

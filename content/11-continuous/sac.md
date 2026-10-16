@@ -83,7 +83,7 @@ The policy is a Gaussian squashed into the allowed range: $a = a_{\max}\tanh(u)$
 $$L(\boldsymbol\theta) = \mathbb E_{s,\,\varepsilon}\Big[\alpha \ln \pol{\pi(a_{\boldsymbol\theta} \mid s)} - \min_i \val{\hat q_i(s, a_{\boldsymbol\theta})}\Big] \label{actor-loss}$$
 can be differentiated straight through the sampled action, as DDPG differentiates through its deterministic one ([[dpg]]). The gradient has much less variance than a likelihood-ratio estimate. Up to a constant and the factor $\alpha$, this loss is the divergence of \ref{soft-improve}, averaged over the states of the memory. The squashing changes the density, by the change of variables:
 $$\ln \pol{\pi(a \mid s)} = \ln \mathcal N\big(u;\, \mu(s), \sigma(s)^2\big) - \sum_{i} \ln\big(a_{\max}\,(1 - \tanh^2 u_i)\big), \label{squash}$$
-summed over the action's dimensions. Forgetting this term makes the policy think a saturated action, deep in the tanh's flat end, is as random as any other.
+summed over the action's dimensions. Forgetting this term makes the policy think a saturated action, deep in the tanh's flat end, is as random as any other. And each step draws a fresh $\varepsilon$, so SAC's exploration, like TD3's, is white noise: drawing the $\varepsilon$ from pink noise instead ([[action-noise]]), or making the noise a function of the state ([[gsde]]), keeps the policy's distribution and makes consecutive actions related.
 
 ### Tuning the entropy weight {#alpha}
 

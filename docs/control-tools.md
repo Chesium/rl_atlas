@@ -21,7 +21,7 @@ anything was built, after reading the papers again (the sources are at the end).
 - **A critic that is fit on a thin slice of actions**, and an actor that climbs its errors ([TD3](../content/11-continuous/td3.md) covers the
   overestimation; the critic regularizers below cover the rest).
 - **Numbers in arbitrary units.** Positions in meters next to velocities a hundred times smaller, rewards in the
-  thousands, actions in newton-metres ([Normalization tricks](../content/12-toolbox/normalization.md)).
+  thousands, actions in newton-metres ([Normalization tricks](../content/13-toolbox/normalization.md)).
 - **Many action dimensions.** Every joint adds a dimension to explore, and to jitter in.
 
 ## The list
@@ -52,7 +52,7 @@ For the deterministic actors (DDPG, TD3), and for the samples of stochastic ones
 | Noisy networks | layers whose weights carry learned noise: exploration tuned by gradient descent | Rainbow DQN (Fortunato et al., 2018) | section |
 | State-dependent exploration (SDE, gSDE) | the noise is a function of the state, ε(s) = θ_εᵀ z(s), with θ_ε drawn every n steps: smooth, consistent, and still a Gaussian whose spread is learned | PPO, A2C, SAC, TD3 in Stable-Baselines3; learning on real robots (Raffin et al., 2021; Rückstieß et al., 2008) | **station** *gSDE*; Lab |
 | Evolution strategies, random search | search in parameter space alone, with no gradient of the return | Salimans et al. (2017); ARS (Mania et al., 2018) | mention |
-| Bootstrapped heads, Thompson sampling | commit to one hypothesis for a while | Osband et al. (2016) | covered ([Exploration strategies](../content/12-toolbox/exploration-strategies.md)) |
+| Bootstrapped heads, Thompson sampling | commit to one hypothesis for a while | Osband et al. (2016) | covered ([Exploration strategies](../content/13-toolbox/exploration-strategies.md)) |
 
 ### 3. The policy's distribution
 
@@ -91,14 +91,14 @@ For the deterministic actors (DDPG, TD3), and for the samples of stochastic ones
 | More updates per step, and resets | many gradient steps per environment step; reset the networks now and then to recover plasticity | REDQ, DroQ (20 updates a step); Nikishin et al. (2022); D'Oro et al. (2023) | section |
 | Dormant units, plasticity loss | units that stop firing for good as training goes on | Sokar et al. (2023); Dohare et al. (2024) | section (the Lab's network strip shows them) |
 | n-step returns, distributional critics | longer targets; a distribution of returns instead of a mean | D4PG (Barth-Maron et al., 2018) | mention |
-| Huber loss, gradient clipping | bounded steps for large errors | DQN | covered ([Normalization tricks](../content/12-toolbox/normalization.md)) |
+| Huber loss, gradient clipping | bounded steps for large errors | DQN | covered ([Normalization tricks](../content/13-toolbox/normalization.md)) |
 
 ### 6. Numbers in range
 
 | Tool | What it does | Who uses it | In the atlas |
 | --- | --- | --- | --- |
-| Observation normalization | running mean and spread of each input, then clip | PPO (Andrychowicz et al., 2021: "always use it"), SB3's VecNormalize | covered ([Normalization tricks](../content/12-toolbox/normalization.md)); new: a knob in the trainer, Lab |
-| Reward scaling, value normalization, advantage normalization | | | covered ([Normalization tricks](../content/12-toolbox/normalization.md)) |
+| Observation normalization | running mean and spread of each input, then clip | PPO (Andrychowicz et al., 2021: "always use it"), SB3's VecNormalize | covered ([Normalization tricks](../content/13-toolbox/normalization.md)); new: a knob in the trainer, Lab |
+| Reward scaling, value normalization, advantage normalization | | | covered ([Normalization tricks](../content/13-toolbox/normalization.md)) |
 | Time limits | bootstrap at a time-out, do not treat it as an end; or give the agent the time left | Pardo et al. (2018); Rudin et al. (2022) | section, *the recipe* |
 
 ### 7. Robustness for real robots
@@ -115,7 +115,7 @@ For the deterministic actors (DDPG, TD3), and for the samples of stochastic ones
 - **Data augmentation** (DrQ, RAD): it is for learning from pixels, which the atlas leaves out.
 - **Optimistic actor–critics** (OAC, Ciosek et al., 2019): one paragraph in *action noise*; not a tool people reach
   for first.
-- **Intrinsic rewards** (RND, ICM, counts): already in [Exploration strategies](../content/12-toolbox/exploration-strategies.md); the new part links to them for
+- **Intrinsic rewards** (RND, ICM, counts): already in [Exploration strategies](../content/13-toolbox/exploration-strategies.md); the new part links to them for
   sparse rewards.
 
 ## How it fits the atlas

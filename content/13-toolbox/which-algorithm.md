@@ -54,7 +54,7 @@ Within a family, a well-tuned standard method is usually the best start:
 
 - **Discrete actions, off-policy**: DQN with Double DQN's target, often with dueling heads and prioritized replay ([[dqn-extensions]]).
 - **On-policy**: PPO, with GAE and normalized advantages ([[ppo]]).
-- **Continuous, off-policy**: SAC with automatic entropy tuning, or TD3 ([[sac]], [[td3]]).
+- **Continuous, off-policy**: SAC with automatic entropy tuning, or TD3 ([[sac]], [[td3]]). What else a continuous-control task usually needs, from action scaling to exploration noise and critic regularization, is in [[control-recipe]].
 
 Published settings for these methods are a better first guess than settings of your own ([[hyperparameters]]), and the odds over several seeds are a better judge than a single run ([[seeds]]).
 

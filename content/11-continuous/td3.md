@@ -159,7 +159,7 @@ Repeat for each step $t$:
 
 - Can underestimate: on Pendulum, 44 below the return that followed, along the shown run's tests.
 - Slower when overestimation was harmless: on Pendulum, a median of 9,000 steps to good training episodes, against DDPG's 6,000.
-- Still a deterministic actor with hand-set exploration noise.
+- Still a deterministic actor with hand-set exploration noise, white by default: where the reward takes long pushes in one direction, it may never find it ([[action-noise]]).
 
 ### Knobs
 

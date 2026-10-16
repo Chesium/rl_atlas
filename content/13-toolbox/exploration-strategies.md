@@ -1,5 +1,5 @@
 +++
-summary = "An agent only learns about what it tries. Exploration strategies decide what to try beyond the current best guess: random dithering (ε-greedy, softmax, action noise), optimism about the unknown (optimistic starts, UCB, count bonuses), and randomness kept inside the policy (entropy bonuses, sampling from what it believes). They differ most on problems where a good discovery needs many deliberate steps."
+summary = "An agent only learns about what it tries. Exploration strategies decide what to try beyond the current best guess: random dithering (ε-greedy, softmax, action noise), optimism about the unknown (optimistic starts, UCB, count bonuses), and randomness kept inside the policy (entropy bonuses, sampling from what it believes). They differ most on problems where a good discovery needs many deliberate steps. When the task is to reach goals, hindsight relabeling learns even from the episodes that miss."
 prereqs = ["explore-exploit", "epsilon-greedy"]
 lab = "mountain-car-optimism"
 sources = [
@@ -10,6 +10,7 @@ sources = [
   { text = "Bellemare, Srinivasan, Ostrovski, Schaul, Saxton & Munos (2016), Unifying count-based exploration and intrinsic motivation, NeurIPS", url = "https://arxiv.org/abs/1606.01868" },
   { text = "Burda, Edwards, Storkey & Klimov (2019), Exploration by random network distillation, ICLR", url = "https://arxiv.org/abs/1810.12894" },
   { text = "Fortunato et al. (2018), Noisy networks for exploration, ICLR", url = "https://arxiv.org/abs/1706.10295" },
+  { text = "Andrychowicz, Wolski, Ray, Schneider, Fong, Welinder, McGrew, Tobin, Abbeel & Zaremba (2017), Hindsight experience replay, NeurIPS", url = "https://arxiv.org/abs/1707.01495" },
 ]
 
 [story]
@@ -76,7 +77,7 @@ The simplest strategies add randomness to the greedy choice, without regard to w
 
 - **ε-greedy** ([[epsilon-greedy]]): with probability $\eps$, a uniformly random action. On the 10-armed testbed, over 500 runs, the fraction of runs that end up pulling the best arm most of the time grows from 39% with $\eps = 0$ to 61% with $\eps = 0.01$ and 85% with $\eps = 0.1$. DQN decays $\eps$ from 1 to a small value, exploring most when it knows least ([[dqn]]).
 - **Softmax (Boltzmann)**: actions chosen with probabilities $\propto e^{Q(s,a)/\tau}$, so a nearly-best action is tried far more often than a terrible one. The temperature $\tau$ plays the role of $\eps$.
-- **Action noise** for continuous actions: Gaussian noise added to a deterministic action, as in [[ddpg]] and [[td3]].
+- **Action noise** for continuous actions: Gaussian noise added to a deterministic action, as in [[ddpg]] and [[td3]]. Correlated in time (pink, red, Ornstein–Uhlenbeck), the same spread reaches much farther ([[action-noise]]); the noise can also go into the policy's weights ([[parameter-noise]]) or depend on the state ([[gsde]]).
 
 Dithering is cheap and works when good actions are a few random steps away. It fails when a discovery needs a long, specific sequence. In a corridor of $N$ steps where only the far end pays and every wrong step sends the agent back, uniformly random moves reach the end with probability $2^{-N}$: about once in a million tries for $N = 20$. Exploration that reaches such places has to be *deep*: committed to a direction for many steps (Osband et al., 2016).
 
@@ -96,6 +97,12 @@ Policy-gradient methods sample their actions from the policy, so they explore by
 - **Maximum entropy RL** makes that bonus part of the objective, with a weight tuned automatically, as [[sac]] does.
 - **Sampling a belief.** Thompson sampling keeps a distribution over what each action is worth, samples one plausible world, and acts greedily in it. Each sample commits to one hypothesis for a while, which gives deep exploration. Bootstrapped DQN does this with several value heads trained on different subsets of the data, acting with one head per episode (Osband et al., 2016). Noisy networks put learned noise in the weights themselves (Fortunato et al., 2018).
 
+### Goals in hindsight {#hindsight}
+
+Some tasks are about reaching a goal, put the box there, move the hand here, and the reward says only whether it was reached. An agent that never reaches the goal then never learns anything. **Hindsight experience replay** (HER, Andrychowicz et al., 2017) learns from the misses: an episode that failed to reach its goal still reached *somewhere*, so its transitions are stored a second time as if that place had been the goal, and there they succeed. The policy and the critic take the goal as an input, and any off-policy learner can use the relabeled transitions, because the goal changes the reward, not how the world moves. Relabeling each step with 4 places the same episode reached later worked best.
+
+On a simulated Fetch arm, with a reward of $-1$ for every step the object was not at its goal, DDPG with HER learned to push, slide, and pick and place objects. DDPG alone learned none of the three, a count-based bonus helped only a little, on sliding, and simple shaped rewards, such as the distance to the goal, failed with or without HER. The pick-and-place policy then ran on the real robot ([[robust-policies]]).
+
 ### Choosing {#choosing}
 
 | situation | a good first choice |
@@ -106,6 +113,7 @@ Policy-gradient methods sample their actions from the policy, so they explore by
 | policy gradients | an entropy bonus, tuned; or SAC |
 | continuous actions, off-policy | Gaussian action noise (DDPG, TD3), or SAC |
 | sparse rewards in a huge state space | novelty bonuses (counts, RND) or posterior sampling |
+| goals to reach, a reward only for reaching them | hindsight experience replay, with an off-policy learner |
 | the world changes | bonuses for what has not been tried lately (Dyna-Q+) |
 
 ### Historical remarks {#history}
@@ -127,6 +135,7 @@ Choosing restaurants in a new city. Dithering: now and then, walk into a random 
 - **Dithering**: ε-greedy, softmax, Gaussian action noise. Easy; shallow.
 - **Optimism**: optimistic starts, UCB, novelty bonuses. Directed; needs a sense of what is unknown.
 - **Policy randomness**: entropy bonus, SAC, Thompson sampling, bootstrapped heads, noisy nets.
+- **Hindsight**, for goals: store each missed episode again as a success at the place it reached (HER).
 
 ### Pitfalls
 

@@ -66,6 +66,10 @@
     // DQN logs the largest Q-value of each state in a batch; the actor–critics, the target of each sample
     q: { title: (n, env, alg) => (alg?.kind === "ac" ? "The critics' targets in the batches, on average" : "The largest Q-value of each state in the batches, on average") },
     eps: { title: () => "Exploration ε at the end of the block", percent: true },
+    // how much the action jumps from one step to the next: 100 × the mean of (Δa / the action range)², gSDE's
+    // continuity cost (0: a constant action; 100: from one end to the other every step)
+    jitter: { title: () => "Test episode: how much the action jumps from step to step", log: true },
+    "jitter-train": { title: () => "Training episodes: how much the action jumps from step to step", log: true },
   };
   const LADDER = [10, 20, 50, 100, 150, 200, 300, 500, 1000, 2000, 3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000];
   const signed = (v, d = 2) => (v < 0 ? "−" : v > 0 ? "+" : "") + Math.abs(v).toFixed(d);
@@ -614,7 +618,7 @@
       const sw = RL.sweeps?.[recs[i].name];
       if (ks.length === 1 && sw?.knobs[ks[0]] && sw.trainer === recs[i].trainer) { // the same trainer: its seeds are these seeds
         const d = sw.knobs[ks[0]], vi = d.values.indexOf(deepValue(ks[0]));
-        if (vi >= 0) return sw.seeds.map((seed, j) => ({ seed, train: d.train[vi][j], test: d.test[vi][j] }));
+        if (vi >= 0) return sw.seeds.map((seed, j) => ({ seed, train: d.train[vi][j], test: d.test[vi][j], ...(d.jitter ? { jitter: d.jitter[vi][j], jitterTrain: d.jitterTrain[vi][j] } : {}) }));
       }
       const b = deepBench?.racers[i];
       return b && b.done === 1 ? [...b.curves.values()].sort((x, y) => x.seed - y.seed) : null;
@@ -633,7 +637,7 @@
     function typicalDeep() {
       const all = commonBenches();
       if (!all) return null;
-      const R = rule(), key = R.metric === "return" ? "train" : R.metric;
+      const R = rule(), key = lab.keptAs(R.metric);
       const scores = all.map((curves) => curves.map((c) => lab.success(R, { [R.metric]: Float64Array.from(c[key] || [], (x) => x ?? NaN) }).score));
       return lab.typicalSeed(scores, all[0].map((c) => c.seed), lab.lowerIsBetter(R));
     }
@@ -710,7 +714,7 @@
       const common = trainable ? commonBenches() : null, benches = racers.map((_, i) => ({ ...recs[i], curves: trainable ? common?.[i] : recs[i].curves }));
       if (benches.some((b) => !b.curves)) { avg = null; if (view.seeds) drawCharts(); tally(); return; }
       // the training returns of every seed, and any other curve every seed kept (DQN's Q-values)
-      const keyOf = (k) => (k === "return" ? "train" : k), kept = [...new Set([...preset.charts, preset.success?.metric].filter(Boolean))].filter((k) => benches.every((b) => b.curves.every((c) => c[keyOf(k)])));
+      const keyOf = lab.keptAs, kept = [...new Set([...preset.charts, preset.success?.metric].filter(Boolean))].filter((k) => benches.every((b) => b.curves.every((c) => c[keyOf(k)])));
       const per = benches.map((b) => Object.fromEntries(kept.map((k) => [k, lab.recordedCurves(b, keyOf(k))]))), n = Math.min(...benches.map((b) => b.curves.length));
       const sums = per.map((c) => Object.fromEntries(kept.map((k) => [k, c[k].mean.map((v) => v * n)])));
       const lines = per.map((c) => Array.from({ length: n }, (_, j) => Object.fromEntries(kept.map((k) => [k, c[k].seeds[j]]))));
@@ -805,7 +809,13 @@
       policy_noise: { sym: "σ′", name: "noise on the target action" }, alpha: { sym: "α", name: "entropy weight (auto: tuned)" }, clip: { sym: "ε", name: "clip range (0: no clip)" }, epochs: { sym: "K", name: "passes over each batch" },
       steps: { sym: "n", name: "steps per worker between updates" }, delta: { sym: "δ", name: "trust region (KL)" }, gamma: { sym: "γ", name: "discount" },
       huber: { sym: "L", name: "loss (0: squared error, 1: Huber)" }, depth: { sym: "D", name: "hidden layers" }, width: { sym: "W", name: "units per layer" },
-      act: { sym: "f", name: "activation" }, reward_scale: { sym: "c", name: "reward scale (rewards × c for learning)" } };
+      act: { sym: "f", name: "activation" }, reward_scale: { sym: "c", name: "reward scale (rewards × c for learning)" },
+      // the tools of continuous control (Part 12)
+      noise_kind: { sym: "β", name: "color of the exploration noise" }, param_noise: { sym: "θ̃", name: "noise in the weights (0: off, 1: on)" },
+      sde: { sym: "gSDE", name: "state-dependent exploration (0: off, 1: on)" }, sde_freq: { sym: "n", name: "steps between new noise matrices (−1: once per batch)" },
+      log_std0: { sym: "ln σ₀", name: "starting log spread of the policy" }, caps_t: { sym: "λT", name: "CAPS: pull toward the next state's action" },
+      caps_s: { sym: "λS", name: "CAPS: pull toward nearby states' actions" }, obs_norm: { sym: "z", name: "normalize observations (0: off, 1: on)" },
+      weight_decay: { sym: "λ", name: "weight decay on the critics" }, squash: { sym: "tanh", name: "squash actions with tanh (0: clip)" } };
     const knobOf = (k) => (recorded ? DEEP_KNOBS[k] || { sym: k, name: k } : { ...KNOBS[k], ...racers.find((r) => r.algorithm.knobs?.[k])?.algorithm.knobs[k] });
     // The values a sweep tries: a knob's choices or its sweep list. Tiny step sizes (linear methods, policy gradients)
     // try the ladder around the ones in use; averaging methods also try 1/n.
@@ -1013,9 +1023,10 @@
       const each = (f) => runs.map((r, i) => `<b>${esc(racers[i].name)}</b> ${f(r, i)}`).join(" · ");
       const pct = (v) => `${Math.round(100 * v)}%`;
       if (recorded) {
-        const end = knobs.units - 1;
-        out.push(`After the last block, the test episode lasts ${each((r) => plural(r.metrics.steps[end], ["step", "steps"]))}${env.kind === "cartpole" ? " (500 at most)" : `, return ${each((r) => signed(r.metrics.test[end], 0))} (0 is the best there is)`}.`);
-        out.push(`Training episodes in the last block, on average: ${each((r) => signed(r.metrics.return[end], 0))}.`);
+        const end = knobs.units - 1, whole = (v) => (Math.round(v) ? signed(v, 0) : "0"); // no "−0" for a car that stood still
+        const best = env.kind === "hillcar" ? "90 or more if the car reached the flag, near 0 if it stood still" : "0 is the best there is";
+        out.push(`After the last block, the test episode lasts ${each((r) => plural(r.metrics.steps[end], ["step", "steps"]))}${env.kind === "cartpole" ? " (500 at most)" : `, return ${each((r) => whole(r.metrics.test[end]))} (${best})`}.`);
+        out.push(`Training episodes in the last block, on average: ${each((r) => whole(r.metrics.return[end]))}.`);
       }
       if (env.kind === "bandit") {
         out.push(`This run's last ${last} pulls: ${each((r) => `${lab.mean(r.metrics.return, knobs.units - last).toFixed(2)} per pull, a best arm ${pct(lab.mean(r.metrics.optimal, knobs.units - last))} of the time`)}.`);

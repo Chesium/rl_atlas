@@ -117,7 +117,7 @@ The PPO paper also tried a penalty instead of the clip: maximize $\hat{\mathbb E
 
 ### What else matters {#details}
 
-PPO's results depend on more than the clip. Careful studies (Engstrom et al., 2020; Andrychowicz et al., 2021) found that several implementation choices, often unmentioned, matter as much: normalizing advantages and observations, clipping the value loss and the gradient norm, annealing the learning rate, the initialization of the last layers, and the number of epochs and minibatches. Without them PPO's advantage over TRPO largely disappears. The lesson for practice: start from a reference implementation, change one thing at a time, and watch the KL divergence and the share of clipped samples.
+PPO's results depend on more than the clip. Careful studies (Engstrom et al., 2020; Andrychowicz et al., 2021) found that several implementation choices, often unmentioned, matter as much: normalizing advantages and observations, clipping the value loss and the gradient norm, annealing the learning rate, the initialization of the last layers, and the number of epochs and minibatches. Without them PPO's advantage over TRPO largely disappears. The lesson for practice: start from a reference implementation, change one thing at a time, and watch the KL divergence and the share of clipped samples. Part 12 measures several of these choices on Pendulum: the policy's starting spread, clipping against squashing and observation normalization ([[policy-spread]]), and noise that depends on the state ([[gsde]]).
 
 ### With networks, on Pendulum {#pendulum}
 

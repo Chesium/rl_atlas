@@ -4,7 +4,7 @@
 # Algorithms also name their `parent` (the algorithm they change in one way: the family tree)
 # and their `labels` (what kind of method they are: the map's filters and the chips on their page).
 
-rows = [[0, 1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13]]
+rows = [[0, 1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14]]
 row_titles = ["Learning with tables", "Learning at scale"]
 
 [lines]
@@ -206,11 +206,29 @@ stations = [
   { id = "sac", title = "Soft actor–critic (SAC)", short = "SAC", kind = "algorithm", parent = "td3", labels = ["approximate", "control", "off-policy", "bootstraps", "model-free", "continuous-actions"] },
 ]
 
+# The tools around the continuous-control algorithms, which their papers leave in the code: how to explore with
+# continuous actions, how to keep the policy smooth and the critic in shape, and how it all fits together.
 [[part]]
 n = 12
+title = "Exploration and regularization"
+line = "continuous"
+folder = "12-exploration-regularization"
+stations = [
+  { id = "action-noise", title = "Action noise: white, red and pink", short = "Action noise" },
+  { id = "parameter-noise", title = "Noise in the weights", short = "Parameter noise" },
+  { id = "gsde", title = "State-dependent exploration (gSDE)", short = "gSDE" },
+  { id = "policy-spread", title = "Gaussian policies in practice", short = "Gaussian policies" },
+  { id = "smooth-policies", title = "Smooth policies: CAPS, penalties, filters", short = "Smooth policies" },
+  { id = "critic-regularization", title = "Regularizing the critic", short = "Critic regularizers" },
+  { id = "robust-policies", title = "Robust policies: randomize the world", short = "Robust policies" },
+  { id = "control-recipe", title = "A recipe for continuous control", short = "The recipe" },
+]
+
+[[part]]
+n = 13
 title = "Toolbox"
 line = "toolbox"
-folder = "12-toolbox"
+folder = "13-toolbox"
 stations = [
   { id = "bias-variance", title = "Bias vs variance" },
   { id = "exploration-strategies", title = "Exploration strategies", short = "Exploration" },
@@ -224,10 +242,10 @@ stations = [
 ]
 
 [[part]]
-n = 13
+n = 14
 title = "Where next"
 line = "next"
-folder = "13-where-next"
+folder = "14-where-next"
 stations = [
   { id = "mcts", title = "MCTS and AlphaZero", short = "MCTS & AlphaZero" },
   { id = "model-based-deep", title = "Model-based deep RL" },

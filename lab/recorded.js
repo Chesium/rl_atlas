@@ -22,11 +22,13 @@
     return out;
   };
 
-  // What one step paid, which the recordings leave out: Gymnasium's rewards, from the states and the action.
+  // What one step paid, which the recordings leave out: Gymnasium's rewards, from the state reached, the action, and
+  // whether the step ended the episode (not by the time limit).
   const REWARD = {
     cartpole: () => 1,
     "mountain-car": () => -1,
     pendulum: (s, a) => -(s[0] ** 2 + 0.1 * s[1] ** 2 + 0.001 * a ** 2),
+    "mountain-car-continuous": (s, a, ended) => (ended ? 100 : 0) - 0.1 * a ** 2,
   };
 
   // A snapshot, unpacked: the grid's values and actions, and the test episode as states, actions and numbers per step.
@@ -64,24 +66,24 @@
       numbers: (ev, env) => (env.actionNames
         ? `${[1 - ev.x[0], ev.x[0]].map((p, a) => `\\pol{\\pi(\\text{${env.actionNames[a]}} \\mid s)} = ${(100 * p).toFixed(0)}\\%`).join(" \\qquad ")} \\qquad \\val{\\hat v(s)} = ${fmt(ev.x[1])}`
         : `\\pol{\\mu(s)} = ${fmt(ev.x[0], 2)} \\qquad \\pol{\\sigma} = ${fmt(ev.x[1], 2)} \\qquad \\val{\\hat v(s)} = ${fmt(ev.x[2])}`),
-      note: (ev, env) => `Step ${ev.k + 1} of the test episode · the policy drew <b>${env.actionNames ? env.actionNames[ev.a] : `a torque of ${fmt(ev.a, 2)}`}</b>`,
+      note: (ev, env) => `Step ${ev.k + 1} of the test episode · the policy drew <b>${env.actionNames ? env.actionNames[ev.a] : `a ${env.actionWord || "torque"} of ${fmt(ev.a, 2)}`}</b>`,
     },
   };
 
   // Off-policy actor-critics for continuous actions (DDPG, TD3, SAC): the actor climbs the critic.
   LEARNERS.ac = {
-    rule: (rec) => (rec.station === "sac"
+    rule: (rec) => (rec.config?.algo === "sac"
       ? "\\boldsymbol\\theta \\leftarrow \\boldsymbol\\theta + \\alp\\,\\nabla_{\\boldsymbol\\theta}\\Big(\\min_i \\val{\\hat q_i(s, a_{\\boldsymbol\\theta})} - \\alpha \\ln \\pol{\\pi(a_{\\boldsymbol\\theta} \\mid s)}\\Big)"
       : "\\boldsymbol\\theta \\leftarrow \\boldsymbol\\theta + \\alp\\,\\nabla_a \\val{\\hat q(s, a)}\\big|_{a = \\pol{\\mu(s)}}\\,\\nabla_{\\boldsymbol\\theta}\\pol{\\mu(s, \\boldsymbol\\theta)}"),
     numbers: (ev) => `\\pol{\\mu(s)} = ${fmt(ev.x[0], 2)} \\qquad \\text{spread } ${fmt(ev.x[1], 2)} \\qquad \\val{\\hat q(s, \\mu(s))} = ${fmt(ev.x[2])}`,
-    note: (ev) => `Step ${ev.k + 1} of the test episode · the actor chose <b>a torque of ${fmt(ev.a, 2)}</b> (no exploration in a test)`,
+    note: (ev, env) => `Step ${ev.k + 1} of the test episode · the actor chose <b>a ${env.actionWord || "torque"} of ${fmt(ev.a, 2)}</b> (no exploration in a test)`,
   };
 
   // The learner of a recording, in the shape of a Lab algorithm: the station whose pseudocode it follows, how it shows
   // a snapshot, and its test episode as events.
   lab.recordedLearner = function (rec) {
     const kind = rec.learner, L = LEARNERS[kind];
-    const reward = REWARD[rec.world];
+    const reward = REWARD[rec.world], limit = lab.make(rec.world).maxSteps;
     return {
       id: rec.station, title: rec.title, unit: "block", recorded: true, kind,
       rule: typeof L.rule === "function" ? L.rule(rec) : L.rule,
@@ -94,12 +96,18 @@
         for (let k = 0; k < m.steps; k++) {
           const a = m.action(k), x = m.numbers(k), s2 = m.state(k + 1);
           yield { type: "choose", s, a, x, k };
-          yield { type: "move", s, a, r: reward(s2, a), s2, k, x, end: k === m.steps - 1 };
+          const end = k === m.steps - 1;
+          yield { type: "move", s, a, r: reward(s2, a, end && m.steps < limit), s2, k, x, end };
           s = s2;
         }
       },
     };
   };
+
+  // The curve every seed keeps for a chart: the training return is kept as "train", the training episodes' jitter
+  // (how much the action jumps from step to step) as "jitterTrain".
+  lab.keptAs = (k) => ({ return: "train", "jitter-train": "jitterTrain" })[k] || k;
+  const jitterOf = (r) => (r.jitter ? { jitter: r.jitter, jitterTrain: r.jitterTrain } : {});
 
   // A recorded run, shaped like lab.simulate's.
   lab.recordedRun = function (rec) {
@@ -117,6 +125,7 @@
       steps: per((t) => rec.snapshots[t + 1].test.steps),
       loss: stat("loss"), td: stat("td"), q: stat("q"), kl: stat("kl"), clipped: stat("clipped"),
       eps: per((t) => rec.snapshots[t + 1].eps ?? NaN),
+      jitter: per((t) => shown.jitter?.[t] ?? NaN), "jitter-train": per((t) => shown.jitterTrain?.[t] ?? NaN),
     };
     return {
       env, algorithm, params: { ...rec.config, block: rec.block }, units, seed: rec.shown, metrics, recorded: true, rec,
@@ -146,7 +155,7 @@
     worker.onmessage = ({ data }) => {
       if (!data.run) { job.done = data.block / blocks; job.secs = data.secs; onBlock?.(job); return; }
       const r = data.run;
-      job.result = lab.recordedRun({ ...rec, config, shown: seed, curves: [{ seed, train: r.train, test: r.test, episodes: r.episodes, ...(r.q ? { q: r.q } : {}) }], snapshots: r.snapshots });
+      job.result = lab.recordedRun({ ...rec, config, shown: seed, curves: [{ seed, train: r.train, test: r.test, episodes: r.episodes, ...(r.q ? { q: r.q } : {}), ...jitterOf(r) }], snapshots: r.snapshots });
       job.done = 1;
       finished.set(key, job.result);
       worker.terminate();
@@ -173,7 +182,7 @@
       const next = () => { const seed = todo.shift(); if (seed === undefined) worker.terminate(); else worker.postMessage({ id: seed, spec: specOf(rec, config), seed, snapshots: false }); };
       worker.onmessage = ({ data }) => {
         if (!data.run) return;
-        const r = data.run, c = { seed: data.id, train: r.train, test: r.test, episodes: r.episodes, ...(r.q ? { q: r.q } : {}) };
+        const r = data.run, c = { seed: data.id, train: r.train, test: r.test, episodes: r.episodes, ...(r.q ? { q: r.q } : {}), ...jitterOf(r) };
         finished.set(keyOf(rec, config, data.id, "seed"), c);
         job.curves.set(data.id, c);
         job.done = job.curves.size / seeds.length;

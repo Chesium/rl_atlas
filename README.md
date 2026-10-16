@@ -23,10 +23,11 @@ Reinforcement learning is easier to understand when you can watch it happen. RL 
 every idea, takes every number it quotes from a real run, and lets you race the algorithms against each other right in
 your browser.
 
-- **95 stations in 14 parts**: the core of Sutton & Barto's *Reinforcement Learning: An Introduction*, then deep RL,
-  a toolbox for real experiments, and where the field goes next.
+- **103 stations in 15 parts**: the core of Sutton & Barto's *Reinforcement Learning: An Introduction*, then deep RL,
+  the exploration noise and regularizers that make continuous control work, a toolbox for real experiments, and where
+  the field goes next.
 - **Three ways to read every algorithm**: a story, a textbook chapter and a one-page card.
-- **58 experiments in the Lab**, from one pseudocode line at a time to 50 episodes a second, with the odds over 20 seeds.
+- **62 experiments in the Lab**, from one pseudocode line at a time to 50 episodes a second, with the odds over 20 seeds.
 - **Deep RL that runs in the page**: networks trained by the guide's own JavaScript trainer.
 - **Private and offline**: one 8 MB file, no server, no account. Your progress stays in your browser.
 
@@ -34,7 +35,7 @@ your browser.
 
 ### The map
 
-<img src="docs/images/map.png" alt="The whole metro map: 14 lines of stations from Start here to Where next, the first four parts read and filled with color">
+<img src="docs/images/map.png" alt="The whole metro map: 15 lines of stations from Start here to Where next, the first four parts read and filled with color">
 
 Every station is one idea, in reading order: the agent–environment loop, bandits, dynamic programming, Monte Carlo,
 temporal difference, n-step methods and traces, planning, function approximation, deep value methods, policy
@@ -84,8 +85,10 @@ pseudocode column folds away for a bigger view.
 <img src="docs/images/deep-lab-dark.png" alt="DQN balancing a pole, in the dark theme: the cart, the network's action values over every state, and how often each hidden unit fires">
 
 DQN and its extensions, A2C, TRPO and PPO on CartPole, and PPO, DDPG, TD3 and SAC on Pendulum, each recorded over 20
-seeds by the guide's own JavaScript trainer. Play back any seed, see what the network thinks of every state, or turn a
-knob and train a new run in the page.
+seeds by the guide's own JavaScript trainer. On continuous Mountain Car, where the reward is far and the car heavy, TD3
+explores with white, Ornstein–Uhlenbeck, pink and red noise and with noise in its weights, and SAC with white noise,
+pink noise and gSDE; on Pendulum, TD3 learns with and without CAPS, and the Lab measures how much each policy's actions
+jitter. Play back any seed, see what the network thinks of every state, or turn a knob and train a new run in the page.
 
 ## Getting around
 
@@ -199,7 +202,7 @@ The Textbook numbers its sections, figures and statements, and any display equat
 
 The core of the guide follows Richard S. Sutton and Andrew G. Barto's *Reinforcement Learning: An Introduction*
 (2nd edition, 2018), retold in the guide's own words with its own pictures; the deep RL and later parts follow the
-papers each entry cites. CartPole, Acrobot and Pendulum port [Gymnasium](https://gymnasium.farama.org/)'s equations,
+papers each entry cites. CartPole, Acrobot, Pendulum and continuous Mountain Car port [Gymnasium](https://gymnasium.farama.org/)'s equations,
 and the math is typeset by [KaTeX](https://katex.org/).
 
 ## License
