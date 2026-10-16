@@ -1,6 +1,10 @@
 /* Policy-gradient learners with networks: A2C, PPO and TRPO, for a softmax policy over a few actions or a Gaussian one
    over a real-valued action. Several workers play at once; GAE judges every step; the critic is a separate network.
-   The JavaScript port of recorder/pg.py, same settings and same defaults. */
+   The JavaScript port of recorder/pg.py, same settings and same defaults.
+
+   The tools of Part 12, each off by default: gSDE (A2C, PPO), where the noise is a function of the policy's last
+   hidden layer, a matrix drawn per worker every sde_freq steps or once per batch (Raffin et al., 2021); squashing the
+   sampled action with tanh instead of clipping it; and observation normalization. */
 (function (RL) {
   "use strict";
   const D = RL.dmath, deep = (RL.deep = RL.deep || {});
@@ -8,6 +12,7 @@
   deep.PG_DEFAULTS = {
     algo: "ppo", workers: 8, steps: 128, gamma: 0.99, lam: 0.95, lr: 3e-4, lr_v: 1e-3, epochs: 10, minibatch: 64, clip: 0.2,
     ent: 0, delta: 0.01, v_epochs: 10, depth: 2, width: 64, norm_adv: true, log_std0: 0, reward_scale: 1,
+    sde: false, sde_freq: -1, squash: false, obs_norm: false,
   };
   const LOG_2PI = 1.8378770664093453;
 
@@ -16,18 +21,23 @@
   const rows = (x, dim, idx) => { const out = new Float64Array(idx.length * dim); for (let k = 0; k < idx.length; k++) for (let c = 0; c < dim; c++) out[k * dim + c] = x[idx[k] * dim + c]; return out; };
 
   // π(a | s, θ): a softmax over logits, or a Gaussian with a learned mean and a log spread that is a free parameter.
+  // With gSDE the log spread is a matrix, one number per pair (last hidden unit z_i, action dimension j), and the
+  // action's spread depends on the state: σ̂_j(s) = √(Σ_i (z_i(s) σ_ij)² + 10⁻⁶).
   class Policy {
     constructor(dim, world, cfg, rng) {
       this.discrete = !world.act; this.dim = dim;
       this.out = this.discrete ? world.nA : world.act;
       this.net = new deep.MLP([dim, ...deep.hiddenOf(cfg), this.out], rng, "tanh", 0.01);
-      this.logStd = this.discrete ? null : new Float64Array(this.out).fill(cfg.log_std0);
+      this.sde = !this.discrete && !!cfg.sde; this.squash = !this.discrete && !!cfg.squash; this.width = deep.hiddenOf(cfg).at(-1);
+      this.logStd = this.discrete ? null : new Float64Array(this.sde ? this.width * this.out : this.out).fill(cfg.log_std0);
       this.lo = world.lo; this.hi = world.hi;
       this.params = [...this.net.params, ...(this.discrete ? [] : [this.logStd])];
+      this.mats = null; // gSDE: each worker's noise matrix
     }
-    // probabilities (B × nA), or means (B × out) and spreads (out)
+    // probabilities (B × nA), or means (B × out) and spreads (out; with gSDE, B × out, rows: true, with the features z)
     dist(x, B) {
       const y = this.net.forward(x, B), n = this.out;
+      if (this.sde) return { mu: y.slice(), ...this.spreads(B), rows: true };
       if (!this.discrete) return { mu: y.slice(), sd: Float64Array.from(this.logStd, (l) => D.exp(l)) };
       const p = new Float64Array(B * n);
       for (let r = 0; r < B; r++) {
@@ -38,14 +48,34 @@
       }
       return { p };
     }
-    // one action per state: an index, or a vector of out numbers
-    sample(x, B, rng) {
-      const d = this.dist(x, B), n = this.out, out = [];
+    // gSDE, after a forward pass over B states: the last hidden layer z (held fixed: no gradient flows into it from
+    // the noise), the spreads σ_ij and each state's action spreads σ̂_j(s).
+    spreads(B) {
+      const n = this.out, w = this.width, z = this.net.h[this.net.L - 2].slice(0, B * w), sig = Float64Array.from(this.logStd, (l) => D.exp(l)), sd = new Float64Array(B * n);
+      for (let r = 0; r < B; r++) for (let j = 0; j < n; j++) {
+        let v = 0;
+        for (let i = 0; i < w; i++) { const zs = z[r * w + i] * sig[i * n + j]; v += zs * zs; }
+        sd[r * n + j] = Math.sqrt(v + 1e-6);
+      }
+      return { z, sig, sd };
+    }
+    // gSDE's noise matrices, one per worker: E_ij = σ_ij times a unit normal. A worker's noise in state s is then
+    // Σ_i z_i(s) E_ij, the same function of the state until the matrix is drawn again.
+    noise(N, rng) {
+      const k = this.width * this.out;
+      return Array.from({ length: N }, () => { const E = new Float64Array(k); for (let q = 0; q < k; q++) E[q] = D.exp(this.logStd[q]) * rng.normal(); return E; });
+    }
+    // one action per state: an index, or a vector of out numbers (gSDE: row r's noise from the matrix mats[r])
+    sample(x, B, rng, mats = this.mats) {
+      const d = this.dist(x, B), n = this.out, w = this.width, out = [];
       for (let r = 0; r < B; r++) {
         if (this.discrete) { // the first cumulative probability above a uniform draw (never past the last action)
           const u = rng.next(); let c = 0, a = 0;
           for (; a < n; a++) { c += d.p[r * n + a]; if (!(u > c)) break; }
           out.push(Math.min(a, n - 1));
+        } else if (this.sde) {
+          const E = mats[r];
+          out.push(Array.from({ length: n }, (_, j) => { let e = 0; for (let i = 0; i < w; i++) e += d.z[r * w + i] * E[i * n + j]; return d.mu[r * n + j] + e; }));
         } else out.push(Array.from({ length: n }, (_, j) => d.mu[r * n + j] + d.sd[j] * rng.normal()));
       }
       return out;
@@ -55,7 +85,8 @@
       for (let r = 0; r < B; r++) {
         if (this.discrete) { lp[r] = D.log(d.p[r * n + a[r]] + 1e-12); continue; }
         let s = 0;
-        for (let j = 0; j < n; j++) { const z = (a[r][j] - d.mu[r * n + j]) / d.sd[j]; s += -0.5 * z * z - this.logStd[j] - 0.5 * LOG_2PI; }
+        if (d.rows) for (let j = 0; j < n; j++) { const sd = d.sd[r * n + j], z = (a[r][j] - d.mu[r * n + j]) / sd; s += -0.5 * z * z - D.log(sd) - 0.5 * LOG_2PI; }
+        else for (let j = 0; j < n; j++) { const z = (a[r][j] - d.mu[r * n + j]) / d.sd[j]; s += -0.5 * z * z - this.logStd[j] - 0.5 * LOG_2PI; }
         lp[r] = s;
       }
       return lp;
@@ -81,6 +112,16 @@
         this.net.backward(d);
         return this.net.grads.map((g) => g.slice());
       }
+      if (this.sde) { // ∂/∂μ as below; ∂ ln π/∂ ln σ_ij = (z² − 1) (z_i σ_ij)² / σ̂_j², and ∂H/∂ ln σ_ij = (z_i σ_ij)² / σ̂_j²
+        const width = this.width, p = this.spreads(B), dls = new Float64Array(width * n);
+        for (let r = 0; r < B; r++) for (let j = 0; j < n; j++) {
+          const sd = p.sd[r * n + j], z = (a[r][j] - y[r * n + j]) / sd, f = w[r] * (z * z - 1) + beta;
+          d[r * n + j] = (w[r] * z) / sd;
+          for (let i = 0; i < width; i++) { const zs = p.z[r * width + i] * p.sig[i * n + j]; dls[i * n + j] += (f * zs * zs) / (sd * sd); }
+        }
+        this.net.backward(d);
+        return [...this.net.grads.map((g) => g.slice()), dls];
+      }
       const sd = Float64Array.from(this.logStd, (l) => D.exp(l)), dls = new Float64Array(n);
       for (let r = 0; r < B; r++) for (let j = 0; j < n; j++) {
         const z = (a[r][j] - y[r * n + j]) / sd[j];
@@ -97,7 +138,7 @@
       let s = 0;
       for (let r = 0; r < B; r++) for (let j = 0; j < n; j++) {
         if (this.discrete) { const q = old.p[r * n + j]; s += q * (D.log(q + 1e-12) - D.log(d.p[r * n + j] + 1e-12)); }
-        else { const m0 = old.mu[r * n + j], s0 = old.sd[j], m = d.mu[r * n + j], s1 = d.sd[j]; s += D.log(s1 / s0) + (s0 * s0 + (m0 - m) * (m0 - m)) / (2 * s1 * s1) - 0.5; }
+        else { const m0 = old.mu[r * n + j], s0 = old.rows ? old.sd[r * n + j] : old.sd[j], m = d.mu[r * n + j], s1 = d.rows ? d.sd[r * n + j] : d.sd[j]; s += D.log(s1 / s0) + (s0 * s0 + (m0 - m) * (m0 - m)) / (2 * s1 * s1) - 0.5; }
       }
       return s / B;
     }
@@ -127,7 +168,20 @@
       this.net.backward(g);
       return [...this.net.grads.map((q) => q.slice()), Float64Array.from(v[v.length - 1], (q) => 2 * q)];
     }
-    forEnv(a) { return this.discrete ? a : a.map((v) => Math.max(this.lo, Math.min(this.hi, v))); }
+    // The action the world receives: clipped to its range, or squashed into it by tanh.
+    forEnv(a) {
+      if (this.discrete) return a;
+      if (this.squash) { const mid = (this.lo + this.hi) / 2, half = (this.hi - this.lo) / 2; return a.map((v) => mid + half * D.tanh(v)); }
+      return a.map((v) => Math.max(this.lo, Math.min(this.hi, v)));
+    }
+    // Row r's mean and spread for the first action dimension, as shown: squashed, in the world's units (the spread
+    // through tanh's slope at the mean).
+    shown(d, r = 0) {
+      const n = this.out, mu = d.mu[r * n], sd = d.rows ? d.sd[r * n] : d.sd[0];
+      if (!this.squash) return [mu, sd];
+      const t = D.tanh(mu), half = (this.hi - this.lo) / 2;
+      return [(this.lo + this.hi) / 2 + half * t, half * sd * (1 - t * t)];
+    }
   }
 
   // Advantages and λ-returns for T steps of N workers (T × N, row-major). done: the episode ended (no bootstrap); cut:
@@ -164,12 +218,21 @@
       const cfg = (this.cfg = { ...deep.PG_DEFAULTS, ...config });
       this.rng = rng; this.dim = dim;
       this.pi = new Policy(dim, world, cfg, rng);
+      if (this.pi.sde && cfg.algo === "trpo") throw new Error("gSDE is wired for A2C and PPO, not TRPO");
+      this.norm = cfg.obs_norm ? new deep.RunningNorm(dim) : null;
       this.v = new deep.MLP([dim, ...deep.hiddenOf(cfg), 1], rng, "tanh");
       this.optPi = new deep.Adam(this.pi.params, cfg.lr, 0.5);
       this.optV = new deep.Adam(this.v.params, cfg.lr_v, 0.5);
       this.stats = {};
     }
     value(x, B) { return this.v.forward(x, B).slice(); }
+    // What the networks see: the observations, or normalized by their running mean and spread (update: count these
+    // observations in first, as Stable-Baselines3's VecNormalize does at every step it plays).
+    input(x, B, update = false) {
+      if (!this.norm) return x;
+      if (update) this.norm.update(x, B);
+      return this.norm.apply(x, B);
+    }
     // One update from a batch: states (n × dim), actions, advantages and λ-returns, over steps and workers.
     update(s, a, adv, ret) {
       const cfg = this.cfg, n = a.length, pi = this.pi, dim = this.dim;

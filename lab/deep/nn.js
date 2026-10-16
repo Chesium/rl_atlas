@@ -182,11 +182,12 @@
   }
   deep.MLP = MLP;
 
-  // Adam (Kingma & Ba, 2015) with an optional limit on the gradient's norm. The bias corrections keep running
+  // Adam (Kingma & Ba, 2015) with an optional limit on the gradient's norm, and an optional weight decay (an L2
+  // penalty, decay/2 · ‖w‖², added to the loss, as DDPG's paper put on its critic). The bias corrections keep running
   // products, not powers: Math.pow may round differently from one engine to the next.
   class Adam {
-    constructor(params, lr, clip = 0) {
-      this.params = params; this.lr = lr; this.clip = clip;
+    constructor(params, lr, clip = 0, decay = 0) {
+      this.params = params; this.lr = lr; this.clip = clip; this.decay = decay;
       this.m = params.map((p) => new Float64Array(p.length)); this.v = params.map((p) => new Float64Array(p.length));
       this.b1 = 1; this.b2 = 1;
     }
@@ -199,11 +200,11 @@
         if (norm > this.clip) scale = this.clip / norm;
       }
       this.b1 *= 0.9; this.b2 *= 0.999;
-      const c1 = 1 - this.b1, c2 = 1 - this.b2;
+      const c1 = 1 - this.b1, c2 = 1 - this.b2, decay = this.decay;
       for (let i = 0; i < this.params.length; i++) {
         const p = this.params[i], g = grads[i], m = this.m[i], v = this.v[i];
         for (let k = 0; k < p.length; k++) {
-          const gk = g[k] * scale;
+          const gk = decay ? g[k] * scale + decay * p[k] : g[k] * scale;
           m[k] = 0.9 * m[k] + 0.1 * gk;
           v[k] = 0.999 * v[k] + 0.001 * gk * gk;
           p[k] -= (lr * (m[k] / c1)) / (Math.sqrt(v[k] / c2) + 1e-8);
@@ -212,4 +213,65 @@
     }
   }
   deep.Adam = Adam;
+
+  // The running mean and spread of each input, updated batch by batch (Chan et al.'s combination of moments, as
+  // Stable-Baselines3's VecNormalize), and inputs normalized by them, then clipped to ±10.
+  class RunningNorm {
+    constructor(dim, clip = 10) {
+      this.dim = dim; this.clip = clip; this.count = 1e-4;
+      this.mean = new Float64Array(dim); this.var = new Float64Array(dim).fill(1);
+    }
+    update(x, B) {
+      const d = this.dim, tot = this.count + B;
+      for (let j = 0; j < d; j++) {
+        let m = 0, v = 0;
+        for (let r = 0; r < B; r++) m += x[r * d + j];
+        m /= B;
+        for (let r = 0; r < B; r++) { const e = x[r * d + j] - m; v += e * e; }
+        v /= B;
+        const delta = m - this.mean[j];
+        this.var[j] = (this.var[j] * this.count + v * B + (delta * delta * this.count * B) / tot) / tot;
+        this.mean[j] += (delta * B) / tot;
+      }
+      this.count = tot;
+    }
+    apply(x, B) {
+      const d = this.dim, out = new Float64Array(B * d), c = this.clip;
+      for (let r = 0; r < B; r++) for (let j = 0; j < d; j++) {
+        const z = (x[r * d + j] - this.mean[j]) / Math.sqrt(this.var[j] + 1e-8);
+        out[r * d + j] = Math.max(-c, Math.min(c, z));
+      }
+      return out;
+    }
+  }
+  deep.RunningNorm = RunningNorm;
+
+  // Colored noise: L numbers whose power falls with frequency f as 1/f^β (white β = 0, pink β = 1, red β = 2), with a
+  // spread of 1 on average. Timmer and König's method, as the colorednoise package that pink-noise-rl builds on:
+  // Gaussian Fourier coefficients scaled by f^(−β/2) (the lowest frequency standing in for f = 0), then an inverse
+  // real Fourier transform, here written out as sums over a table of L cosines and sines.
+  const tables = new Map();
+  function trig(L) {
+    if (!tables.has(L)) tables.set(L, { cos: Float64Array.from({ length: L }, (_, m) => D.cos((2 * Math.PI * m) / L)), sin: Float64Array.from({ length: L }, (_, m) => D.sin((2 * Math.PI * m) / L)) });
+    return tables.get(L);
+  }
+  deep.colored = function (L, beta, rng) {
+    const M = Math.floor(L / 2) + 1, s = new Float64Array(M);
+    for (let k = 0; k < M; k++) s[k] = beta === 0 ? 1 : D.pow(Math.max(k, 1) / L, -beta / 2);
+    let w2 = 0;
+    for (let k = 1; k < M; k++) { const w = k === M - 1 ? (s[k] * (1 + (L % 2))) / 2 : s[k]; w2 += w * w; }
+    const sigma = (2 * Math.sqrt(w2)) / L, re = new Float64Array(M), im = new Float64Array(M);
+    for (let k = 0; k < M; k++) re[k] = s[k] * rng.normal();
+    for (let k = 0; k < M; k++) im[k] = s[k] * rng.normal();
+    if (L % 2 === 0) { im[M - 1] = 0; re[M - 1] *= Math.SQRT2; }
+    im[0] = 0; re[0] *= Math.SQRT2;
+    const { cos, sin } = trig(L), y = new Float64Array(L), top = L % 2 === 0 ? M - 1 : M; // the real Nyquist term apart
+    for (let n = 0; n < L; n++) {
+      let acc = re[0];
+      for (let k = 1; k < top; k++) { const q = (k * n) % L; acc += 2 * (re[k] * cos[q] - im[k] * sin[q]); }
+      if (L % 2 === 0) acc += n % 2 ? -re[M - 1] : re[M - 1];
+      y[n] = acc / L / sigma;
+    }
+    return y;
+  };
 })(globalThis.RL = globalThis.RL || {});

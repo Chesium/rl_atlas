@@ -52,6 +52,33 @@
     },
   };
 
-  deep.worlds = { cartpole, pendulum };
+  // Continuous Mountain Car (MountainCarContinuous-v0): (x, v), a force in [−1, 1], too weak to climb the right hill
+  // directly: v += 0.0015 force − 0.0025 cos 3x, clipped to ±0.07; x += v, clipped to [−1.2, 0.6] (the left wall stops
+  // the car). Every step costs 0.1 a² (the action as given, before clipping, as Gymnasium has it); reaching x ≥ 0.45
+  // (with v ≥ 0) pays 100 and ends the episode; at most 999 steps. The network sees (x, v), in their own units.
+  // Gymnasium keeps the state in 32-bit floats; here it stays in 64, so the two agree to about six digits.
+  const MC = { power: 0.0015, maxSpeed: 0.07, minX: -1.2, maxX: 0.6, goal: 0.45 };
+  const mountainCar = {
+    id: "mountain-car-continuous", obs: 2, act: 1, lo: -1, hi: 1, maxSteps: 999,
+    x: ["position", -1.2, 0.6], y: ["velocity", -0.07, 0.07],
+    ranges: [[-1.2, 0.6], [-0.07, 0.07]],
+    grid: () => grid(axis(-1.2, 0.6), axis(-0.07, 0.07), (x, v) => [x, v]),
+    reset: (r) => [-0.6 + 0.2 * r.next(), 0],
+    observe: (s) => s,
+    state: (s) => s,
+    step(s, a) {
+      const f = Math.max(-1, Math.min(1, a));
+      let [x, v] = s;
+      v += f * MC.power - 0.0025 * D.cos(3 * x);
+      v = Math.max(-MC.maxSpeed, Math.min(MC.maxSpeed, v));
+      x += v;
+      x = Math.max(MC.minX, Math.min(MC.maxX, x));
+      if (x === MC.minX && v < 0) v = 0;
+      const term = x >= MC.goal && v >= 0;
+      return { s2: [x, v], r: (term ? 100 : 0) - 0.1 * a * a, term };
+    },
+  };
+
+  deep.worlds = { cartpole, pendulum, "mountain-car-continuous": mountainCar };
   deep.GRID = GRID;
 })(globalThis.RL = globalThis.RL || {});
