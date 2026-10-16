@@ -53,7 +53,7 @@ const CATALOG = {
       cfg: { algo: "td3", noise: 0.5, ...(kind === "white" ? {} : { noise_kind: kind }) } }])),
   // SAC on the same car: its samples are white noise, unless pink noise replaces the normals, or gSDE makes the noise a
   // function of the state (a new matrix every 8 steps).
-  ...Object.fromEntries([["sac-car", "action-noise", "SAC", {}], ["sac-car-pink-noise", "action-noise", "SAC, pink noise", { noise_kind: "pink" }], ["sac-car-gsde", "gsde", "SAC with gSDE", { sde: true }]].map(([name, station, title, cfg]) => [name,
+  ...Object.fromEntries([["sac-car", "sac", "SAC", {}], ["sac-car-pink-noise", "sac", "SAC, pink noise", { noise_kind: "pink" }], ["sac-car-gsde", "gsde", "SAC with gSDE", { sde: true }]].map(([name, station, title, cfg]) => [name,
     { world: "mountain-car-continuous", learner: "ac", station, title, steps: 30000, block: 750, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true, cfg: { algo: "sac", ...cfg } }])),
   // TD3 on the car with noise in its weights (Plappert et al., 2018): the perturbation adapts until the actions move by 0.5,
   // the white noise's spread. Unnormalized, the speed (never beyond ±0.07, while the position ranges over 1.8) barely
@@ -69,7 +69,7 @@ const CATALOG = {
   "td3-pendulum-caps": { world: "pendulum", learner: "ac", station: "smooth-policies", title: "TD3 with CAPS", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), shown: 6, jitter: true,
     cfg: { algo: "td3", reward_scale: 0.1, caps_t: 0.1, caps_s: 0.3 } },
   // TD3 on Pendulum again for that race: the same runs as td3-pendulum, shown at seed 6.
-  "td3-pendulum-jitter": { world: "pendulum", learner: "ac", station: "smooth-policies", title: "TD3", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), shown: 6, jitter: true,
+  "td3-pendulum-jitter": { world: "pendulum", learner: "ac", station: "td3", title: "TD3", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), shown: 6, jitter: true,
     cfg: { algo: "td3", reward_scale: 0.1 } },
 };
 // The knobs each recording's sweep tries, its own value among them. target_every = 0: no target network; buffer = 128

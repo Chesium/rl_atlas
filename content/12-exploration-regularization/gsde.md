@@ -114,14 +114,14 @@ $$a = \pol{\mu(s)} + \sum_i z_i(s)\,\theta_{ij}, \quad \theta_{ij} \sim \mathcal
 ### Pseudocode
 
 ::: pseudocode
-Parameters: the interval $n$ between draws ($-1$: once per batch of steps), the starting log spreads $\ln\knob{\sigma_{ij}}$; the rest is PPO's
-Initialize the policy network (its last hidden layer $\mathbf z(s)$, its output $\pol{\mu(s)}$), the matrix of log spreads, the critic
-Repeat for each batch of $T$ steps:
-  Repeat for each step $t$ of the batch:
-    If $t = 0$ or $t$ is a multiple of $n$: each worker draws its matrix, $\theta_{ij} \sim \mathcal N(0, \knob{\sigma_{ij}}^2)$
-    Each worker: $A \leftarrow \pol{\mu(S)} + \boldsymbol\theta^\top\mathbf z(S)$; clip it to the allowed range and take it; observe $\rew R$, $S'$
-    Store $S$, $A$ and $\ln\pol{\pi(A \mid S)}$ under the Gaussian of mean $\pol{\mu(S)}$ and spreads $\pol{\hat\sigma_j(S)} = \sqrt{\sum_i (z_i(S)\knob{\sigma_{ij}})^2}$
-  Advantages by GAE; PPO's clipped passes over the batch, training the network and the log spreads through that Gaussian (the features $\mathbf z$ held fixed in the spreads)
+Parameters: the interval $n$ between draws ($-1$: once per episode), the starting log spreads $\ln\knob{\sigma_{ij}}$; the rest is SAC's
+Initialize SAC: the actor (its last hidden layer $\mathbf z(s)$, its mean $\pol{\mu(s)}$), the matrix of log spreads, two critics and their target copies, $\ln\alpha$; an empty memory $\mathcal D$
+Repeat for each episode:
+  Repeat for each step $t$ of the episode:
+    If $t = 0$ or $t$ is a multiple of $n$: draw the matrix, $\theta_{ij} \sim \mathcal N(0, \knob{\sigma_{ij}}^2)$
+    $A \leftarrow a_{\max}\tanh\big(\pol{\mu(S)} + \boldsymbol\theta^\top\mathbf z(S)\big)$ (a random action during the first steps); take it, observe $\rew R$, $S'$; store $(S, A, \rew R, S')$ in $\mathcal D$
+    SAC's update from a batch of $\mathcal D$, its samples drawn with a fresh matrix: the policy is the Gaussian of mean $\pol{\mu(s)}$ and spreads $\pol{\hat\sigma_j(s)} = \sqrt{\sum_i (z_i(s)\knob{\sigma_{ij}})^2}$, squashed by $\tanh$, the features $\mathbf z$ held fixed in the spreads
+    $S \leftarrow S'$
 :::
 
 ### Pitfalls
