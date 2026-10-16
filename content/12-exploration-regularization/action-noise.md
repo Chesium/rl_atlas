@@ -56,7 +56,7 @@ sacpink = { recording = "sac-car-pink-noise", name = "SAC, pink noise" }
 :::
 
 ::: step {run = "pink", at = 40, curves = ["white", "ou", "pink", "red"], metric = "jitter-train"}
-**What a motor would feel.** How much the training pushes jump from one step to the next, typically: 11.6 with white noise, 2.6 with pink, 0.5 with red, 0.4 with Ornstein–Uhlenbeck. The colors that explore better are also the gentler ones ([[smooth-policies]]). [Race the four in the Lab](lab:action-noise-car).
+**What a motor would feel.** How much the training pushes jump from one step to the next, on average after the first 1,000 steps of random pushes: 11.4 with white noise, 2.3 with pink, 0.1 with red, 0.03 with Ornstein–Uhlenbeck. The colors that explore better are also the gentler ones ([[smooth-policies]]). [Race the four in the Lab](lab:action-noise-car).
 :::
 
 ## Textbook
