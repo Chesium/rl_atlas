@@ -856,7 +856,7 @@ env = "pendulum"
 racers = [{ recording = "td3-pendulum", name = "TD3" }, { recording = "td3-pendulum-caps", name = "TD3 with CAPS" }]
 charts = ["test", "jitter", "jitter-train"]
 film = [0, 3, 6, 40]
-intro = "TD3 twice on the pendulum, from the same seeds. With CAPS, the actor's loss also pays for the distance between its torques in consecutive states, and between its torques in a state and in a slightly perturbed copy of it. Jitter measures how much the torque jumps from step to step: 100 × the mean of (change of torque / its range)², 0 for a constant torque, 100 for a jump across the whole range every step. After every block of 1,500 steps the actor plays one test episode without noise, from the same start; every step costs the angle from upright, the spin and the torque, so 0 is the best there is."
+intro = "TD3 twice on the pendulum, from the same seeds. With CAPS, the actor's loss also pays for the distance between its torques in consecutive states (weight 0.1), and between its torques in a state and in a copy of it perturbed by noise of spread 0.05 (weight 0.3). Jitter measures how much the torque jumps from step to step: 100 × the mean of (change of torque / its range)², 0 for a constant torque, 100 for a jump across the whole range every step. After every block of 1,500 steps the actor plays one test episode without noise, from the same start; every step costs the angle from upright, the spin and the torque, so 0 is the best there is."
 success = { metric = "test", min = -250, text = "end up swinging it up and holding it in the test episodes, −250 or better" }
 
 [a2c-cartpole]

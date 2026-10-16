@@ -55,6 +55,11 @@ const CATALOG = {
   // function of the state (a new matrix every 8 steps).
   ...Object.fromEntries([["sac-car", "action-noise", "SAC", {}], ["sac-car-pink-noise", "action-noise", "SAC, pink noise", { noise_kind: "pink" }], ["sac-car-gsde", "gsde", "SAC with gSDE", { sde: true }]].map(([name, station, title, cfg]) => [name,
     { world: "mountain-car-continuous", learner: "ac", station, title, steps: 30000, block: 750, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true, cfg: { algo: "sac", ...cfg } }])),
+  // TD3 on Pendulum with CAPS's two terms. The temporal weight 0.1 and the spatial 0.3 (σ = 0.05): in trials, a temporal
+  // weight of 0.3 or a spatial one of 1 froze some seeds at the start (every torque at one end of tanh), and a spatial
+  // weight of 0.05 smoothed less.
+  "td3-pendulum-caps": { world: "pendulum", learner: "ac", station: "smooth-policies", title: "TD3 with CAPS", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), jitter: true,
+    cfg: { algo: "td3", reward_scale: 0.1, caps_t: 0.1, caps_s: 0.3 } },
 };
 // The knobs each recording's sweep tries, its own value among them. target_every = 0: no target network; buffer = 128
 // (the batch size): no replay, each batch is the latest experience.
