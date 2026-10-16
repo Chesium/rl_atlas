@@ -25,8 +25,6 @@ white = { recording = "td3-car-white-noise", name = "white" }
 ou = { recording = "td3-car-ou-noise", name = "Ornstein–Uhlenbeck" }
 pink = { recording = "td3-car-pink-noise", name = "pink" }
 red = { recording = "td3-car-red-noise", name = "red" }
-sac = { recording = "sac-car", name = "SAC" }
-sacpink = { recording = "sac-car-pink-noise", name = "SAC, pink noise" }
 +++
 
 ## Story
@@ -56,7 +54,7 @@ sacpink = { recording = "sac-car-pink-noise", name = "SAC, pink noise" }
 :::
 
 ::: step {run = "pink", at = 40, curves = ["white", "ou", "pink", "red"], metric = "jitter-train"}
-**What a motor would feel.** How much the training pushes jump from one step to the next, on average after the first 1,000 steps of random pushes: 11.4 with white noise, 2.3 with pink, 0.1 with red, 0.03 with Ornstein–Uhlenbeck. The colors that explore better are also the gentler ones ([[smooth-policies]]). [Race the four in the Lab](lab:action-noise-car).
+**What a motor would feel.** How much the training pushes jump from one step to the next, on average after the first 1,000 steps of random pushes: 11.4 with white noise, 2.3 with pink, 0.1 with red, 0.03 with Ornstein–Uhlenbeck. The colors that explore better are also the gentler ones ([[smooth-policies]]). SAC's samples are white noise too: [[gsde]] races it against pink noise and noise that depends on the state. [Race the four colors in the Lab](lab:action-noise-car).
 :::
 
 ## Textbook

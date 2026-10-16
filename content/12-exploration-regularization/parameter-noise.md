@@ -33,7 +33,7 @@ norm = { recording = "td3-car-param-noise-norm", name = "weights, inputs normali
 :::
 
 ::: step {run = "weights", at = 40, map = "action"}
-**The speed is too small to matter.** The car's speed never exceeds 0.07, while its position ranges over 1.8. A perturbation changes the actor's response to each input in proportion to its size, so each copy's extra push depends on where the car is, not on how it moves, and a push like that cannot pump a swing. After 40,000 steps the critic has seen the flag, but the actor's push still ignores the speed, and its test episode stands still.
+**The speed is too small to matter.** The car's speed never exceeds 0.07, while its position ranges over 1.8. A perturbation changes the actor's response to each input in proportion to its size, so each copy's extra push depends on where the car is, not on how it moves, and a push like that cannot pump a swing. After 40,000 steps the critic has seen the flag, but the actor's own push still ignores the speed: on the map it changes across the positions, in stripes, and hardly with the speed. Its test episode stands still.
 :::
 
 ::: step {run = "norm", at = 2, map = "value"}
