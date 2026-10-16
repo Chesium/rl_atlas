@@ -104,7 +104,7 @@ Repeat for each step:
 
 ### Pitfalls
 
-- Weights so large that the actor ignores the critic: the policy becomes smooth and useless.
+- Weights so large that the actor ignores the critic: the policy becomes smooth and useless. With a $\tanh$ output it can even freeze at the start: the untrained critic pushes every action the same way, the terms hold the actions together, and once all of them sit at the flat ends of $\tanh$, no gradient brings them back.
 - A spatial perturbation larger than the states' meaningful differences: nearby states that need different actions get forced together.
 - Adding a filter after training: the policy was not trained with its delay.
 - Judging smoothness by the training episodes, whose noise dominates: measure the test episodes.
