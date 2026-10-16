@@ -27,7 +27,7 @@ your browser.
   the exploration noise and regularizers that make continuous control work, a toolbox for real experiments, and where
   the field goes next.
 - **Three ways to read every algorithm**: a story, a textbook chapter and a one-page card.
-- **62 experiments in the Lab**, from one pseudocode line at a time to 50 episodes a second, with the odds over 20 seeds.
+- **63 experiments in the Lab**, from one pseudocode line at a time to 50 episodes a second, with the odds over 20 seeds.
 - **Deep RL that runs in the page**: networks trained by the guide's own JavaScript trainer.
 - **Private and offline**: one 13 MB file, no server, no account. Your progress stays in your browser.
 
@@ -88,8 +88,9 @@ pseudocode column folds away for a bigger view.
 DQN and its extensions, A2C, TRPO and PPO on CartPole, and PPO, DDPG, TD3 and SAC on Pendulum, each recorded over 20
 seeds by the guide's own JavaScript trainer. On continuous Mountain Car, where the reward is far and the car heavy, TD3
 explores with white, Ornstein–Uhlenbeck, pink and red noise and with noise in its weights, and SAC with white noise,
-pink noise and gSDE; on Pendulum, TD3 learns with and without CAPS, and the Lab measures how much each policy's actions
-jitter. Play back any seed, see what the network thinks of every state, or turn a knob and train a new run in the page.
+pink noise and gSDE; on Pendulum, PPO starts from three spreads and TD3 learns with and without CAPS, and the Lab
+measures how much each policy's actions jitter. Play back any seed, see what the network thinks of every state, or
+turn a knob and train a new run in the page.
 
 ## Getting around
 

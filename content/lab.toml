@@ -859,6 +859,16 @@ film = [0, 3, 6, 40]
 intro = "TD3 twice on the pendulum, from the same seeds. With CAPS, the actor's loss also pays for the distance between its torques in consecutive states (weight 0.1), and between its torques in a state and in a copy of it perturbed by noise of spread 0.05 (weight 0.3). Jitter measures how much the torque jumps from step to step: 100 × the mean of (change of torque / its range)², 0 for a constant torque, 100 for a jump across the whole range every step. After every block of 1,500 steps the actor plays one test episode without noise, from the same start; every step costs the angle from upright, the spin and the torque, so 0 is the best there is."
 success = { metric = "test", min = -250, text = "end up swinging it up and holding it in the test episodes, −250 or better" }
 
+[ppo-spread-pendulum]
+title = "PPO from three starting spreads"
+env = "pendulum"
+racers = [{ recording = "ppo-pendulum-narrow", name = "σ₀ = 0.37" }, { recording = "ppo-pendulum", name = "σ₀ = 1" }, { recording = "ppo-pendulum-wide", name = "σ₀ = 2.7" }]
+charts = ["return", "test", "jitter-train"]
+film = [0, 4, 5, 12, 40]
+seeds = true
+intro = "PPO three times on the pendulum, from the same seeds, with one difference: the spread its policy starts with. The policy draws each torque from a bell curve, its mean from the network, near 0 in every state at first, and its spread σ one learned number for all states, starting at 0.37, at 1 (the PPO Lab's) or at 2.7, against torques from −2 to 2; a sample past the range is clipped to its end. Four workers play at once; every 512 of their steps, PPO takes ten clipped passes over the batch. After every block of 5,000 steps the policy plays one test episode of 200 steps, sampled as in training, from the same start every time; every step costs the angle from upright, the spin and the torque, so 0 is the best there is."
+success = { metric = "return", min = -250, text = "end up swinging it up and holding it, −250 or better per training episode" }
+
 [a2c-cartpole]
 title = "A2C balances a pole"
 env = "cartpole"

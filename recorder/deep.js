@@ -72,6 +72,10 @@ const CATALOG = {
   "td3-pendulum-jitter": { world: "pendulum", learner: "ac", station: "td3", title: "TD3", steps: 60000, block: 1500, seeds: SEEDS, sweepSeeds: SEEDS.slice(0, 10), shown: 6, jitter: true,
     cfg: { algo: "td3", reward_scale: 0.1 } },
 };
+// PPO on Pendulum from a narrower and a wider starting spread (Gaussian policies in practice): ln σ₀ = −1 and 1 around
+// the recording's 0, shown at its seed. Their first 10 seeds are the PPO sweep's runs, cached.
+for (const [kind, v, how] of [["narrow", -1, "a narrow start"], ["wide", 1, "a wide start"]])
+  CATALOG[`ppo-pendulum-${kind}`] = { ...CATALOG["ppo-pendulum"], title: `PPO, ${how}`, cfg: { ...CATALOG["ppo-pendulum"].cfg, log_std0: v } };
 // The knobs each recording's sweep tries, its own value among them. target_every = 0: no target network; buffer = 128
 // (the batch size): no replay, each batch is the latest experience.
 const SWEEPS = {

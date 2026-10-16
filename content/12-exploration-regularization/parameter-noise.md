@@ -80,7 +80,7 @@ No push that depends on the position alone can take the car to the flag. Whateve
 Take an untrained actor, as TD3 starts with, remember 1,000 steps of random actions, adapt the perturbation on them until the actions move by 0.5, the size of the action noise in the example of [[action-noise]], and let one perturbed copy drive the car for an episode, without learning. With raw inputs, 1 of 300 such copies reached the flag. With both inputs normalized, 82 of 300 did, in 277 steps on average. The copies that got there pushed in the direction the car was moving 71% of the time, the others 44%: a perturbed actor whose push happens to follow the speed pumps the swing at every pass. White noise on the actions, of the same size, never reached the flag; pink noise reached it in 39% of the episodes.
 :::
 
-Training shows the same. In the Lab's race, 20 seeds of 40,000 steps each, TD3 with noise in its weights and normalized inputs ends up reaching the flag on 15 seeds, half of them within 13,000 steps; with raw inputs, on 1, as with white noise on its actions.
+Training shows the same. In the Lab's race, 20 seeds of 40,000 steps each, TD3 with noise in its weights and normalized inputs ends up reaching the flag on 15 seeds, half of them within 14,000 steps; with raw inputs, on 1, as with white noise on its actions. Normalizing does little for noise on the actions, which does not pass through the inputs: in the Lab's sweep of TD3 with white noise, 10 seeds each, normalized observations brought 2 seeds to the flag, against 1.
 
 ### Off-policy and on-policy {#on-off}
 

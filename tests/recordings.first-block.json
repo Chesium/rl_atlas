@@ -22,5 +22,7 @@
   "td3-car-red-noise": "7158e17a8d99b697afd117248e6b9a905137251a",
   "td3-car-white-noise": "1de6b56a3fb77b68af447cf1d55e298a61863215",
   "td3-pendulum-caps": "f4a618b3ec0f2d9493d85b6df8ca4eb1046f9be2",
-  "td3-pendulum-jitter": "5e5a217e738dfbd770e37a4ab8681a8ecdfa1d12"
+  "td3-pendulum-jitter": "5e5a217e738dfbd770e37a4ab8681a8ecdfa1d12",
+  "ppo-pendulum-narrow": "cf8db3575b39e0d2329c984335381e86f12864cd",
+  "ppo-pendulum-wide": "3be5164faaddaf2f57bdf74d8747fdff9336a813"
 }

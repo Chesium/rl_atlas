@@ -1,7 +1,7 @@
 +++
 summary = "A Gaussian policy is two numbers per action dimension, a mean and a spread, and the details of both decide much of what PPO, A2C and SAC can learn: whether the spread depends on the state, how it is kept positive, where it starts, how a sample is fitted into the allowed range (clipped, or squashed with tanh), and what scale the actions and observations come in. The largest study of these choices found the starting distribution the most surprising: a mean near zero everywhere and a smallish spread."
 prereqs = ["policy-parameterization", "ppo", "sac"]
-lab = "ppo-pendulum"
+lab = "ppo-spread-pendulum"
 sources = [
   { text = "Andrychowicz et al. (2021), What matters in on-policy reinforcement learning? A large-scale empirical study, ICLR", url = "https://arxiv.org/abs/2006.05990" },
   { text = "Haarnoja, Zhou, Abbeel & Levine (2018), Soft actor-critic: off-policy maximum entropy deep reinforcement learning with a stochastic actor, ICML", url = "https://arxiv.org/abs/1801.01290" },
@@ -11,7 +11,39 @@ sources = [
   { text = "Stable-Baselines3 documentation: reinforcement learning tips and tricks", url = "https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html" },
   { text = "Andrychowicz et al. (2017), Hindsight experience replay, NeurIPS", url = "https://arxiv.org/abs/1707.01495" },
 ]
+
+[story]
+scene = "pendulum"
+env = "pendulum"
+formula = '''\step{1}{A \sim \mathcal N\big(\pol{\mu(S)}, \pol{\sigma}^2\big), \text{ clipped to } [-2, 2] \qquad} \step{2}{\pol{\sigma} = e^{\pol{\ln\sigma}}, \quad \pol{\ln\sigma} \text{ learned with the network, from } \knob{\ln\sigma_0}}'''
+
+[story.runs]
+narrow = { recording = "ppo-pendulum-narrow", name = "σ₀ = 0.37" }
+mid = { recording = "ppo-pendulum", name = "σ₀ = 1" }
+wide = { recording = "ppo-pendulum-wide", name = "σ₀ = 2.7" }
 +++
+
+## Story
+
+::: step {run = "mid", at = 0, map = "action", formula = 1}
+**PPO's policy is a bell curve** in every state (formula 1): the network gives the mean torque, and one learned number, the spread $\pol\sigma$, says how far around it to sample; a sample past the range, $-2$ to 2, is clipped to its end. The network's last layer starts small, so every state's mean starts near 0, and the map shows no preference anywhere. The spread starts at $\pol\sigma = 1$, half the largest torque, as the study below advises for actions scaled to $[-1, 1]$. The test episode, sampled like the training ones, flails at the bottom.
+:::
+
+::: step {run = "narrow", at = 4, map = "action"}
+**Start at $\pol\sigma = 0.37$ instead**, and the torques stay close to the means: in the test episode after 20,000 steps, not one reaches the end of the range. The pendulum needs full pushes, back and forth, to swing up, and PPO learns only about the torques it tries. The means widen slowly, to $\pm 0.6$ by now, and the pendulum still hangs.
+:::
+
+::: step {run = "wide", at = 4, map = "action"}
+**Start at $\pol\sigma = 2.7$**, wider than the range itself, and from the first step half the torques are clipped to its ends: full pushes, the kind a swing needs. After the same 20,000 steps the means run past both ends of the range, and the test episode swings the pendulum up by step 53 and holds it. From $\pol\sigma = 1$ that takes 25,000 steps on this seed; from 0.37, 60,000.
+:::
+
+::: step {run = "wide", at = 40, curves = ["narrow", "mid", "wide"], metric = "return"}
+**Twenty seeds of each**, judged by their training episodes. Starting at $\pol\sigma = 0.37$, 15 seeds end up swinging the pendulum up and holding it, and half the seeds need 70,000 steps to first get there; at $\pol\sigma = 1$, 17 seeds, and 35,000 steps; at $\pol\sigma = 2.7$, all 20, and 25,000.
+:::
+
+::: step {run = "mid", at = 40, curves = ["narrow", "mid", "wide"], metric = "jitter-train", formula = 2}
+**The spread is learned too** (formula 2), and it narrows as the policy improves: on this seed, from 2.7 to 0.37 over the 200,000 steps, from 1 to 0.27, from 0.37 to 0.16. Until it has, a wide start shakes: its training torques jump by 12 from step to step on average, against 3.2 from $\pol\sigma = 1$ and 0.8 from 0.37 ([[smooth-policies]]). The best start depends on the task, and so does its price. [Race the three starts in the Lab](lab:ppo-spread-pendulum).
+:::
 
 ## Textbook
 
@@ -34,7 +66,7 @@ The study's "most surprising finding" was the starting policy. Initialize the ne
 - **A small last layer.** Scaling the last layer's initial weights by 0.01 makes the initial means almost independent of the state: no state starts with a strong, arbitrary preference. That alone raised performance on Humanoid by 66%. This guide's PPO and A2C networks start that way (their last layer is scaled by 0.01; the actors of DDPG, TD3 and SAC by 0.1).
 - **A smallish spread.** With actions scaled to $[-1, 1]$, an initial $\pol\sigma$ of 0.5 did best on four tasks of five (Hopper preferred more). Too wide, and most early samples land outside the range and get clipped to its ends; too narrow, and the policy hardly explores before it commits.
 
-The best start depends on the task, and on Pendulum it was wider. In the PPO Lab's sweep, 10 seeds of 200,000 steps each, with the torque running from $-2$ to 2: starting at $\pol\sigma = 0.37$ ($\ln\pol\sigma = -1$), 9 seeds ended up holding the pendulum, but half of them took 70,000 steps to get there; at $\pol\sigma = 1$, this guide's default, 8 seeds, half within 35,000; at $\pol\sigma = 2.7$, all 10, half within 25,000, with training torques that jumped four times as much from step to step.
+The best start depends on the task, and on Pendulum it was wider. In the Lab's race of three starts, 20 seeds of 200,000 steps each, with the torque running from $-2$ to 2: starting at $\pol\sigma = 0.37$ ($\ln\pol\sigma = -1$), 15 seeds ended up holding the pendulum, and half the seeds needed 70,000 steps to first get there; at $\pol\sigma = 1$, this guide's default, 17 seeds, and 35,000; at $\pol\sigma = 2.7$, all 20, and 25,000, with training torques that jumped four times as much from step to step (12 against 3.2).
 
 ### Bounded actions: clip or squash {#bounds}
 

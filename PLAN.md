@@ -337,8 +337,8 @@ animations and hover effects this guide relies on would not be smooth.
   Ornstein–Uhlenbeck noise, adaptive parameter noise, gSDE (SAC, A2C, PPO), CAPS, tanh squashing for policy gradients,
   observation normalization and weight decay, all off by default so that every earlier recording stays bit for bit;
   recordings keep how much the actions jitter. Toolbox and Where next became Parts 13 and 14.
-  Decided: four stations tell a story from the recordings (action noise, noise in the weights, gSDE, smooth
-  policies); Gaussian policies in practice, regularizing the critic, robust policies and the recipe have none, on
-  purpose (one PPO run has nothing to compare with, and its choices are the PPO Lab's knobs; the trainer has weight
-  decay alone of the critic's regularizers; no world here to randomize; a decision guide). What changed on the way,
-  with the reasons, is at the end of `docs/control-tools.md`.
+  Decided: five stations tell a story from the recordings (action noise, noise in the weights, gSDE, Gaussian
+  policies in practice with PPO's starting spread, smooth policies); regularizing the critic, robust policies and the
+  recipe have none, on purpose (the trainer has weight decay alone of the critic's regularizers, and it changes
+  nothing on Pendulum; no world here to randomize; a decision guide). What changed on the way, with the reasons, is
+  at the end of `docs/control-tools.md`.
