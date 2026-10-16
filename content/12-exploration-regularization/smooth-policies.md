@@ -26,7 +26,29 @@ caps = { recording = "td3-pendulum-caps", name = "TD3 with CAPS" }
 
 ## Story
 
-STORY
+::: step {run = "plain", at = 9, map = "action"}
+**A pendulum held upright.** After 13,500 steps of training, TD3's test episode swings the pendulum up by step 23 and holds it there with a steady torque. Its **jitter**, how much the torque jumps from one step to the next, is 0.1: 0 would be a constant torque, 100 a jump across the whole range at every step.
+:::
+
+::: step {run = "plain", at = 11, map = "action"}
+**3,000 steps later: the same return, another controller.** At the top the torque now flips between −1.9 and +1.7 at every step, 99 flips in the last 100 steps: jitter 72. The return cannot tell, −115.7 both times. Pendulum charges only 0.001 × torque² per step, and flips that fast cancel before the pendulum can move. Nothing in the reward asks for calm, and on a motor this is heat and wear.
+:::
+
+::: step {run = "caps", at = 13, map = "action", formula = 1}
+**CAPS adds a term to the actor's loss** (formula 1): the distance between the torque in a state and the torque in the next state of the same transition, with weight $\knob{\lambda_T} = 0.1$. Same seed, after 19,500 steps: the pendulum held with a steady torque of −0.6, jitter 0.2.
+:::
+
+::: step {run = "caps", at = 40, map = "action", formula = 2}
+**And a second** (formula 2): the distance between the torque in a state and in a copy of it nudged by noise of spread 0.05, with weight $\knob{\lambda_S} = 0.3$: nearby states, nearby torques. After 60,000 steps the jitter is 0.6, and the return −119, against −118 for plain TD3, still chattering at 55.
+:::
+
+::: step {run = "caps", at = 40, curves = ["plain", "caps"], metric = "jitter"}
+**Twenty seeds of each**, the test episodes' jitter averaged over the seeds. Plain TD3's climbs once the pendulum is held, from below 1 to between 15 and 20, as 8 of its 20 seeds come to chatter; with CAPS it stays near 1.
+:::
+
+::: step {run = "caps", at = 40, curves = ["plain", "caps"], metric = "test"}
+**At almost no cost in return.** Every seed of both ends up swinging the pendulum up and holding it; with CAPS it takes a little longer, 9,000 steps for half the seeds against 7,500. Stronger weights can freeze the actor at the start (the pitfalls below). [Race them in the Lab](lab:smooth-pendulum).
+:::
 
 ## Textbook
 
