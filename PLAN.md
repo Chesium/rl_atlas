@@ -21,7 +21,7 @@ you learn by watching things happen, not only by reading.
 - The tabular / function-approximation split is a visible line on the map ("Learning with tables" / "Learning at scale").
 - Sources: Sutton & Barto (2018), OpenAI Spinning Up and the original papers, in our own words.
 
-The full curriculum, 95 stations in 14 parts, lives in [content/map.toml](content/map.toml).
+The full curriculum, 103 stations in 15 parts, lives in [content/map.toml](content/map.toml).
 
 ## Look and feel
 

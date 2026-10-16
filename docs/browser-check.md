@@ -11,7 +11,7 @@ report is the deliverable: the owner takes it back to the cloud session that dev
 made. Only report a problem you have seen happen. Mark a guess as a guess.
 
 RL Atlas is a guide to reinforcement learning in one HTML file (about 8 MB) that works offline. Readers download
-`rl_atlas.html` and open it from disk (a `file://` address). It has a **map** of 95 stations; for each one a **story**
+`rl_atlas.html` and open it from disk (a `file://` address). It has a **map** of 103 stations; for each one a **story**
 (the text scrolls and an animated picture follows it), a **textbook** chapter and a one-page **card**; and a **Lab**
 where algorithms learn live, side by side. Every check so far ran in headless Chromium in the cloud, without a GPU or
 a real screen. What matters most now:
@@ -55,10 +55,10 @@ for a window covered by another app, down to one frame a second. The report flag
 was hidden; run those again. Close heavy apps, and keep a laptop plugged in. A run:
 
 - measures the display's refresh rate on the idle map;
-- scrolls 15 stories from top to bottom with the mouse wheel, once slowly and once in a fast flick. For each pass it
+- scrolls 16 stories from top to bottom with the mouse wheel, once slowly and once in a fast flick. For each pass it
   records frames per second, the worst gap between frames, long tasks (over 50 ms), how long "Working out this
   run…" showed, and whether the last step was reached;
-- plays 7 labs at each of their speeds for 5 s each, measuring the same, then opens and closes the **World & display**
+- plays 8 labs at each of their speeds for 5 s each, measuring the same, then opens and closes the **World & display**
   drawer and folds and unfolds the pseudocode column;
 - trains a seed the recordings do not have (PPO on CartPole, seed 77) in the page's Web Worker. It checks that the
   training starts and ends and that the page stays free meanwhile;

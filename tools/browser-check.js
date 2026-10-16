@@ -28,8 +28,8 @@ const OUT = path.resolve(arg("out", path.join(__dirname, "..", "browser-check-re
 const URL = pathToFileURL(FILE).href;
 
 const STORIES = QUICK ? ["q-learning", "mcts", "a2c", "ppo", "dqn"]
-  : ["q-learning", "expected-sarsa", "dyna-q", "deadly-triad", "reinforce", "baseline", "a2c", "gae", "trpo", "ppo", "dqn", "sac", "mcts", "bias-variance", "imitation"];
-const LABS = QUICK ? ["cliff-race", "ppo-maze", "dqn-cartpole"] : ["cliff-race", "dyna-maze", "mountain-car", "a2c-maze", "ppo-maze", "dqn-cartpole", "ppo-pendulum"];
+  : ["q-learning", "expected-sarsa", "dyna-q", "deadly-triad", "reinforce", "baseline", "a2c", "gae", "trpo", "ppo", "dqn", "sac", "action-noise", "mcts", "bias-variance", "imitation"];
+const LABS = QUICK ? ["cliff-race", "ppo-maze", "dqn-cartpole"] : ["cliff-race", "dyna-maze", "mountain-car", "a2c-maze", "ppo-maze", "dqn-cartpole", "ppo-pendulum", "action-noise-car"];
 const FORMULAS = ["mcts", "a2c", "bias-variance", "prioritized-sweeping", "imitation", "mc-vs-td", "value-error", "pg-theorem"]; // once too wide
 const SIZES = [[1920, 1080], [1440, 900], [1366, 768], [1280, 800], [1024, 768]];
 const PAGES = [["map", "#/map"], ["story", "#/e/mcts/story", 5], ["textbook", "#/e/td0/textbook"], ["card", "#/e/q-learning/card"], ["lab", "#/lab/cliff-race"], ["deep-lab", "#/lab/dqn-cartpole"], ["symbols", "#/symbols"]];
