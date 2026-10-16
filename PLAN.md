@@ -137,15 +137,6 @@ animations and hover effects this guide relies on would not be smooth.
 - [x] **M8 · Honest runs**: stories show a run chosen offline that sells the idea; the Lab lets anyone test settings
   and seeds. One phase at a time, each reviewed with screenshots before the next. The deep presets (recorded on
   CartPole and Pendulum) wait until the live ones work; they then adopt the same method.
-- [x] **M9 · Exploration and regularization**: Part 12, the tools that make continuous control work beyond the bare
-  algorithms (the list and its sources: `docs/control-tools.md`). Eight stations: action noise (white,
-  Ornstein–Uhlenbeck, pink, red), noise in the weights, gSDE, Gaussian policies in practice, smooth policies (CAPS,
-  penalties, filters, Lipschitz bounds), regularizing the critic (weight decay, layer and batch normalization, spectral
-  normalization, ensembles, dropout, resets), robust policies (randomization, memory, teachers, curricula) and a
-  recipe. A new world, Gymnasium's continuous Mountain Car, with its own view; the trainer gained colored and
-  Ornstein–Uhlenbeck noise, adaptive parameter noise, gSDE (SAC, A2C, PPO), CAPS, tanh squashing for policy gradients,
-  observation normalization and weight decay, all off by default so that every earlier recording stays bit for bit;
-  recordings keep how much the actions jitter. Toolbox and Where next became Parts 13 and 14.
 
   **Principles**
   - *Stories sell the idea, with runs chosen offline.* For every story run, a script searches knobs and seeds
@@ -336,3 +327,18 @@ animations and hover effects this guide relies on would not be smooth.
   windows, story runs prepared while the reader scrolls, labs at a few rounds a second without freezes, and the phone's
   header and symbols page. 1.0.3 fixes the freezes the second check and the checks here still found (a deep run arriving,
   a lab played again from its start, the switch to the typical seed).
+
+- [x] **M11 · Exploration and regularization**: Part 12, the tools that make continuous control work beyond the bare
+  algorithms (the list and its sources: `docs/control-tools.md`). Eight stations: action noise (white,
+  Ornstein–Uhlenbeck, pink, red), noise in the weights, gSDE, Gaussian policies in practice, smooth policies (CAPS,
+  penalties, filters, Lipschitz bounds), regularizing the critic (weight decay, layer and batch normalization, spectral
+  normalization, ensembles, dropout, resets), robust policies (randomization, memory, teachers, curricula) and a
+  recipe. A new world, Gymnasium's continuous Mountain Car, with its own view; the trainer gained colored and
+  Ornstein–Uhlenbeck noise, adaptive parameter noise, gSDE (SAC, A2C, PPO), CAPS, tanh squashing for policy gradients,
+  observation normalization and weight decay, all off by default so that every earlier recording stays bit for bit;
+  recordings keep how much the actions jitter. Toolbox and Where next became Parts 13 and 14.
+  Decided: four stations tell a story from the recordings (action noise, noise in the weights, gSDE, smooth
+  policies); Gaussian policies in practice, regularizing the critic, robust policies and the recipe have none, on
+  purpose (one PPO run has nothing to compare with, and its choices are the PPO Lab's knobs; the trainer has weight
+  decay alone of the critic's regularizers; no world here to randomize; a decision guide). What changed on the way,
+  with the reasons, is at the end of `docs/control-tools.md`.

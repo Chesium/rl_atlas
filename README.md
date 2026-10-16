@@ -39,9 +39,10 @@ your browser.
 
 Every station is one idea, in reading order: the agent–environment loop, bandits, dynamic programming, Monte Carlo,
 temporal difference, n-step methods and traces, planning, function approximation, deep value methods, policy
-gradients, continuous control, the toolbox, and where next (MCTS and AlphaZero, offline RL, imitation, RLHF). The
-stations you have read fill with color, and the next one pulses. Two more views draw a family tree for each line, and
-every algorithm on Sutton & Barto's unified map.
+gradients, continuous control and the tools that make it work (exploration noise, smooth policies, regularized
+critics), the toolbox, and where next (MCTS and AlphaZero, offline RL, imitation, RLHF). The stations you have read
+fill with color, and the next one pulses. Two more views draw a family tree for each line, and every algorithm on
+Sutton & Barto's unified map.
 
 ### Stories
 

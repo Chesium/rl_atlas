@@ -97,7 +97,7 @@ A mechanic checks the fuel and the tires before taking the engine apart. Most ca
 | Symptom | First things to try |
 | --- | --- |
 | nothing learns, on any seed | the setup: action scale, observation normalization, time-outs, the reward |
-| flat return, the agent stands still | pink noise (TD3, SAC), parameter noise (TD3), gSDE (PPO, or SAC on hardware) |
+| flat return, the agent stands still | pink noise (TD3, SAC), parameter noise with normalized inputs (TD3), gSDE (PPO, or SAC on hardware) |
 | learns, then collapses; values far above returns | layer norm in the critic, twin critics, the reward's scale |
 | works, but the actions jitter | CAPS, an action-rate penalty, a lower control rate |
 | works in simulation, fails on the robot | randomization, sensor noise, delays, memory, an actuator model |
@@ -121,5 +121,5 @@ The cut is a rule of the training loop, not of the world: the state at step 1,00
 ::: question
 TD3 on a task with a sparse reward learns to stand still. What would you change first, and why?
 ---
-The exploration: white noise cancels out through the body's inertia and rarely reaches the reward. Pink noise, one sequence per episode, or parameter noise, a consistent perturbed policy each episode, push in one direction long enough to get there. If even that never reaches the reward, the reward itself needs shaping or demonstrations.
+The exploration: white noise cancels out through the body's inertia and rarely reaches the reward. Pink noise, one sequence per episode, or parameter noise on normalized inputs, a consistent perturbed policy each episode, push in one direction long enough to get there. If even that never reaches the reward, the reward itself needs shaping or demonstrations.
 :::
