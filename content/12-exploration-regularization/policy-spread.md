@@ -61,7 +61,7 @@ Nothing in the return asks for moderate actions, and trained Gaussian policies o
 The spread can collapse early, before the policy has found what pays. PPO and A2C can add an entropy bonus to their loss ([[entropy-bonus]]); SAC weighs entropy in the return itself and tunes the weight toward a target entropy of minus the number of action dimensions ([[sac]]). In the study, neither an entropy bonus nor any other regularizer of the policy helped significantly, except on HalfCheetah; the authors suggest that the careful starting policy already explored enough.
 
 ::: example {#ex-clip} A mean past the end
-A pendulum's torque runs from −2 to 2. A PPO policy whose mean drifted to 3, with a spread of 0.5, sends 2 almost every time: the world cannot tell this policy from one whose mean is 2.5 or 10, so the gradient has nothing to pull the mean back with. Squashed, the same mean sends $2\tanh 3 = 1.99$, and a mean of 1 sends $1.52$: every change of the mean changes the action, however slightly, and the gradient never goes entirely flat, though far out at the ends it is weak.
+A pendulum's torque runs from −2 to 2. A PPO policy whose mean drifted to 3, with a spread of 0.5, sends 2 almost every time: the world can hardly tell this policy from one whose mean is 4 or 10, so the gradient has little to pull the mean back with. Squashed, the same mean sends $2\tanh 3 = 1.99$, and a mean of 1 sends $1.52$: every change of the mean changes the action, however slightly, and the gradient never goes entirely flat, though far out at the ends it is weak.
 :::
 
 ## Card
@@ -103,5 +103,5 @@ Every sample past the end becomes the same clipped action, so the returns do not
 ::: question
 Why does PPO not need the tanh correction in its ratios, when SAC needs it?
 ---
-PPO's ratio compares the new and old policies' densities at the same sample, and the tanh term is the same in both, so it cancels; so does it in the KL divergence. SAC uses the density itself, in its entropy term, where the correction does not cancel.
+PPO's ratio compares the new and old policies' densities at the same sample, and the tanh term is the same in both, so it cancels, as it does in the KL divergence. SAC uses the density itself, in its entropy term, where the correction does not cancel.
 :::

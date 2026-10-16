@@ -29,7 +29,7 @@ your browser.
 - **Three ways to read every algorithm**: a story, a textbook chapter and a one-page card.
 - **62 experiments in the Lab**, from one pseudocode line at a time to 50 episodes a second, with the odds over 20 seeds.
 - **Deep RL that runs in the page**: networks trained by the guide's own JavaScript trainer.
-- **Private and offline**: one 8 MB file, no server, no account. Your progress stays in your browser.
+- **Private and offline**: one 13 MB file, no server, no account. Your progress stays in your browser.
 
 ## A quick tour
 

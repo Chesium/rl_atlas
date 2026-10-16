@@ -10,7 +10,7 @@ and write a report of what works and what does not, with evidence. **Do not chan
 report is the deliverable: the owner takes it back to the cloud session that develops the atlas, where the fixes are
 made. Only report a problem you have seen happen. Mark a guess as a guess.
 
-RL Atlas is a guide to reinforcement learning in one HTML file (about 8 MB) that works offline. Readers download
+RL Atlas is a guide to reinforcement learning in one HTML file (about 13 MB) that works offline. Readers download
 `rl_atlas.html` and open it from disk (a `file://` address). It has a **map** of 103 stations; for each one a **story**
 (the text scrolls and an animated picture follows it), a **textbook** chapter and a one-page **card**; and a **Lab**
 where algorithms learn live, side by side. Every check so far ran in headless Chromium in the cloud, without a GPU or
