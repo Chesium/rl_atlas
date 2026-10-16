@@ -11,19 +11,7 @@ sources = [
   { text = "Stable-Baselines3 documentation: reinforcement learning tips and tricks", url = "https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html" },
   { text = "Andrychowicz et al. (2017), Hindsight experience replay, NeurIPS", url = "https://arxiv.org/abs/1707.01495" },
 ]
-
-[story]
-scene = "pendulum"
-env = "pendulum"
-formula = '''\step{1}{a \sim \mathcal N\big(\pol{\mu(s)}, \pol{\sigma}^2\big), \quad \pol{\sigma} = e^{\knob{\ln\sigma_0} + \dots} \qquad} \step{2}{\text{the world receives } \operatorname{clip}(a) \ \text{or}\ 2\tanh(a)}'''
-
-[story.runs]
-base = { recording = "ppo-pendulum", name = "PPO" }
 +++
-
-## Story
-
-STORY
 
 ## Textbook
 
@@ -43,7 +31,7 @@ For PPO, the study found no clear advantage either way. What matters more is kee
 
 The study's "most surprising finding" was the starting policy. Initialize the network so that every state's mean starts near 0 and the spread starts smallish, and PPO learns much faster:
 
-- **A small last layer.** Scaling the last layer's initial weights by 0.01 makes the initial means almost independent of the state: no state starts with a strong, arbitrary preference. That alone raised performance on Humanoid by 66%. This guide's policy networks start that way (their last layer is scaled by 0.01).
+- **A small last layer.** Scaling the last layer's initial weights by 0.01 makes the initial means almost independent of the state: no state starts with a strong, arbitrary preference. That alone raised performance on Humanoid by 66%. This guide's PPO and A2C networks start that way (their last layer is scaled by 0.01; the actors of DDPG, TD3 and SAC by 0.1).
 - **A smallish spread.** With actions scaled to $[-1, 1]$, an initial $\pol\sigma$ of 0.5 did best on four tasks of five (Hopper preferred more). Too wide, and most early samples land outside the range and get clipped to its ends; too narrow, and the policy hardly explores before it commits.
 
 ### Bounded actions: clip or squash {#bounds}
@@ -71,7 +59,7 @@ Nothing in the return asks for moderate actions, and trained Gaussian policies o
 The spread can collapse early, before the policy has found what pays. PPO and A2C can add an entropy bonus to their loss ([[entropy-bonus]]); SAC weighs entropy in the return itself and tunes the weight toward a target entropy of minus the number of action dimensions ([[sac]]). In the study, neither an entropy bonus nor any other regularizer of the policy helped significantly, except on HalfCheetah; the authors suggest that the careful starting policy already explored enough.
 
 ::: example {#ex-clip} A mean past the end
-A pendulum's torque runs from −2 to 2. A PPO policy whose mean drifted to 3, with a spread of 0.5, sends 2 almost every time: the world cannot tell this policy from one whose mean is 2.5 or 10, so the gradient has nothing to pull the mean back with. Squashed, the same mean sends $2\tanh 3 = 1.99$, and a mean of 1 sends $1.52$: every change of the mean changes the action, however slightly, and the gradient never goes flat.
+A pendulum's torque runs from −2 to 2. A PPO policy whose mean drifted to 3, with a spread of 0.5, sends 2 almost every time: the world cannot tell this policy from one whose mean is 2.5 or 10, so the gradient has nothing to pull the mean back with. Squashed, the same mean sends $2\tanh 3 = 1.99$, and a mean of 1 sends $1.52$: every change of the mean changes the action, however slightly, and the gradient never goes entirely flat, though far out at the ends it is weak.
 :::
 
 ## Card

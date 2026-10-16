@@ -1,5 +1,5 @@
 +++
-summary = "Instead of adding noise to every action, perturb the actor's weights once per episode and act with the perturbed copy for the whole episode. The same state then gets the same exploratory action, and the exploration is a consistent, smooth function of the state. Since nobody can say how much noise a weight needs, the perturbation adapts until the actions move by a set amount. NoisyNets learn their noise instead; evolution strategies explore with weight noise alone."
+summary = "Instead of adding noise to every action, perturb the actor's weights once per episode and act with the perturbed copy for the whole episode. The same state then gets the same exploratory action, and the exploration is a consistent, smooth function of the state. Since nobody can say how much noise a weight needs, the perturbation adapts until the actions move by a set amount, and the inputs must be of comparable size: on continuous Mountain Car, whose speed never exceeds 0.07 while its position ranges over 1.8, noise in the weights finds the flag only once the observations are normalized. NoisyNets learn their noise instead; evolution strategies explore with weight noise alone."
 prereqs = ["action-noise", "ddpg"]
 lab = "parameter-noise-car"
 sources = [
@@ -44,9 +44,21 @@ over the $N$ action dimensions. If the distance is below a threshold $\knob\delt
 
 The paper also put **layer normalization** between the actor's layers ([[normalization]]): with every layer's units rescaled to the same spread, the same $\knob\sigma$ moves every layer by a comparable amount. The trainer of this guide has no layer normalization; the adaptive scale does the work alone.
 
+### What the actor sees {#inputs}
+
+Plappert et al. normalized the observations too, and on the car that decides everything. The car's speed never exceeds 0.07 either way, while its position ranges over 1.8, from $-1.2$ to 0.6. A perturbation of the first layer's weights changes the actor's response to each input in proportion to that input's size, so it changes the response to the speed far less than the response to the position: the perturbed actor's extra push depends, in effect, on where the car is and not on how it moves.
+
+No push that depends on the position alone can take the car to the flag. Whatever such a push adds while the car moves one way over a stretch of the track, it takes back when the car comes back the other way over the same stretch, as if only the valley's shape had changed; in 240,000 trials of random functions of the position, from starts across the valley's bottom, none reached the flag. Pumping the swing needs a push that follows the speed: to the right while the car moves right, to the left while it moves left. Normalized by their running mean and spread ([[normalization]]), both inputs reach the network at the same scale, and some perturbed actors push with the motion.
+
+::: example {#ex-car-weights} Perturbed actors alone on the hill
+Take an untrained actor, as TD3 starts with, remember 1,000 steps of random actions, adapt the perturbation on them until the actions move by 0.5, the size of the action noise in the example of [[action-noise]], and let one perturbed copy drive the car for an episode, without learning. With raw inputs, 1 of 300 such copies reached the flag. With both inputs normalized, 82 of 300 did, in 277 steps on average: each was a perturbed actor whose push happened to follow the speed, and pumped the swing at every pass. White noise on the actions, of the same size, never reached the flag; pink noise reached it in 39% of the episodes.
+:::
+
+Training shows the same. In the Lab's race, 20 seeds of 40,000 steps each, TD3 with noise in its weights and normalized inputs ends up reaching the flag on 15 seeds, half of them within 13,000 steps; with white noise on its actions, on 1.
+
 ### Off-policy and on-policy {#on-off}
 
-For DDPG and TD3 nothing else changes: the perturbed actor only collects experience; the critics and the unperturbed actor learn from the memory as usual ([[on-off-policy]]). In the paper's experiments, DDPG with parameter noise broke out of a poor habit on HalfCheetah (flipping onto its back and wiggling forward) that every other kind of noise kept. On a sparse cart-pole swing-up and a sparse Mountain Car, only parameter noise learned: with action noise, correlated or not, DDPG never reached a state with a reward. On tasks with well-shaped rewards it did as well as action noise, and so did no noise at all: those tasks do not test exploration.
+For DDPG and TD3 nothing else changes: the perturbed actor only collects experience; the critics and the unperturbed actor learn from the memory as usual ([[on-off-policy]]). In the paper's experiments, DDPG with parameter noise broke out of a poor habit on HalfCheetah (flipping onto its back and wiggling forward) that every other kind of noise kept. On a sparse cart-pole swing-up and a sparse Mountain Car, only parameter noise learned: with Gaussian or Ornstein–Uhlenbeck noise on its actions, DDPG never reached a state with a reward. On tasks with well-shaped rewards it did as well as action noise, and so did no noise at all: those tasks do not test exploration.
 
 For an on-policy method the perturbation becomes part of the policy, a distribution over weights, and its gradient follows from it (Rückstieß et al., 2008; the paper did this for TRPO). For DQN the paper perturbed a policy head trained to imitate the greedy action, adapted against the KL divergence that ε-greedy would cause, and kept a little ε-greedy exploration on top.
 
@@ -98,6 +110,7 @@ Repeat for each episode:
 
 - Choosing the weights' noise by hand: its effect on the actions depends on the network and drifts during training; adapt it in action space.
 - Perturbing layers of very different scales by the same amount, without layer normalization.
+- Inputs of very different sizes: the perturbation then barely touches the small ones (the car's speed). Normalize the observations.
 - Expecting it to help where the actions must vary from state to state in a way no small perturbation produces.
 - Testing with the perturbed actor: the test plays the unperturbed one.
 

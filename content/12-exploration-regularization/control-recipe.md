@@ -49,7 +49,7 @@ Before blaming the algorithm, check that it learns a task where the answer is kn
 The signature: the return stays flat, and the policy settles on doing as little as possible, because every action costs and nothing has paid yet. On continuous Mountain Car, TD3 with white noise learns to stand still ([[action-noise]]).
 
 - **For DDPG and TD3, colored noise**: pink noise, one sequence per episode, at the same spread as before. It costs nothing and is a good default (Eberhard et al., 2023). Ornstein–Uhlenbeck noise is the classic alternative, red noise the extreme one.
-- **Noise in the weights**: parameter noise explores with a consistent, slightly different policy each episode ([[parameter-noise]]).
+- **Noise in the weights**: parameter noise explores with a consistent, slightly different policy each episode, provided the observations are normalized: on the car it found the flag only then ([[parameter-noise]]).
 - **For SAC, PPO and A2C, gSDE**: noise that is a function of the state, resampled every few steps (4 to 8), smooth and still a Gaussian ([[gsde]]).
 - **If the reward is truly sparse**, no noise is enough: shape the reward, add intrinsic rewards, or start from demonstrations ([[reward-design]], [[exploration-strategies]], [[imitation]]). If the task is to reach goals, store each missed episode again as a success at the place it did reach: hindsight experience replay taught DDPG to push and pick up objects from a reward for success alone ([[exploration-strategies]]).
 
