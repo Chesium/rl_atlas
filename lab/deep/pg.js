@@ -3,7 +3,8 @@
    The JavaScript port of recorder/pg.py, same settings and same defaults.
 
    The tools of Part 12, each off by default: gSDE (A2C, PPO), where the noise is a function of the policy's last
-   hidden layer, a matrix drawn per worker every sde_freq steps or once per batch (Raffin et al., 2021); squashing the
+   hidden layer, a matrix drawn per worker every sde_freq steps, or once per batch with −1 (Raffin et al., 2021; every 4
+   steps as the RL Zoo's PPO on Pendulum: drawn once per batch, the noise explored too little there); squashing the
    sampled action with tanh instead of clipping it; and observation normalization. */
 (function (RL) {
   "use strict";
@@ -12,7 +13,7 @@
   deep.PG_DEFAULTS = {
     algo: "ppo", workers: 8, steps: 128, gamma: 0.99, lam: 0.95, lr: 3e-4, lr_v: 1e-3, epochs: 10, minibatch: 64, clip: 0.2,
     ent: 0, delta: 0.01, v_epochs: 10, depth: 2, width: 64, norm_adv: true, log_std0: 0, reward_scale: 1,
-    sde: false, sde_freq: -1, squash: false, obs_norm: false,
+    sde: false, sde_freq: 4, squash: false, obs_norm: false,
   };
   const LOG_2PI = 1.8378770664093453;
 
