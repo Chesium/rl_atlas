@@ -48,7 +48,7 @@ In supervised learning a poor step size usually costs time: the loss falls slowl
 
 ### Sweet spots {#sweet-spots}
 
-Almost every knob in this guide has failure on both sides. The Lab's sweeps measure how often: below, how many runs end well, out of 40 seeds for the two gems and out of the seeds recorded for each setting of the deep methods, as each cell says. A CartPole run ends well when its last training episodes balance the pole (450 steps or more), a Pendulum run when they hold the pendulum up (a return of −250 or more).
+Almost every knob in this guide has failure on both sides. The Lab's sweeps measure how often: below, how many runs end well, out of 40 seeds for the two gems and out of the seeds recorded for each setting of the deep methods, as each cell says. A CartPole run ends well when its last training episodes balance the pole (450 steps or more), a Pendulum run when they hold the pendulum up (a return of −250 or more), a Mountain Car run when its last test episodes reach the flag (90 or more).
 
 | Knob | too low | sweet spot | too high |
 | --- | --- | --- | --- |
@@ -62,6 +62,7 @@ Almost every knob in this guide has failure on both sides. The Lab's sweeps meas
 | DQN's step size $\alp$ (CartPole) | 14 of 20 ($10^{-4}$, no worse here) | 13 of 20 ($5 \cdot 10^{-4}$) | 2 of 20 ($2.5 \cdot 10^{-3}$) |
 | DQN's target period $C$ (CartPole) | 0 of 20 (no copy) | 13 of 20 (500 steps) | 4 of 20 (2,000 steps) |
 | DQN's memory $N$ (CartPole) | 9 of 20 (128 steps) | 13 of 20 (10,000 steps) | 11 of 20 (100,000 steps) |
+| TD3's exploration spread $\knob\sigma$, pink noise (Mountain Car) | 1 of 10 ($\knob\sigma = 0.2$) | 10 of 10 ($0.5$) | 10 of 10 ($\knob\sigma = 1$, faster here, but jerkier) |
 
 The reasons differ, and the [[bias-variance]] trade explains several of them. Too little exploration commits early, too much never commits. Too small a step learns slowly, too large a step knocks over what was learned. A target that moves too often chases itself, one that moves too rarely crawls. Knowing why a knob fails on each side tells which way to turn it.
 

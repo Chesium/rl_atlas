@@ -63,7 +63,7 @@ red = { recording = "td3-car-red-noise", name = "red" }
 
 A deterministic actor explores by adding noise to its action. DDPG and TD3 add a fresh normal number at every step, $a_t = \operatorname{clip}(\pol{\mu(s_t)} + \knob{\sigma}\varepsilon_t)$ with $\varepsilon_t \sim \mathcal N(0, 1)$, independent from one step to the next; SAC draws its action from a bell curve around its mean, which comes to the same, a new independent draw every step ([[sac]]). Independent numbers have the same power at every frequency, as white light has every color: they are **white noise**.
 
-A body with mass does not follow a force, it integrates it. In continuous Mountain Car a force of 1 changes the car's speed by 0.0015 per step, so where the car goes depends on the *sum* of many pushes. Independent pushes of spread $\knob\sigma$ add up like a random walk: after $n$ steps their sum is typically $\knob{\sigma}\sqrt n$, against $\knob\sigma n$ for pushes that keep their sign. The car swings in its valley with a period of about 73 steps, and to pump the swing a push must keep its direction for half of that, about 36 steps: white noise delivers $\sqrt{36} = 6$ pushes' worth where 36 were needed. The pushes cancel before the car moves, whatever the spread: a larger $\knob\sigma$ mostly clips more actions to the ends of the range.
+A body with mass does not follow a force, it integrates it. In continuous Mountain Car a force of 1 changes the car's speed by 0.0015 per step, so where the car goes depends on the *sum* of many pushes. Independent pushes of spread $\knob\sigma$ add up like a random walk: after $n$ steps their sum is typically $\knob{\sigma}\sqrt n$, against $\knob\sigma n$ for pushes that keep their sign. The car swings in its valley with a period of about 73 steps, and to pump the swing a push must keep its direction for half of that, about 36 steps: white noise delivers $\sqrt{36} = 6$ pushes' worth where 36 were needed. The pushes cancel before the car moves. A larger $\knob\sigma$ takes it further, but the range caps every push, and clipping turns more and more of them into pushes at its ends: in the Lab's sweep, 10 seeds per spread, TD3 with white noise ended up reaching the flag on no seed at $\knob\sigma = 0.2$, on 1 at 0.5 and on 4 at 1, the full force, where pink noise of spread 0.5 took all 10 there.
 
 Noise that is **correlated in time** keeps its sign for a while and lets the pushes add up. How long it keeps it is the noise's *color*.
 
@@ -106,6 +106,7 @@ Drive the car with noise alone, the actor's action held at 0, at a spread of hal
 
 - **Relative to the action's range.** The spread is a fraction of the largest action: TD3 uses 0.1, the RL Zoo's settings for Mountain Car 0.5. Scaling every action dimension to $[-1, 1]$ first, as Stable-Baselines3 advises, lets one spread mean the same for every joint ([[policy-spread]]).
 - **Clipped after adding.** The noisy action is clipped to the allowed range. With a spread near the range itself, clipping turns much of the noise into pushes at the extremes.
+- **Large enough to reach.** On the car the spread mattered for every color. Pink noise ended up at the flag on 1 seed of 10 at $\knob\sigma = 0.2$ and on all 10 at 0.5 and at 1, faster at 1 (half the seeds within 12,500 steps, against 18,000), with training pushes that jumped two and a half times as much ([[smooth-policies]]).
 - **A schedule.** Some implementations lower the spread over training, or give each parallel worker its own. Lower it only once the task is solved: the noise is what finds the reward.
 - **A random start.** Before learning, TD3 and SAC act uniformly at random for a while (TD3's paper: the first 1,000 or 10,000 steps, depending on the task; 1,000 here). Uniform random actions are white noise too: in Mountain Car they never reach the flag.
 
@@ -166,7 +167,7 @@ Repeat for each episode:
 ### Check yourself {#check}
 
 ::: question
-Why does white noise of spread 1 fail to move the car, when a constant push of 1 for 36 steps would?
+Why does white noise of spread 1 rarely swing the car far, when a constant push of 1 for 36 steps would?
 ---
 The car integrates the force. Independent pushes add up like a random walk: 36 of them sum to about 6 in typical size, with random signs, against 36 for pushes that keep their direction. The car's swing needs pushes that last half a swing, about 36 steps.
 :::
