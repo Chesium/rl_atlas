@@ -24,7 +24,33 @@ norm = { recording = "td3-car-param-noise-norm", name = "weights, inputs normali
 
 ## Story
 
-STORY
+::: step {run = "weights", at = 0, formula = 1}
+**Noise in the weights.** At the start of each episode TD3 copies its actor, adds a little noise to every weight, and drives with the copy, with no other noise (formula 1). The same position and speed then get the same push all episode long: each episode tries one slightly different policy.
+:::
+
+::: step {run = "weights", at = 20, map = "action", formula = 2}
+**How much noise.** Every 50 steps a second perturbed copy is compared with the actor on remembered states, and the noise grows or shrinks by 1% until their pushes differ by 0.5, the white noise's spread (formula 2). With the raw observations, the copies push steadily, often hard, but almost never swing: in 40,000 steps of training, this seed's copies reach the flag once.
+:::
+
+::: step {run = "weights", at = 40, map = "action"}
+**The speed is too small to matter.** The car's speed never exceeds 0.07, while its position ranges over 1.8. A perturbation changes the actor's response to each input in proportion to its size, so each copy's extra push depends on where the car is, not on how it moves, and a push like that cannot pump a swing. After 40,000 steps the critic has seen the flag, but the actor's push still ignores the speed, and its test episode stands still.
+:::
+
+::: step {run = "norm", at = 2, map = "value"}
+**The same, with normalized observations**: each input has its running mean subtracted and is divided by its running spread, as Plappert et al. did. Now the speed weighs as much as the position, and some copies push with the motion: within 2,000 steps one drives to the flag, and the critic rates the states near it up to 44.
+:::
+
+::: step {run = "norm", at = 27, map = "action"}
+**After 27,000 steps the actor swings by itself**: its test episode reaches the flag in 152 steps. By the end it pushes with the speed in 92% of the map.
+:::
+
+::: step {run = "norm", at = 40, curves = ["action", "weights", "norm"], metric = "test"}
+**Twenty seeds of each.** Noise on the actions: 1 seed ends up reaching the flag. Noise in the weights with raw observations: 1 too, although its copies do reach the flag in training on 15 seeds, late, half of them after 27,000 steps, and rarely. With normalized observations: 15, and their copies reach the flag in training on every seed, half of them within 3,500 steps.
+:::
+
+::: step {run = "norm", at = 40, curves = ["action", "weights", "norm"], metric = "jitter-train"}
+**And gently.** A perturbed actor is a smooth function of the state: with normalized observations its training pushes jump by 0.4 from step to step on average, against 11.4 with white noise on the actions. [Race the three in the Lab](lab:parameter-noise-car).
+:::
 
 ## Textbook
 
@@ -54,7 +80,7 @@ No push that depends on the position alone can take the car to the flag. Whateve
 Take an untrained actor, as TD3 starts with, remember 1,000 steps of random actions, adapt the perturbation on them until the actions move by 0.5, the size of the action noise in the example of [[action-noise]], and let one perturbed copy drive the car for an episode, without learning. With raw inputs, 1 of 300 such copies reached the flag. With both inputs normalized, 82 of 300 did, in 277 steps on average. The copies that got there pushed in the direction the car was moving 71% of the time, the others 44%: a perturbed actor whose push happens to follow the speed pumps the swing at every pass. White noise on the actions, of the same size, never reached the flag; pink noise reached it in 39% of the episodes.
 :::
 
-Training shows the same. In the Lab's race, 20 seeds of 40,000 steps each, TD3 with noise in its weights and normalized inputs ends up reaching the flag on 15 seeds, half of them within 13,000 steps; with white noise on its actions, on 1.
+Training shows the same. In the Lab's race, 20 seeds of 40,000 steps each, TD3 with noise in its weights and normalized inputs ends up reaching the flag on 15 seeds, half of them within 13,000 steps; with raw inputs, on 1, as with white noise on its actions.
 
 ### Off-policy and on-policy {#on-off}
 
