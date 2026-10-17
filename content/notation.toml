@@ -230,3 +230,38 @@ station = "td3"
 tex = '\alpha,\ \mathcal H,\ \bar{\mathcal H}'
 text = "SAC: the entropy weight (an ink α, not the step size), the policy's entropy, and the target entropy α is tuned toward"
 station = "sac"
+
+[[symbol]]
+tex = '\knob{\sigma}\,\varepsilon_t,\ \knob{\beta}'
+text = "exploration noise added to an action: its spread, the noise at step t, and its color β, a power that falls as 1/fᵝ over the frequencies f (0 white, 1 pink, 2 red)"
+station = "action-noise"
+
+[[symbol]]
+tex = '\tilde{\boldsymbol\theta} = \boldsymbol\theta + \knob{\sigma}\boldsymbol\xi,\ \knob{\delta}'
+text = "noise in the weights: the perturbed actor an episode is played with, and the distance its actions should keep from the actor's, toward which σ adapts (an ink δ, not the TD error)"
+station = "parameter-noise"
+
+[[symbol]]
+tex = '\mathbf z(s),\ \theta_{ij},\ \knob{\sigma_{ij}},\ n'
+text = "gSDE: the features (the policy's last hidden layer), the noise matrix held for n steps, and the learned spreads it is drawn with"
+station = "gsde"
+
+[[symbol]]
+tex = 'C,\ \Delta a_t'
+text = "jitter, gSDE's continuity cost: 100 × the mean of (Δaₜ / the width of the range)², where Δaₜ is how much the action jumps from one step to the next; 0 for a constant action, 100 for a jump across the whole range at every step"
+station = "gsde"
+
+[[symbol]]
+tex = '\knob{\ln\sigma_0}'
+text = "the log spread a Gaussian policy starts with, before the policy gradient tunes it"
+station = "policy-spread"
+
+[[symbol]]
+tex = '\knob{\lambda_T},\ \knob{\lambda_S},\ \bar s'
+text = "CAPS: the weights of the pull toward the next state's action and toward the actions of nearby states, and a state nudged by noise"
+station = "smooth-policies"
+
+[[symbol]]
+tex = '\tfrac{\knob\lambda}{2}\|\mathbf w\|^2'
+text = "weight decay: a penalty on the size of the critic's weights, which pulls every weight a little toward 0 at each step (an ink λ, not the trace decay)"
+station = "critic-regularization"
