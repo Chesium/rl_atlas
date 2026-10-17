@@ -1,5 +1,6 @@
 +++
 summary = "The critic of DDPG, TD3 and SAC is a network fit to its own moving targets, on the few actions its memory holds, and the actor climbs whatever errors it makes. Target networks and twin critics were the first fixes. Since then, weight decay, layer normalization, dropout, ensembles, batch normalization without a target network, spectral normalization and periodic resets have let learners take many updates per step and use much larger critics: the recent state of the art in continuous control comes as much from regularized critics as from new algorithms."
+story_in = ["target-network", "td3"]
 prereqs = ["td3", "sac", "target-network"]
 lab = "ddpg-pendulum"
 sources = [

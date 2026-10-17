@@ -1,5 +1,6 @@
 +++
 summary = "What to reach for, in order, when a continuous-control task will not learn. First the problem's setup: actions in [−1, 1] around a sensible pose, normalized observations, time limits handled as time-outs, a control rate that fits the body. Then a well-tuned default learner. Then exploration that matches the body's inertia, then a regularized critic, and, for a policy bound for hardware, smoothness and robustness. Each step points to the station that explains it."
+story_in = ["action-noise", "parameter-noise", "policy-spread", "smooth-policies"]
 prereqs = ["which-algorithm", "action-noise", "critic-regularization"]
 lab = "action-noise-car"
 sources = [
