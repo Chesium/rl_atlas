@@ -194,3 +194,116 @@ seeds at each knob's two ends; then 20 seeds for a recording and 10 per value fo
   randomization, ICRA.
 - Raffin et al. (2021), Stable-Baselines3 and the RL Zoo's tuned settings (hyperparams/*.yml): TD3 on
   MountainCarContinuous with Ornstein–Uhlenbeck noise; SAC and PPO there, and PPO on Pendulum, with gSDE.
+
+## Status
+
+Built as planned: Part 12's eight stations, between Continuous control and the Toolbox (now Parts 13 and 14);
+continuous Mountain Car with its Lab view; the trainer's tools, each off by default (the recordings test confirms that
+every earlier recording trains as before); five new Lab presets; and the links from Parts 0, 1, 9, 10, 11 and 13.
+Five stations tell a story from the recordings: action noise, parameter noise, gSDE, Gaussian policies and smooth
+policies.
+
+Changed on the way, with the reasons:
+
+- **Parameter noise races TD3, not DDPG.** The car's comparison keeps one learner: TD3 with white noise on its
+  actions against TD3 with noise in its weights, from the same seeds.
+- **Parameter noise needs normalized observations on the car.** The car's speed never exceeds 0.07 while its position
+  ranges over 1.8, so a perturbed actor's push follows the position, and no push that follows the position alone can
+  pump the swing (none did in 240,000 trials of such pushes). The race has a third racer, with the observations
+  normalized as Plappert et al. did: 1 of 20 seeds ends up reaching the flag with raw inputs, 15 with normalized ones.
+- **gSDE's story is SAC on the car**, not PPO on Pendulum. Pendulum learns with almost any noise. PPO's gSDE is a knob
+  of the PPO Lab (its sweep). On the car gSDE, a new matrix every 8 steps as in the paper, beat SAC's own samples (12
+  seeds of 20 against none) but not pink noise (all 20). Its sweep over the interval found the reason: held for 32
+  steps, about half the car's swing, the matrices took 9 seeds of 10 to the flag, nearly as many as pink noise, with
+  a fifth of its jitter. The story, the textbook and the recipe say so.
+- **PPO draws gSDE's matrix every 4 steps by default**, not once per batch: drawn once per batch of 512 steps, PPO on
+  Pendulum failed on all three seeds of a trial (the RL Zoo uses 4 there). Even so, gSDE did not make PPO better on
+  Pendulum: in the PPO Lab's sweep it held the pendulum on 4 seeds of 10, against 8 for PPO's own noise, with half the
+  jitter. *Gaussian policies in practice*, *gSDE* and the recipe say so.
+- **DDPG on Pendulum keeps white noise**: its sweep showed it learns with no noise at all, so the noise's color
+  cannot matter there. The colors race on the car instead.
+- **CAPS's weights are λ_T = 0.1 and λ_S = 0.3 (σ = 0.05)**, and CAPS is wired for DDPG and TD3, not SAC. Stronger
+  weights freeze some seeds at the start: an untrained critic pushes every torque one way, the terms hold the torques
+  together, and at tanh's flat ends nothing moves them back. Its sweep measured it: λ_T = 0.3 froze 2 seeds of 10,
+  λ_S = 1 one; and each term alone already cut the jitter from 18 to 1.8 (spatial) and 2.6 (temporal), 0.5 with both.
+- **The CAPS race shows seed 6**, through a second TD3 recording with the same runs (`td3-pendulum-jitter`): on seed 1,
+  which TD3's own recording shows, plain TD3 stays smooth; on seed 6 it comes to flip its torque between the ends of
+  its range, as 8 of its 20 seeds do for much of the second half.
+- **Gaussian policies in practice tells its story with the starting spread alone**: two more recordings, PPO from
+  σ₀ = 0.37 and from 2.7, race the PPO Lab's σ₀ = 1, in a Lab of their own. Clipping against squashing, normalization
+  and gSDE stay knobs of the PPO Lab's sweep, which the race's Lab shows too.
+- **Regularizing the critic has no story**: of its tools the trainer has weight decay only (layer norm, ensembles,
+  dropout and resets would each need a new network in the trainer), and many updates per step cost too much to record
+  at 20 per step. Its Lab is DDPG on Pendulum, whose sweep gains weight decay; there it changes next to nothing, as
+  the page says: a small critic taking one update per step has little to overfit.
+- **Weight decay went to the actor–critics only** (DDPG, TD3, SAC), whose critics the part regularizes. PPO, A2C and
+  TRPO gained observation normalization alone, and DQN neither: the part is about continuous control, and DQN's
+  CartPole learns without them.
+- **Added after the list**: hindsight experience replay (a section of *Exploration strategies*, and a line in the
+  recipe), the tanh-saturation penalty (in *Gaussian policies in practice*), autoregressive noise and spectral
+  normalization for value-based agents (one paragraph each).
+
+Recordings added (20 seeds each; the sweeps 10 seeds per value):
+
+| Recording | Steps | Result |
+| --- | --- | --- |
+| td3-car-white-noise | 40,000 | 1 of 20 end up reaching the flag (training reaches it on 2) |
+| td3-car-ou-noise | 40,000 | 1 of 20 (training reaches it on 4) |
+| td3-car-pink-noise | 40,000 | 18 of 20 (training reaches it on 20, half by step 3,000) |
+| td3-car-red-noise | 40,000 | 7 of 20 (training reaches it on 20, half by step 7,000) |
+| td3-car-param-noise | 40,000 | 1 of 20 (training reaches it on 15, half by step 27,000) |
+| td3-car-param-noise-norm | 40,000 | 15 of 20 (training reaches it on 20, half by step 3,500) |
+| sac-car | 30,000 | 0 of 20 (training never reaches it) |
+| sac-car-pink-noise | 30,000 | 20 of 20 (training reaches it on 20, half by step 2,250) |
+| sac-car-gsde | 30,000 | 12 of 20, with the smoothest training forces (jitter 0.4, against 1.0 with pink noise) |
+| td3-pendulum-caps | 60,000 | all 20 swing it up and hold it; the test episodes' jitter averages 1 in the second half, against 16 for plain TD3 |
+| td3-pendulum-jitter | 60,000 | td3-pendulum's runs, shown at seed 6 |
+| ppo-pendulum-narrow | 200,000 | PPO from σ₀ = 0.37: 15 of 20 end up holding the pendulum in training, half the seeds first by step 70,000; training jitter 0.8 |
+| ppo-pendulum-wide | 200,000 | PPO from σ₀ = 2.7: 20 of 20, half by step 25,000 (σ₀ = 1, the PPO Lab's: 17, by 35,000); training jitter 12, against 3.2 |
+| ppo-pendulum, td3-pendulum | as before | retrained to keep the jitter; otherwise identical |
+
+Sweeps added or extended:
+
+| Sweep | Knobs | Result |
+| --- | --- | --- |
+| ppo-pendulum | starting spread, tanh squashing, normalized observations, gSDE | σ₀ = 0.37, 1, 2.7: 9, 8 and 10 of 10 hold the pendulum, the narrow start twice as slow; tanh 9, normalized 10, gSDE 4 |
+| ddpg-pendulum | weight decay | λ = 0 and 10⁻³: every seed ends near −117 and −116; DDPG's 10⁻²: two of 10 end near −210 |
+| td3-car-white-noise | the four colors (the recordings' runs), the spread, normalized observations | colors: white 1, Ornstein–Uhlenbeck 1, pink 10, red 2 of 10 reach the flag; spread 0.2, 0.5, 1: 0, 1, 4; normalized inputs: 2, against 1 |
+| td3-car-pink-noise | the spread | 0.2, 0.5, 1: 1, 10 and 10 of 10, fastest at 1 (half the seeds by 12,500 steps, against 18,000), with 2.5 times the jitter |
+| sac-car-gsde | how long each gSDE matrix is held (1 to 128 steps) | every 1, 4, 8, 32, 128 steps: 0, 2, 5, 9 and 6 of 10 reach the flag; training jitter 3.1, 0.8, 0.4, 0.2, 0.07 |
+| td3-pendulum-caps | CAPS's two weights, each from 0 to three times the recording's | λ_T = 0, 0.1, 0.3: 9, 10, 8 of 10 hold the pendulum (2 frozen at 0.3); λ_S = 0, 0.3, 1: 10, 10, 8 (1 frozen at 1); test jitter 1.8 (spatial alone), 2.6 (temporal alone), 0.5 (both), against 18 for plain TD3 |
+| td3-pendulum-jitter | TD3's delay and target noise (td3-pendulum's runs) | for the CAPS race's knobs |
+
+Found and fixed in the review:
+
+- The page's copy of the trainer (`app/deep-worker.js`, built from `lab/deep/`) was stale: in the browser, PPO drew
+  gSDE's matrix once per batch instead of every 4 steps. Rebuilt, and a test now fails when the copy and `lab/deep/`
+  differ.
+- The build now checks that every story run names a recording that exists and that its steps name the story's runs
+  (a missing recording used to leave a story waiting forever).
+- The recordings test compared a fresh run's returns with the recording's at full strictness, and failed on −0, which
+  JSON writes as 0.
+- Numbers corrected after decoding the runs themselves: training jitter that counted the random first steps (smooth
+  noises looked five to fifteen times rougher than they are); a gSDE actor said to push right everywhere (it pushed
+  with the position); Ornstein–Uhlenbeck noise said to reach farther than white (on the car it did not); the car's
+  speed called a twentieth of its position's range (0.07 against 1.8).
+- Added from the sources: autoregressive noise (Korenkevych et al., 2019), the optimistic actor–critic's source,
+  spectral normalization for value-based agents (Gogianu et al., 2021), MBPO's updates per step and source.
+- Checked against the papers again, and corrected: RLPD's weight decay fell behind its ensemble on every task (not
+  "on none"); gSDE scored a little lower than per-step noise on HalfCheetah; Hwangbo et al.'s hand-tuned motor model
+  took over a week; the CAPS example's spin now has the sign its angles imply; a clipped mean past the range is
+  nearly, not wholly, invisible to the gradient; the trainer's observation normalization is for its actor–critics
+  and policy gradients, not DQN.
+- In the Labs, the SAC racers showed TD3's pseudocode (their recordings named the action-noise station), the gSDE
+  racer PPO's, and plain TD3 in the CAPS race CAPS's. Each racer now shows its own learner's, and gSDE's card is
+  written for SAC, as its story and Lab run it. The CAPS racer's live formula, plain TD3's actor update, now has
+  CAPS's two terms.
+- The README's map picture showed 14 parts, and its reading order left this part out; the plan's milestone for it
+  had split M8 in two and repeated M9's number (it is M11 now). The Symbols page, which lists every symbol, had none
+  of this part's; the welcome page's reading paths had none into it.
+- Corrected against the recordings and the new sweeps: white noise does reach the flag with the full force as its
+  spread (4 seeds of 10), where *Action noise* said no spread helps; the normalized weight-noise racers reach the flag
+  in a median of 14,000 steps, not 13,000; plain TD3's torque in the CAPS story jitters by 71, not 72; CAPS's test
+  episodes drop the pendulum now and then (4 of 600 after the first 15,000 steps), which *Smooth policies* now says.
+
+Compute: about nine hours of a 4-core machine, nearly all of it for the recordings and sweeps above.
