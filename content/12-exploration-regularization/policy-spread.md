@@ -26,7 +26,7 @@ wide = { recording = "ppo-pendulum-wide", name = "σ₀ = 2.7" }
 ## Story
 
 ::: step {run = "mid", at = 0, map = "action", formula = 1}
-**PPO's policy is a bell curve** in every state (formula 1): the network gives the mean torque, and one learned number, the spread $\pol\sigma$, says how far around it to sample; a sample past the range, $-2$ to 2, is clipped to its end. The network's last layer starts small, so every state's mean starts near 0, and the map shows no preference anywhere. The spread starts at $\pol\sigma = 1$, half the largest torque, as the study below advises for actions scaled to $[-1, 1]$. The test episode, sampled like the training ones, flails at the bottom.
+**PPO's policy is a bell curve** in every state (formula 1): the network gives the mean torque, and one learned number, the spread $\pol\sigma$, says how far around it to sample; a sample past the range, $-2$ to 2, is clipped to its end. The network's last layer starts small, so every state's mean starts near 0, and the map shows no preference anywhere. The spread starts at $\pol\sigma = 1$, half the largest torque, as the largest study of PPO's choices advises for actions scaled to $[-1, 1]$ (0.5 there). The test episode, sampled like the training ones, flails at the bottom.
 :::
 
 ::: step {run = "narrow", at = 4, map = "action"}
