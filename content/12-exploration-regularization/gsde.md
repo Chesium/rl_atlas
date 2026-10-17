@@ -43,7 +43,7 @@ pink = { recording = "sac-car-pink-noise", name = "SAC, pink noise" }
 :::
 
 ::: step {run = "pink", at = 40, curves = ["white", "sde", "pink"], metric = "test"}
-**Twenty seeds of each.** SAC with its own samples: no seed ends up at the flag. With gSDE: 12, half of them within 15,750 steps. With pink noise: all 20, half within 6,375. A gSDE matrix lasts 8 steps, a ninth of the car's swing; pink noise keeps power at every time scale, the swing's included.
+**Twenty seeds of each.** SAC with its own samples: no seed ends up at the flag. With gSDE: 12, half of them within 15,750 steps. With pink noise: all 20, half within 6,375. A gSDE matrix lasts 8 steps, a ninth of the car's swing; pink noise keeps power at every time scale, the swing's included. Held for 32 steps instead, close to half a swing, the matrices took 9 seeds of 10 to the flag in the Lab's sweep, against 5 at 8 steps.
 :::
 
 ::: step {run = "sde", at = 40, curves = ["white", "sde", "pink"], metric = "jitter-train"}
@@ -79,7 +79,7 @@ with $\Delta a_{\max}$ the width of the action range: 0 for a constant action, 1
 
 On four PyBullet locomotion tasks with SAC, 10 runs of a million steps each, per-step noise cost 3.6 to 5.1 during training; gSDE with a new matrix every 8 steps cost 2.4 to 4.1, and scored higher on three of the tasks and a little lower on the fourth, HalfCheetah. Ornstein–Uhlenbeck and parameter noise were smoother still, but scored lower. For PPO the interval mattered most: drawn too rarely, the noise did not explore enough in long episodes; drawn every step, the old problems came back. PPO with gSDE beat PPO with per-step Gaussian noise on all four tasks.
 
-On continuous Mountain Car, over 20 seeds of 30,000 steps here, SAC with its own per-step samples never reached the flag, even in training. With gSDE, a new matrix every 8 steps, 12 seeds ended up reaching it, and its training forces were the smoothest of all: a jitter of 0.4 on average once its first random steps were over, against 1.0 with pink noise in SAC's samples, which reached the flag on all 20 seeds ([[action-noise]]).
+On continuous Mountain Car, over 20 seeds of 30,000 steps here, SAC with its own per-step samples never reached the flag, even in training. With gSDE, a new matrix every 8 steps, 12 seeds ended up reaching it, and its training forces were the smoothest of all: a jitter of 0.4 on average once its first random steps were over, against 1.0 with pink noise in SAC's samples, which reached the flag on all 20 seeds ([[action-noise]]). On the car the interval decides much. In the Lab's sweep, 10 seeds per interval, a new matrix every step took no seed to the flag, every 4 steps 2, every 8 steps 5, every 32 steps 9 and every 128 steps 6, and the longer each matrix lasted, the smoother the training forces: a jitter of 3.1, 0.8, 0.4, 0.2 and 0.07. Held for 32 steps, about half the car's swing of 73, gSDE nearly matched pink noise, with a fifth of its jitter: the interval should match how long a push must last.
 
 ### On real robots {#robots}
 
