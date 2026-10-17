@@ -78,9 +78,9 @@
     _map() {
       const S = 250, P = 36, N = 31;
       this.map = el("svg", { class: "phase", viewBox: `0 0 ${S + P + 8} ${S + P}`, role: "img", "aria-label": "Values and choices over the pole's angle and spin" }, this.mapHost);
-      this.cellEls = [];
-      const c = S / N, cells = el("g", {}, this.map);
-      for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) this.cellEls.push(el("rect", { x: P + i * c, y: (N - 1 - j) * c, width: c + 0.4, height: c + 0.4 }, cells));
+      const c = S / N;
+      this.cells = el("g", { transform: `translate(${P} 0) scale(${c})` }, this.map); // cells one unit wide, one path per color
+      this.cellsN = N;
       // chevrons on every third cell: the push the network prefers there
       this.chev = [];
       const marks = el("g", { class: "chevrons" }, this.map);
@@ -113,10 +113,10 @@
       const head = this.box.querySelector(".map-head b"), title = d.live ? "What the learner thinks" : "What the network thinks";
       if (head.textContent !== title) head.textContent = title; // unchanged, it is left alone: nothing to lay out again
       const [lo, hi] = span(d.v), color = rangeColor(lo, hi), valueMode = this.o.map !== "action" && !d.noValue;
-      for (let k = 0; k < this.cellEls.length; k++) {
+      this.cells.innerHTML = RL.Film.cells(this.cellsN, 1, (k) => {
         const pr = d.act ? d.act[k] : d.mean ? d.mean[k] : 0.5; // 1 or 0: right or left (DQN); P(right) (a policy)
-        this.cellEls[k].setAttribute("fill", valueMode ? color(d.v[k]) : `color-mix(in oklab, var(--pol) ${Math.round(Math.abs(pr - 0.5) * 140)}%, var(--v-mid))`);
-      }
+        return valueMode ? color(d.v[k]) : `color-mix(in oklab, var(--pol) ${Math.round(Math.abs(pr - 0.5) * 140)}%, var(--v-mid))`;
+      });
       for (const { k, e } of this.chev) {
         const pr = d.act ? d.act[k] : d.mean ? d.mean[k] : 0.5, right = pr >= 0.5;
         e.setAttribute("d", right ? "M-3 -4.5l4.5 4.5l-4.5 4.5" : "M3 -4.5l-4.5 4.5l4.5 4.5");

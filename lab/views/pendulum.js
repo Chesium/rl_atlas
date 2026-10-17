@@ -62,9 +62,9 @@
     _map() {
       const S = 250, P = 36, N = 31;
       this.map = el("svg", { class: "phase", viewBox: `0 0 ${S + P + 8} ${S + P}`, role: "img", "aria-label": "Values and pushes over the pendulum's angle and spin" }, this.box.querySelector(".map-host"));
-      this.cellEls = [];
-      const c = S / N, cells = el("g", {}, this.map);
-      for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) this.cellEls.push(el("rect", { x: P + i * c, y: (N - 1 - j) * c, width: c + 0.4, height: c + 0.4 }, cells));
+      const c = S / N;
+      this.cells = el("g", { transform: `translate(${P} 0) scale(${c})` }, this.map); // cells one unit wide, one path per color
+      this.cellsN = N;
       this.chev = [];
       const marks = el("g", { class: "chevrons" }, this.map);
       for (let j = 1; j < N; j += 3) for (let i = 1; i < N; i += 3) this.chev.push({ k: j * N + i, e: el("path", { class: "chev", transform: `translate(${P + (i + 0.5) * c} ${(N - j - 0.5) * c})` }, marks) });
@@ -88,10 +88,10 @@
       this.d = d;
       RL.netStrip.draw(this.grid, d.net, d.units); // the network strip under the bars (runs of lab/deep/)
       const [lo, hi] = span(d.v), color = rangeColor(lo, hi), valueMode = this.o.map !== "action";
-      for (let k = 0; k < this.cellEls.length; k++) {
+      this.cells.innerHTML = RL.Film.cells(this.cellsN, 1, (k) => {
         const mu = d.mean ? d.mean[k] : 0;
-        this.cellEls[k].setAttribute("fill", valueMode ? color(d.v[k]) : `color-mix(in oklab, var(--pol) ${Math.round(Math.min(1, Math.abs(mu) / 2) * 70)}%, var(--v-mid))`);
-      }
+        return valueMode ? color(d.v[k]) : `color-mix(in oklab, var(--pol) ${Math.round(Math.min(1, Math.abs(mu) / 2) * 70)}%, var(--v-mid))`;
+      });
       for (const { k, e } of this.chev) {
         const mu = d.mean ? d.mean[k] : 0;
         e.setAttribute("d", mu >= 0 ? "M-3 -4.5l4.5 4.5l-4.5 4.5" : "M3 -4.5l-4.5 4.5l4.5 4.5");

@@ -49,7 +49,7 @@ Sutton & Barto's unified map.
 <img src="docs/images/story.gif" alt="The Q-learning story: as the text scrolls, the grid fills with values and the path along the cliff appears">
 
 Scroll the text and the picture follows, one step at a time: an agent takes its first steps, a value changes, a policy
-settles. There are 79 stories. Their runs are picked because they make their point clearly, and the Lab shows how
+settles. There are 84 stories. Their runs are picked because they make their point clearly, and the Lab shows how
 typical they are.
 
 <p align="center">

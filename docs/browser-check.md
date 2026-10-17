@@ -30,8 +30,8 @@ a real screen. What matters most now:
 2. Test the file readers download. Download
    <https://github.com/DrippingSoup22/rl_atlas/releases/latest/download/rl_atlas.html> into a new folder `downloads/`
    inside the clone. Check it is the same file as the clone's `rl_atlas.html` by comparing their SHA-256: on Windows
-   `Get-FileHash <file> -Algorithm SHA256`, on macOS `shasum -a 256 <file>`, on Linux `sha256sum <file>`. Release 1.0.3
-   is `c569efe7d15646dcccf081ddac739b4ca7bcb4f650508ea79a740aa7d2040fd7`. If a newer release is out, its hash is on
+   `Get-FileHash <file> -Algorithm SHA256`, on macOS `shasum -a 256 <file>`, on Linux `sha256sum <file>`. Release 1.1.0
+   is `7e1b9a17bf7f8311219e6f48c23bbeabbeaa128b36cb9753883fb22489f8ccd3`. If a newer release is out, its hash is on
    its release page. If the two files differ, say so and test the downloaded one.
 3. Install Node 18 or newer (22 recommended). In the clone, run `npm install --no-save playwright-core`.
    playwright-core drives the browsers already installed and downloads none. `node_modules/` and
@@ -119,8 +119,10 @@ and in Brave. Note the browser, page and window size of anything wrong, and take
   minutes, with progress under the racer's name; the trained run then waits for Play.
 - A lab whose seeds were still running when you pressed Play keeps playing seed 1; once they are done, its seed button
   offers "▸ Typical: seed N".
-- The cloud checks found at most one long task (50 to 60 ms) in two of the 79 stories, and slow frames that seemed
-  due to software rendering. A real GPU should do better, and confirming that is a goal of this check.
+- The cloud checks of 1.0.3 found at most one long task (50 to 60 ms) in two of its 79 stories, and slow frames that
+  seemed due to software rendering. Those of 1.1.0 found none in its five new stories, except two (up to 87 ms) in
+  whichever story opened first, and a few (51 to 72 ms, at most three in 5 seconds) in labs of three or four racers.
+  A real GPU should do better, and confirming that is a goal of this check.
 - The page saves progress under the `localStorage` key `rl-atlas:v1`. Clear it, or use a fresh browser profile, to
   start as a new reader.
 

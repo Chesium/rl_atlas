@@ -307,7 +307,9 @@ animations and hover effects this guide relies on would not be smooth.
     400 to 620 ms frames nor the first story's long task, and the A2C story within its bounds. 1.0.3 fixes what it and
     the checks here still found: the freeze when a deep run trained in the page arrives (its film strip's maps drawn as
     one path per color), the first round of a lab played again from its start at a fast rate (worked out while
-    paused), and the switch to the typical seed some seconds after a lab opens (worked out in slices). Still open:
+    paused), and the switch to the typical seed some seconds after a lab opens (worked out in slices). 1.1.0 draws the
+    deep labs' big maps one path per color too: in the checks here, six labs of two to four racers, each played at
+    every speed, had 8 long tasks instead of 48, the longest 72 ms instead of 111. Still open:
     - A2C maze at 4 rounds a second in Chrome: three freezes of up to 79 ms in 10 s, seen once, not in Brave nor here.
       Cause unknown; garbage collection is a guess.
     - Cliff walking's first play here: one long task of about 60 ms, a third of it garbage collection after the
@@ -339,6 +341,6 @@ animations and hover effects this guide relies on would not be smooth.
   recordings keep how much the actions jitter. Toolbox and Where next became Parts 13 and 14.
   Decided: five stations tell a story from the recordings (action noise, noise in the weights, gSDE, Gaussian
   policies in practice with PPO's starting spread, smooth policies); regularizing the critic, robust policies and the
-  recipe have none, on purpose (the trainer has weight decay alone of the critic's regularizers, and it changes
-  nothing on Pendulum; no world here to randomize; a decision guide). What changed on the way, with the reasons, is
-  at the end of `docs/control-tools.md`.
+  recipe have none, on purpose (the trainer has weight decay alone of the critic's regularizers, and on Pendulum it
+  does not help; no world here to randomize; a decision guide). What changed on the way, with the reasons, is at the
+  end of `docs/control-tools.md`. Released as 1.1.0.
