@@ -9,11 +9,14 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import hashlib
+import tomllib
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import build
+from course_sources import read_document
 
 spec = importlib.util.spec_from_file_location("course_import", ROOT / "tools/course-import.py")
 importer = importlib.util.module_from_spec(spec)
@@ -128,6 +131,113 @@ class CourseTests(unittest.TestCase):
         self.assertNotIn(b"globalThis.RL.course =", before)
         build.bundle(public)
         self.assertEqual(before, public.read_bytes())
+
+    def add_document(self):
+        pdf = self.pack / "notes.pdf"
+        pdf.write_bytes(b"%PDF invented document fixture")
+        digest = hashlib.sha256(pdf.read_bytes()).hexdigest()
+        manifest = self.pack / "course.toml"
+        with manifest.open("a", encoding="utf-8") as out:
+            out.write(f'''\n[[document]]
+id = "Notes"
+title = "Invented chapter"
+edition = "Fixture edition"
+path = "notes.pdf"
+sha256 = "{digest}"
+kind = "course note"
+review = "located"
+chapter = 3
+pending_sections = ["3.2"]
+''')
+        doc = tomllib.loads(manifest.read_text(encoding="utf-8"))["document"][0]
+        result = read_document(doc, ["3.1 Dynamics\n\nDefinition 3.1 (A state). Text.\n",
+                                     "3.2 Appendix\n\nTheorem 3.2 (A draft). Text.\n"])
+        self.write("documents", [result])
+        return doc, result
+
+    def test_document_locators_provenance_and_pending_routes(self):
+        doc, result = self.add_document()
+        self.assertEqual([a["page"] for a in result["anchors"]], [1, 1, 2, 2])
+        self.assertEqual([a["review"] for a in result["anchors"]], ["located", "located", "pending", "pending"])
+        links = self.pack / "links.toml"
+        with links.open("a", encoding="utf-8") as out:
+            out.write('''\n[[link]]
+at="Notes:3.2"
+stations=["stability"]
+role="compares"
+relation="optional"
+note="Invented draft context."
+''')
+        course, p = self.compile()
+        self.assertEqual(p.errors, 0)
+        it = course["items"]["Notes:theorem-3.2"]
+        self.assertEqual(it["kind"], "source-anchor")
+        self.assertEqual(it["page"], 2)
+        self.assertIn("PDF p. 2", it["source"]["locator"])
+        self.assertEqual(next(l for l in course["links"] if l["at"] == "Notes:3.2")["source"]["review"], "pending")
+        links.write_text(links.read_text(encoding="utf-8").replace('relation="optional"', 'relation="required"'), encoding="utf-8")
+        self.assertGreater(self.compile()[1].errors, 0)
+
+    def test_hash_preflight_leaves_previous_import_untouched(self):
+        self.add_document()
+        saved = (self.pack / "import/documents.json").read_bytes()
+        (self.pack / "notes.pdf").write_bytes(b"changed source")
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(importer.main(["course-import.py", str(self.pack)]), 1)
+        self.assertEqual((self.pack / "import/documents.json").read_bytes(), saved)
+        self.assertGreater(self.compile()[1].errors, 0)
+
+    def test_document_manifest_changes_require_reimport(self):
+        self.add_document()
+        file = self.pack / "course.toml"
+        file.write_text(file.read_text(encoding="utf-8").replace('pending_sections = ["3.2"]', 'pending_sections = ["3.1", "3.2"]'), encoding="utf-8")
+        self.assertGreater(self.compile()[1].errors, 0)
+
+    def test_manual_anchors_check_page_text_and_printed_offset(self):
+        doc, _ = self.add_document()
+        doc.pop("chapter")
+        doc["offset"] = 1
+        doc["anchor"] = [dict(id="1.1", title="Invented heading", page=2, printed=1, match="Heading")]
+        result = read_document(doc, ["cover", "1.1 Heading\nText"])
+        self.assertEqual(result["anchors"][0]["printed"], 1)
+        with self.assertRaises(ValueError):
+            read_document(doc, ["cover", "wrong page"])
+        doc["anchor"][0]["printed"] = 2
+        with self.assertRaises(ValueError):
+            read_document(doc, ["cover", "Heading"])
+
+    def test_document_parser_ignores_body_references_and_deduplicates(self):
+        doc, _ = self.add_document()
+        result = read_document(doc, ["3.1 Dynamics\n\nTheorem 3.1 is discussed here.\nDefinition 3.1 (State). Body.",
+                                     "Definition 3.1 (State). Repeated.\n3.2 Appendix\n\n3.2.1 Detail\nTheorem 3.2 (Draft). Body."])
+        self.assertEqual([a["id"] for a in result["anchors"]], ["3.1", "definition-3.1", "3.2", "3.2.1", "theorem-3.2"])
+        self.assertEqual(result["anchors"][-1]["review"], "pending")
+
+    @unittest.skipUnless((ROOT / "course/ese6180/course.toml").exists(), "private ESE6180 pack absent")
+    def test_real_control_pack_coverage_and_separation(self):
+        p = build.Problems()
+        course = build.compile_course(ROOT / "course/ese6180", self.data, self.recordings, p)
+        self.assertEqual(p.errors, 0)
+        self.assertEqual([d["chapter"] for d in course["documents"] if "chapter" in d], [3, 4, 5, 6, 7])
+        self.assertEqual(len(course["documents"]), 11)
+        for at in ["N3:3.5", "N4:4.1", "N5:5.6", "N6:6.3", "N7:7.6", "Boffi:theorem-4.2"]:
+            self.assertIn(at, course["items"])
+            self.assertTrue(any(l["at"] == at for l in course["links"]))
+        self.assertEqual(course["items"]["Khalil:4.1"]["page"], 128)
+        self.assertEqual(course["items"]["Khalil:4.1"]["printed"], 112)
+        model = next(l for l in course["links"] if l["at"] == "N4:4.1")
+        self.assertTrue({"models", "model-based-deep"}.issubset(model["stations"]))
+        for link in course["links"]:
+            self.assertIn("source", link)
+            if link["at"].startswith(("N6:", "N7:")):
+                self.assertIn(link["relation"], ["motivation", "optional"])
+            if link["source"]["review"] == "pending":
+                self.assertEqual(link["relation"], "optional")
+        before = json.dumps(self.data["routes"], sort_keys=True)
+        public = self.pack / "public-control.html"
+        build.bundle(public)
+        self.assertNotIn(b"globalThis.RL.course =", public.read_bytes())
+        self.assertEqual(before, json.dumps(self.data["routes"], sort_keys=True))
 
     @unittest.skipUnless((ROOT / "course/ese3990/course.toml").exists(), "private pack absent")
     def test_real_pack_coverage_and_numeric_solutions(self):

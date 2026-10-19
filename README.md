@@ -210,7 +210,8 @@ See [the authoring and numerical notes](docs/guarantees.md) and [the implementat
 ### Course companions
 
 Private course packs add lecture references, homework excerpts, hidden practice solutions and course maps beside
-the atlas. See [the pack format and build instructions](docs/course-packs.md). Course materials and generated
+the atlas. The ESE6180 companion adds chapter and statement locators, reference books and papers, and a course-order
+bridge with a continuous/discrete-time dictionary. See [the pack format and build instructions](docs/course-packs.md). Course materials and generated
 companion files stay in the ignored `course/` folder; the public download contains no pack data.
 
 ## Credits

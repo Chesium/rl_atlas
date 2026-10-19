@@ -651,7 +651,7 @@ animations and hover effects this guide relies on would not be smooth.
   The original dynamics, ball, horizon and metric degree are retained; integration, derivative access and solver differ.
   These distinctions and the source's sign/rate conventions are documented in `docs/m13-m14-review.md`.
 
-- [ ] **M15 · The ESE6180 companion**: the course pack for ESE 6180 (*Learning and Control*), built with M12's mechanism
+- [x] **M15 · The ESE6180 companion**: the course pack for ESE 6180 (*Learning and Control*), built with M12's mechanism
   and M13's routes. From a station you reach the course notes and book pages on it; from the notes you reach the
   stations; and a view follows the course's order. Needs M12's Phase 1 and M13, and grows alongside M14's phases.
   - `course/ese6180/` is ignored by git, like the ESE3990 pack. It holds:
@@ -672,6 +672,11 @@ animations and hover effects this guide relies on would not be smooth.
   - Chapter 7's technical appendix (§7.6) is a draft by its own account: written on request, and flagged "TO BE
     CHECKED 7.1". It stays in the pack with status pending. No public station rests on it until it has been checked
     against primary sources (Angeli 2002; Lohmiller & Slotine 1998).
-  - Missing, and not needed to start: the proposal's seed (56 nodes, 85 typed edges, six views), which is in neither the
-    source folder nor here, so M14 drafts its stations again; and the extended paper, linked by its version
-    (arXiv:2008.05952v2).
+  - The proposal's seed (56 nodes, 85 typed edges, six views) remains missing; M14 drafted its stations again.
+    The extended paper is now available locally as arXiv:2008.05952v2, with version-specific theorem links.
+  Done: the ignored pack contains five note chapters and six reference PDFs, 213 page-addressable locators and
+  213 links to 41 stations. Import and build verify SHA-256 hashes and reject stale source metadata. Notes,
+  numbered statements, books and paper pages link in both directions; the bridge follows chapter/section order,
+  with the time dictionary beside it and links into M13's prerequisite routes. Chapter 4 links to model learning;
+  Chapters 6–7 stay motivational, and §7.6 and its descendants stay pending and optional. The public build includes
+  no pack payload. Validation and limits are recorded in `docs/m15-review.md`.

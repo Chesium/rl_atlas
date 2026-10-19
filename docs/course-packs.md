@@ -98,3 +98,90 @@ the local ESE3990 pack and an installed browser. `--exe PATH` accepts another Ch
 PDF links use relative `file://` URLs with `#page=N`. If a browser blocks them, serve the pack folder with
 `python -m http.server` and open its HTML on localhost. Browser navigation checks establish that the requested
 page fragment reaches the PDF viewer; they do not independently read the viewer's displayed page counter.
+
+## Chapter notes and multiple reference sources
+
+A pack can also declare `[[document]]` records. Each names a PDF inside the pack, its exact SHA-256, source kind,
+edition/version and review status. This is independent of the older single `[book]` and slide mechanisms:
+
+```toml
+[[document]]
+id = "Notes3"
+title = "An invented dynamics chapter"
+path = "chapter-3.pdf"
+sha256 = "<the source file's 64 lowercase hexadecimal SHA-256 characters>"
+kind = "course note"
+edition = "Example course, supplied Chapter 3"
+review = "located"
+chapter = 3
+pending_sections = ["3.6"]
+pending_note = "This appendix is awaiting source review."
+```
+
+The importer extracts numbered sections and statements (definitions, assumptions, theorems, lemmas, propositions,
+corollaries, examples and remarks), retaining the first page of repeated labels. Chapter numbers come from the
+manifest; filename prefixes do not determine them. Wrapped headings are joined conservatively. A document's
+`titles = { "proposition-3.1" = "Corrected title" }` overrides extraction errors without changing the PDF or page.
+Overrides must name existing locators.
+
+Books and papers use curated anchors, each checked against text on its specified PDF page:
+
+```toml
+[[document]]
+id = "Book"
+title = "An invented reference book"
+path = "book.pdf"
+sha256 = "<the source file's SHA-256>"
+kind = "textbook"
+edition = "Example, 2nd edition"
+review = "located"
+offset = 16
+
+[[document.anchor]]
+id = "4.1"
+title = "Autonomous systems"
+page = 128
+printed = 112
+match = "Autonomous Systems"
+```
+
+`match` is a case-insensitive regular expression. `offset`, when declared, enforces `PDF page = printed page +
+offset` for every anchor with a printed page. This offset belongs to the declared source/edition, never all PDFs.
+Use a version-specific `edition` for papers and add anchors for that exact version's theorem numbering.
+
+Both import and build rehash every declared document. A mismatch stops the import before it changes `import/`;
+missing PDF tools or a failed PDF extraction also stop document imports. Changed manifest metadata requires a
+fresh import. `import/documents.json` records the imported specification and locators. These checks establish
+file identity and locator consistency, not mathematical correctness.
+
+Links use the existing course roles and may add M13's relation type:
+
+```toml
+[[link]]
+at = "Notes3:3.2" # or "Notes3:theorem-3.4", "Book:4.1"
+stations = ["lyapunov-functions", "time-dictionary"]
+role = "compares"
+relation = "illustrative" # required, sufficient, illustrative, motivation, optional
+note = "Compare a one-step difference with a continuous-time Lie derivative."
+```
+
+Provenance is inherited from the source, including its edition, locator and review status. `pending_sections`
+applies to a section, its subsections and their statements. Pending links cannot be `required` or `sufficient`.
+These course relations do not modify the public prerequisite graph. Source status, personal proof progress and
+numerical evidence remain separate.
+
+Document pages, station course tabs and search use the same references in both directions. Packs with chapter
+notes gain **Course order** on the map and a bridge page at `#/c/bridge`, with sections and their stations beside
+the continuous/discrete-time dictionary. Prerequisite links open M13's route view at the selected station.
+
+The local ESE6180 pack is built and checked with:
+
+```powershell
+python tools/course-import.py course/ese6180
+python build.py --course course/ese6180
+node tools/control-course-check.js chrome
+node tools/control-course-check.js edge
+```
+
+Open `course/ese6180/rl_atlas-ese6180.html`. Its PDFs, manifest, links, import output and HTML remain private and
+ignored. Browser reports and screenshots stay in ignored `browser-check-results/m15-{chrome,edge}/`.

@@ -1891,6 +1891,20 @@ a.ref:hover { text-decoration-color: var(--ink); }
    Course items wear --course; stations keep their line's color. */
 
 .c-pill { color: var(--course-ink); box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--course) 55%, transparent); }
+.c-provenance { display: block; width: 100%; color: var(--ink-2); font-size: 12px; overflow-wrap: anywhere; }
+.c-source-row, .c-bridge-row { padding: 10px 14px; margin: 12px 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); scroll-margin-top: 100px; }
+.c-source-row h3, .c-bridge-row h3 { display: flex; flex-wrap: wrap; gap: 10px; }
+.c-bridge { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 26px; align-items: start; }
+.c-bridge > *, .c-dictionary { min-width: 0; }
+.c-dictionary { position: sticky; top: 80px; padding: 16px; background: var(--surface); border-radius: 14px; border: 1px solid var(--line); }
+.c-dictionary h2 { margin-top: 0; font-size: 20px; }
+.c-dictionary table { width: 100%; font-size: 12px; }
+.c-dictionary td, .c-dictionary th { padding: 7px 3px; text-align: left; }
+.c-dictionary p { font-size: 13px; }
+.c-bridge-stations { display: flex; flex-wrap: wrap; gap: 10px; }
+.c-bridge-stations > span { display: grid; gap: 3px; }
+.c-pending { border-left: 3px solid var(--rew-ink); padding: 6px 10px; font-size: 13px; }
+@media (max-width: 900px) { .c-bridge { grid-template-columns: 1fr; } .c-dictionary { position: static; grid-row: 1; } }
 .c-badge i { background: var(--course); }
 .c-eyebrow a { color: inherit; }
 .c-lead { max-width: 72ch; color: var(--ink-2); margin: 4px 0 18px; }
@@ -19469,6 +19483,7 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
   const items = C.items;
   const nbs = Object.fromEntries(C.notebooks.map((n) => [n.id, n]));
   const papers = Object.fromEntries(C.papers.map((p) => [p.id, p]));
+  const documents = Object.fromEntries((C.documents || []).map((d) => [d.id, d]));
   const ROLE = { introduces: "Introduces", derives: "Derives", implements: "Implements", compares: "Compares", assesses: "Assesses" };
   // a run of slides: L8:28-31
   function item(at) {
@@ -19512,6 +19527,8 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
       case "predict": return `PS${nbs[it.notebook].ps} · ${esc(nbs[it.notebook].title)} · Predict first`;
       case "cell": return `PS${nbs[it.notebook].ps} · ${esc(nbs[it.notebook].title)} · ${it.activity ? `Activity ${it.activity.slice(1)}, ` : ""}experiment`;
       case "section": return `Sutton &amp; Barto §${esc(it.id)}${long ? ` ${esc(it.title)}` : ""}`;
+      case "document": return esc(it.title);
+      case "source-anchor": return `${esc(documents[it.document].chapter ? `Chapter ${documents[it.document].chapter}` : documents[it.document].id)} · ${esc(it.category === "section" ? `§${it.id} ${it.title}` : it.title)}`;
     }
     return esc(at);
   }
@@ -19530,6 +19547,7 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
     if (it.kind === "lecture") return `${C.files.slides}#page=${C.lectures.find((l) => l.n === it.n).pages[0]}`;
     if (it.kind === "question") return `${papers[it.paper].file}#page=${it.page}`;
     if (it.kind === "section") return `${C.files.book}#page=${it.page}`;
+    if (it.document) return `${documents[it.document].file}#page=${it.page}`;
     if (it.notebook || it.kind === "notebook") return nbs[it.notebook || it.id].file;
     return null;
   }
@@ -19538,6 +19556,12 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
     ? `<a class="chip c-st" href="#/e/${sid}/course" data-term="${sid}" style="--c:${lineColor(station(sid).line)}"><i></i>${esc(station(sid).short || station(sid).title)}</a>`
     : "";
   const roleTag = (role) => `<span class="c-role c-role-${role}">${ROLE[role] || esc(role)}</span>`;
+  const provenance = (l) => l.source ? `<small class="c-provenance">${esc(l.source.kind)} · ${esc(l.source.review)} · ${esc(l.relation || "illustrative")}<br>${esc(l.source.locator)}</small>` : "";
+  const routeLink = (sid) => `<a class="c-pdf" href="#/" data-course-route="${sid}">Prerequisite route ↗</a>`;
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest?.("[data-course-route]");
+    if (a) { store.set("routeDestination", a.dataset.courseRoute); store.set("lens", "route"); }
+  });
 
   // ---- solved questions are ticked, kept like visited stations ----
   const solved = (at) => !!store.get("solved", {})[at];
@@ -19624,6 +19648,7 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
     const of = (kinds) => links.filter((l) => kinds.includes(item(l.at)?.kind));
     const lectures = of(["slide", "slides", "lecture"]).sort((a, b) => item(a.at).page - item(b.at).page);
     const book = of(["section"]);
+    const sources = of(["document", "source-anchor"]);
     const homework = of(["notebook", "activity", "function", "cell"]);
     const practice = of(["question", "nb-question", "predict"]);
     const notes = C.notes.filter((n) => n.stations.includes(id));
@@ -19669,6 +19694,7 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
       <p class="c-lead">Where ${esc(station(id).title)} comes up in <a href="#/c/">${esc(C.code)}, ${esc(C.title)}</a>. The atlas's own words stay the reference; the course's material sits beside them.</p>
       ${sec("c-in-lectures", "In lectures", `${lectures.length} ${lectures.length === 1 ? "place" : "places"}`, lectureHtml)}
       ${sec("c-in-book", "In the book", "sections and printed pages", bookHtml)}
+      ${sec("c-in-sources", "In the course sources", "chapters, statements and reference pages", linkRows(sources))}
       ${sec("c-in-homework", "In homework", "the functions you write and the experiments they run", homeworkHtml)}
       ${sec("c-practice", "Practice", "click a card to see its solution", practiceHtml ? `<div class="c-prs">${practiceHtml}</div>` : "")}
       ${sec("c-notes", "Course notes", "notation, assumptions, and where the course's version differs", notesHtml)}
@@ -19683,9 +19709,10 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
   const head = (eyebrow, title, sub = "", extra = "") => `<header class="hero"><a class="part-badge c-badge" href="#/c/"><i>${esc(C.code)}</i>${esc(C.title)}</a>
     <div class="eyebrow c-eyebrow">${eyebrow}</div><h1>${title}</h1>${sub ? `<p class="summary">${sub}</p>` : ""}${extra}</header>`;
   // the links of an item, as rows: role, stations, what the reader finds
-  const linkRows = (ls) => ls.length ? `<ul class="c-links">${ls.map((l) => `<li>${roleTag(l.role)} ${l.stations.map((s) => chip(s)).join(" ")}<p>${l.note}</p></li>`).join("")}</ul>` : "";
+  const linkRows = (ls, references = true) => ls.length ? `<ul class="c-links">${ls.map((l) => `<li>${roleTag(l.role)} ${references ? `<a href="${page(l.at)}">${name(l.at, true)}</a>${pdfLink(l.at, "PDF")}` : ""} ${l.stations.map((s) => chip(s)).join(" ")}<p>${l.note}</p>${provenance(l)}</li>`).join("")}</ul>` : "";
 
   function home() {
+    if (C.documents?.length) return sourceHome();
     const count = (pred) => C.links.filter((l) => pred(item(l.at))).length;
     return `<article class="entry c-page">${head("A study companion", esc(C.code), `${esc(C.title)} · ${esc(C.school)}, ${esc(C.term)}. From a station's ${esc(C.code)} tab you reach the slides, homework, questions and book pages on its topic; from any of those, the stations that explain it.`)}
       <section class="c-sec"><h2>Lectures<small>${count((it) => it && /slide|lecture/.test(it.kind))} links to slides</small></h2>
@@ -19696,6 +19723,49 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
         <ul class="c-index">${C.papers.map((p) => `<li><a href="#/c/${p.id}"><b>${esc(paperTitle(p.id))}</b> ${esc(p.title.split(" · ")[1] || "")}</a><span class="faint">${p.questions.filter((q) => solved(`${p.id}:${q}`)).length} of ${p.questions.length} solved</span></li>`).join("")}</ul></section>
       ${C.book ? `<section class="c-sec"><h2>The book<small>${esc(C.book.title)}</small></h2><p><a href="#/c/${C.book.id}">The sections the stations cite</a>, each opening the PDF at its page.</p></section>` : ""}
       <p class="faint">The map has the course's views too: open <a href="#/">the map</a> and its <b>Views &amp; filters</b>.</p></article>`;
+  }
+
+  const dictionary = () => `<aside class="c-dictionary"><h2>Continuous ↔ discrete time</h2>
+    <p>The course notes use discrete time; many certificate results use continuous time.</p>
+    <table><thead><tr><th>Flow</th><th>Map</th></tr></thead><tbody>
+      <tr><td><span class="tex">\\dot x=f(x)</span></td><td><span class="tex">x^+=F(x)</span></td></tr>
+      <tr><td><span class="tex">\\dot V=\\nabla V^\\top f</span></td><td><span class="tex">V(F(x))-V(x)</span></td></tr>
+      <tr><td><span class="tex">\\dot\\delta=J_f\\delta</span></td><td><span class="tex">\\delta^+=J_F\\delta</span></td></tr>
+      <tr><td><span class="tex">e^{-ct}</span></td><td><span class="tex">\\rho^k,\\quad 0&lt;\\rho&lt;1</span></td></tr>
+    </tbody></table><p>For an exact flow sampled every h, ρ = exp(−ch) for the same norm rate. An Euler step needs its own stability check.</p>
+    <p>${chip("time-dictionary")} ${chip("three-contractions")}</p><p>A deployment bound motivates certificate learning. It does not become an assumption of the paper's learning theorem.</p></aside>`;
+
+  function sourceHome() {
+    return `<article class="entry c-page">${head("A study companion", esc(C.code), esc(C.title), '<p><a class="btn" href="#/c/bridge">Follow the course order →</a></p>')}
+      <section class="c-sec"><h2>Course notes<small>chapter numbers, independent of file prefixes</small></h2>
+      <ol class="c-index">${C.documents.filter((d) => d.chapter).map((d) => `<li><a href="#/c/${d.id}"><b>Chapter ${d.chapter}</b> ${esc(d.title)}</a></li>`).join("")}</ol></section>
+      <section class="c-sec"><h2>Books and papers</h2><ul class="c-index">${C.documents.filter((d) => !d.chapter).map((d) => `<li><a href="#/c/${d.id}">${esc(d.title)}</a><span class="faint">${esc(d.edition)}</span></li>`).join("")}</ul></section>
+      <p class="faint">Source status records locator review. It is separate from personal proof progress and numerical evidence.</p></article>`;
+  }
+
+  function anchorRow(at) {
+    const it = items[at], ls = linksAt.get(at) || [];
+    return `<section class="c-source-row" id="source-${esc(it.id)}"><h3><a href="#/c/${at}">${name(at, true)}</a>${pdfLink(at, `PDF p. ${it.page}${it.printed != null ? ` · printed p. ${it.printed}` : ""}`)}</h3>
+      ${it.source.review === "pending" ? `<p class="c-pending"><b>Pending source review.</b> ${esc(documents[it.document].pending_note || "This source has not been checked.")} This draft supplies no public prerequisite or sufficient condition.</p>` : ""}
+      ${ls.length ? linkRows(ls, false) : '<p class="faint">No station link curated for this item.</p>'}</section>`;
+  }
+
+  function documentPage(id) {
+    const doc = documents[id], own = items[id];
+    return `<article class="entry c-page">${head(doc.chapter ? `Chapter ${doc.chapter}` : "Reference source", esc(doc.title), esc(doc.edition), `<p>${pdfLink(id)} · <a href="#/c/bridge">Course order and time dictionary</a></p>`)}
+      ${provenance({ source: own.source, relation: "illustrative" })}
+      ${doc.anchors.map((a) => anchorRow(`${id}:${a}`)).join("")}</article>`;
+  }
+
+  function bridgePage() {
+    return `<article class="entry c-page">${head("Course order", `${esc(C.code)} · the bridge`, "Follow the notes by chapter and section. Each row leads to the source PDF and the stations that explain it.")}
+      <div class="c-bridge"><div>${C.documents.filter((d) => d.chapter).map((d) => `<section class="c-sec"><h2><a href="#/c/${d.id}">Chapter ${d.chapter} · ${esc(d.title)}</a></h2>
+        ${d.anchors.filter((a) => items[`${d.id}:${a}`].category === "section").map((a) => {
+          const at = `${d.id}:${a}`, ls = linksAt.get(at) || [], sts = [...new Set(ls.flatMap((l) => l.stations))];
+          return `<div class="c-bridge-row"><h3><a href="#/c/${at}">${name(at, true)}</a>${pdfLink(at, "PDF")}</h3>
+            ${items[at].review === "pending" ? '<p class="c-pending">Pending · draft technical appendix; no public result depends on it.</p>' : ""}
+            <div class="c-bridge-stations">${sts.map((s) => `<span>${chip(s)} ${routeLink(s)}</span>`).join("")}</div>${ls.map((l) => `<p>${roleTag(l.role)} ${l.note} ${provenance(l)}</p>`).join("")}</div>`;
+        }).join("")}</section>`).join("")}</div>${dictionary()}</div></article>`;
   }
 
   function lecturePage(n, at) {
@@ -19758,6 +19828,9 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
     let html, focus = null;
     const it = item(ref);
     if (!ref) html = home();
+    else if (ref === "bridge" && C.documents?.length) html = bridgePage();
+    else if (it?.kind === "document") html = documentPage(ref);
+    else if (it?.kind === "source-anchor") { html = documentPage(it.document); focus = `#${CSS.escape(`source-${it.id}`)}`; }
     else if (C.book && ref === C.book.id) html = bookPage();
     else if (papers[ref]) html = paperPage(ref);
     else if (!it) { location.replace("#/c/"); return {}; }
@@ -19786,6 +19859,7 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
   RL.courseTitle = (ref) => {
     ref = decodeURIComponent(ref || "");
     if (!ref) return C.code;
+    if (ref === "bridge") return "Course order";
     if (papers[ref]) return papers[ref].title;
     if (C.book && ref === C.book.id) return "The book";
     return item(ref) ? plain(name(ref)) : C.code;
@@ -19801,6 +19875,7 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
       for (const s of l.slides) add(`L${l.n}:${s.n}`, `L${l.n} · slide ${s.n} · ${s.title}`, `L${l.n} ${s.n} slide ${s.title}`);
     }
     for (const [at, it] of Object.entries(items)) {
+      if (it.kind === "document" || it.kind === "source-anchor") add(at, plain(name(at, true)), `${name(at, true)} ${it.source.locator}`);
       if (it.kind === "question") add(at, name(at).replace(/&amp;/g, "&"), `${it.paper} ${paperTitle(it.paper)} q${it.n}${it.part} q ${it.n} ${it.paper === "Rec" ? "recitation problem" : ""} ${it.text.slice(0, 200)}`);
       else if (it.kind === "activity") add(at, plain(name(at, true)), `${it.notebook} ps${nbs[it.notebook].ps} activity ${it.n} ${it.title}`);
       else if (it.kind === "function") add(at, `${it.name}() · ${nbs[it.notebook].title}`, `${it.name} ${it.notebook} function def`);
@@ -19823,9 +19898,33 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
   const curve = (a, b, cls) => { const mx = (a.x + b.x) / 2; return `<path class="${cls}" d="M${a.x} ${a.y} C${mx} ${a.y} ${mx} ${b.y} ${b.x} ${b.y}"/>`; };
   const lectureLinks = (sid) => (byStation.get(sid) || []).map((i) => C.links[i]).filter((l) => { const it = item(l.at); return it && /slide|lecture/.test(it.kind); });
 
+  if (C.documents?.length) lens({
+    id: "c-bridge", tab: "c-bridge", name: "Course order",
+    caption: "Chapters in course order. Open a chapter for its sections and the continuous/discrete-time dictionary; each station also has its prerequisite route.",
+    layout() {
+      const pos = new Map(), hubs = [], ties = [];
+      let bottom = 120;
+      C.documents.filter((d) => d.chapter).forEach((d, i) => {
+        const x = 70 + i * 270, y = 100;
+        hubs.push({ x, y, d });
+        const sts = [...new Set(C.links.filter((l) => items[l.at]?.document === d.id).flatMap((l) => l.stations))];
+        let row = y + 55;
+        for (const sid of sts) {
+          if (!pos.has(sid)) { pos.set(sid, { x: x + 8, y: row }); row += 30; }
+          else ties.push({ x, y: y + 14, sid });
+        }
+        bottom = Math.max(bottom, row + 30);
+      });
+      return { pos, hubs, ties, width: 1470, height: bottom };
+    },
+    drawing(L) {
+      return L.ties.map((t) => curve(t, L.pos.get(t.sid), "c-tie")).join("") + L.hubs.map((h) => node(h.x, h.y, 200, `Chapter ${h.d.chapter}`, `#/c/${h.d.id}`, "c-hub", h.d.title)).join("") + node(70, 35, 300, "Course order + time dictionary →", "#/c/bridge", "c-hub");
+    },
+  });
+
   // The lecture roadmap: L1–L13 in course order, each station once, under the lecture that introduces it, with a faint
   // tie to every later lecture that comes back to it.
-  lens({
+  if (C.lectures.length) lens({
     id: "c-lectures", tab: "c-lectures", name: "Lectures",
     caption: `${C.code}'s lectures in course order. Each station hangs under the lecture that introduces it; a faint tie joins it to the lectures that come back to it.`,
     layout() {
@@ -19881,7 +19980,7 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
     }
     return lines;
   }
-  lens({
+  if (C.notebooks.length) lens({
     id: "c-homework", tab: "c-homework", name: "Homework",
     caption: "The problem sets: each activity, the functions it asks you to write, and the stations behind them. A ▸ Lab badge runs the same experiment in the Lab.",
     layout() {
@@ -19930,7 +20029,7 @@ Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0}
   });
 
   // The assessment map: the questions of each quiz and the recitation, tied to the stations they need; solved ones ticked.
-  lens({
+  if (C.papers.length) lens({
     id: "c-quizzes", tab: "c-quizzes", name: "Quizzes",
     caption: "The quizzes' and the recitation's questions, each tied to the stations it needs. Tick a question on its page and it is ticked here.",
     layout() {

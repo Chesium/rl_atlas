@@ -2,6 +2,20 @@
    Course items wear --course; stations keep their line's color. */
 
 .c-pill { color: var(--course-ink); box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--course) 55%, transparent); }
+.c-provenance { display: block; width: 100%; color: var(--ink-2); font-size: 12px; overflow-wrap: anywhere; }
+.c-source-row, .c-bridge-row { padding: 10px 14px; margin: 12px 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); scroll-margin-top: 100px; }
+.c-source-row h3, .c-bridge-row h3 { display: flex; flex-wrap: wrap; gap: 10px; }
+.c-bridge { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 26px; align-items: start; }
+.c-bridge > *, .c-dictionary { min-width: 0; }
+.c-dictionary { position: sticky; top: 80px; padding: 16px; background: var(--surface); border-radius: 14px; border: 1px solid var(--line); }
+.c-dictionary h2 { margin-top: 0; font-size: 20px; }
+.c-dictionary table { width: 100%; font-size: 12px; }
+.c-dictionary td, .c-dictionary th { padding: 7px 3px; text-align: left; }
+.c-dictionary p { font-size: 13px; }
+.c-bridge-stations { display: flex; flex-wrap: wrap; gap: 10px; }
+.c-bridge-stations > span { display: grid; gap: 3px; }
+.c-pending { border-left: 3px solid var(--rew-ink); padding: 6px 10px; font-size: 13px; }
+@media (max-width: 900px) { .c-bridge { grid-template-columns: 1fr; } .c-dictionary { position: static; grid-row: 1; } }
 .c-badge i { background: var(--course); }
 .c-eyebrow a { color: inherit; }
 .c-lead { max-width: 72ch; color: var(--ink-2); margin: 4px 0 18px; }

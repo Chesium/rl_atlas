@@ -23,6 +23,9 @@ import tomllib
 import html
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from course_sources import verified_documents, read_document
+
 PICTURE_WIDTH = 600  # pixels across a slide's picture; a question's crop keeps the page's scale
 
 
@@ -52,7 +55,9 @@ def pdf_text(exe: str, pdf: Path, first: int | None = None, last: int | None = N
     if first:
         args += ["-f", str(first), "-l", str(last or first)]
     out = subprocess.run(args + [str(pdf), "-"], capture_output=True, timeout=600)
-    pages = out.stdout.decode("utf-8", "replace").split("\f")
+    if out.returncode:
+        raise ValueError(f"pdftotext failed for {pdf.name} (exit {out.returncode})")
+    pages = out.stdout.decode("utf-8", "replace").replace("\r", "").split("\f")
     return pages[:-1] if pages and not pages[-1].strip() else pages
 
 
@@ -300,11 +305,22 @@ def main(argv: list[str]) -> int:
         return 2
     pack = Path(argv[1]).resolve()
     spec = tomllib.loads((pack / "course.toml").read_text(encoding="utf-8"))
+    try:
+        documents = verified_documents(pack, spec)
+        text = tool("pdftotext")
+        if documents and not text:
+            raise ValueError("Poppler's pdftotext is required for source-document imports")
+        sources = [read_document(doc, pdf_text(text, pack / doc["path"])) for doc in documents]
+    except (ValueError, OSError) as exc:
+        print(f"Source verification failed: {exc}", file=sys.stderr)
+        return 1
     out = pack / "import"
     pictures = out / "pictures"
     pictures.mkdir(parents=True, exist_ok=True)
+    (out / "documents.json").write_text(json.dumps(sources, ensure_ascii=False, indent=1), encoding="utf-8")
     text, ppm = tool("pdftotext"), tool("pdftoppm", poppler=False)
     report = []
+    report.extend(f"{d['id']}: SHA-256 verified, {d['pages']} pages, {len(d['anchors'])} locators" for d in sources)
 
     notebooks = [read_notebook(pack, nb, pictures) for nb in spec.get("notebook", [])]
     (out / "notebooks.json").write_text(json.dumps(notebooks, ensure_ascii=False, indent=1), encoding="utf-8")

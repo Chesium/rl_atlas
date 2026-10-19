@@ -742,6 +742,12 @@ def compile_course(pack: Path, data: dict, recordings: dict, problems: Problems)
         problems.error(where, "no course.toml: is this a course pack?")
         return None
     spec = tomllib.loads((pack / "course.toml").read_text(encoding="utf-8"))
+    from course_sources import verified_documents
+    try:
+        source_docs = verified_documents(pack, spec)
+    except (ValueError, OSError) as exc:
+        problems.error(where, str(exc))
+        return None
     imported = pack / "import"
     if not imported.exists():
         problems.error(f"{pack.name}/import", "missing: run python tools/course-import.py first")
@@ -806,6 +812,24 @@ def compile_course(pack: Path, data: dict, recordings: dict, problems: Problems)
         for s in book:
             items[f"{bk['id']}:{s['id']}"] = {"kind": "section", "id": s["id"], "title": s["title"], "printed": s["printed"], "page": s["pdf"]}
 
+    documents = []
+    imported_docs = {d["id"]: d for d in load("documents")}
+    for doc in source_docs:
+        imported_doc = imported_docs.get(doc["id"], {})
+        if imported_doc.get("spec") != doc:
+            problems.error(where, f"{doc['id']}: stale or missing document import; re-run tools/course-import.py")
+            continue
+        source = {"text": doc["title"], "kind": doc["kind"], "review": doc["review"], "locator": doc["edition"]}
+        anchors = imported_doc["anchors"]
+        documents.append({**doc, "file": href(doc["path"]), "anchors": [a["id"] for a in anchors], "pages": imported_doc["pages"]})
+        items[doc["id"]] = {"kind": "document", "document": doc["id"], "title": doc["title"], "page": 1, "source": source}
+        for anchor in anchors:
+            locator = f"{doc['edition']}, {anchor['title']}, PDF p. {anchor['page']}"
+            if anchor.get("printed") is not None:
+                locator += f", printed p. {anchor['printed']}"
+            items[f"{doc['id']}:{anchor['id']}"] = {**anchor, "kind": "source-anchor", "document": doc["id"],
+                "source": {**source, "review": anchor["review"], "locator": locator}}
+
     def known(ref: str, src: str) -> bool:
         m = COURSE_REF.match(ref)
         if m and m.group("lec") and m.group("b"):  # printed slide numbers may skip; both endpoints must exist
@@ -823,8 +847,8 @@ def compile_course(pack: Path, data: dict, recordings: dict, problems: Problems)
     for src, raw in read_tomls(pack, "links", problems):
         for k, link in enumerate(raw.get("link", []), 1):
             here = f"{src} link {k} ({link.get('at', '?')})"
-            if set(link) - {"at", "stations", "role", "note", "pair"}:
-                problems.error(here, f"unknown keys: {', '.join(sorted(set(link) - {'at', 'stations', 'role', 'note', 'pair'}))}")
+            if set(link) - {"at", "stations", "role", "note", "pair", "relation"}:
+                problems.error(here, f"unknown keys: {', '.join(sorted(set(link) - {'at', 'stations', 'role', 'note', 'pair', 'relation'}))}")
             at, sts = link.get("at", ""), link.get("stations", [])
             if not known(at, here):
                 continue
@@ -837,6 +861,14 @@ def compile_course(pack: Path, data: dict, recordings: dict, problems: Problems)
                 problems.error(here, f"role '{link.get('role')}' is not one of {', '.join(ROLES)}")
             if not link.get("note"):
                 problems.error(here, "needs a note: one sentence on what the reader finds there")
+            relation = link.get("relation", "illustrative")
+            if relation not in LINK_ROLES:
+                problems.error(here, f"unknown route relation '{relation}'")
+            source = items.get(at, {}).get("source")
+            if source:
+                validate_source(source, here, problems)
+                if source["review"] == "pending" and relation in ("required", "sufficient"):
+                    problems.error(here, "a pending source cannot supply a required or sufficient route")
             pair = link.get("pair")
             if pair is not None:  # pseudocode line → the line of the function that does it
                 item = items.get(at, {})
@@ -851,7 +883,8 @@ def compile_course(pack: Path, data: dict, recordings: dict, problems: Problems)
                         if text not in code:
                             problems.error(here, f"pair: '{text}' is not in {item['name']}")
             md = Markdown(stations, site["presets"], here, problems)
-            links.append({"at": at, "stations": sts, "role": link.get("role"), "note": md.inline(link.get("note", "")), **({"pair": pair} if pair else {})})
+            links.append({"at": at, "stations": sts, "role": link.get("role"), "note": md.inline(link.get("note", "")),
+                          "relation": relation, **({"source": source} if source else {}), **({"pair": pair} if pair else {})})
 
     # the book's sections, worked out from the § numbers in every entry's sources
     if bk:
@@ -980,7 +1013,7 @@ def compile_course(pack: Path, data: dict, recordings: dict, problems: Problems)
         "term": spec.get("term", ""),
         "files": {"slides": href(spec["slides"]["path"]) if "slides" in spec else None, "book": href(bk["path"]) if bk else None},
         "book": {"id": bk["id"], "title": bk["title"], "offset": bk.get("offset", 0)} if bk else None,
-        "lectures": lectures, "papers": papers, "notebooks": out_nbs,
+        "lectures": lectures, "papers": papers, "notebooks": out_nbs, "documents": documents,
         "items": {ref: item for ref, item in items.items() if item["kind"] not in ("cell", "section") or ref in linked},
         "links": links, "experiments": experiments, "notes": notes, "solutions": solutions, "presets": presets, "worlds": worlds,
         "notation": notation, "maps": maps,
