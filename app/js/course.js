@@ -176,7 +176,7 @@
     const lectureHtml = lectures.length ? Object.entries(Object.groupBy(lectures, (l) => lectureOf(item(l.at)))).map(([n, ls]) => `
       <div class="c-lec"><h3><a href="#/c/L${n}">Lecture ${n} · ${esc(C.lectures.find((x) => x.n === +n).title)}</a></h3>
       <ul class="c-slides">${ls.map((l) => { const it = item(l.at); return `<li class="c-slide">
-        <a class="c-thumb" href="${page(l.at)}">${it.pic ? pic(it.pic, name(l.at, true), "c-pic c-small") : `<span class="c-nopic">${it.n}</span>`}</a>
+        <div class="c-thumb">${it.pic ? pic(it.pic, name(l.at, true), "c-pic c-small") : `<span class="c-nopic">${it.n}</span>`}</div>
         <div><div class="c-line1">${roleTag(l.role)}<a href="${page(l.at)}">${name(l.at, true)}</a>${pdfLink(l.at, "PDF")}</div><p>${l.note}</p>${also(l)}</div></li>`; }).join("")}</ul></div>`).join("") : "";
     const bookHtml = book.length ? `<ul class="c-book">${book.map((l) => `<li>${pdfLink(l.at, name(l.at, true))} <span class="faint">${l.note}</span></li>`).join("")}</ul>` : "";
 
