@@ -22,3 +22,5 @@ desktop.ini
 .claude/settings.local.json
 recorder/.cache/
 tmp
+# course packs (build.py --course): course material, never committed
+course/

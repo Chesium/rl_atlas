@@ -10,6 +10,8 @@ sources = [
   { text = "Williams (1992), Simple statistical gradient-following algorithms for connectionist reinforcement learning, Machine Learning 8", url = "https://doi.org/10.1007/BF00992696" },
   { text = "Sutton (1984), Temporal credit assignment in reinforcement learning, PhD thesis, University of Massachusetts Amherst" },
   { text = "Greensmith, Bartlett & Baxter (2004), Variance reduction techniques for gradient estimates in reinforcement learning, Journal of Machine Learning Research 5", url = "https://www.jmlr.org/papers/v5/greensmith04a.html" },
+  { text = "Weaver & Tao (2001), The optimal reward baseline for gradient-based reinforcement learning, Proceedings of the 17th Conference on Uncertainty in Artificial Intelligence" },
+  { text = "Peters & Schaal (2008), Reinforcement learning of motor skills with policy gradients, Neural Networks 21" },
   { text = "OpenAI (2018), Spinning Up in Deep RL, Part 3: Intro to Policy Optimization (baselines)", url = "https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html" },
 ]
 
@@ -81,7 +83,27 @@ The variance can be computed exactly where the problem is small. On the short co
 Single-episode estimates of the same slope on the short corridor at $p = 0.3$, without and with a baseline. Both average close to the true 8.48; the baseline cuts the spread by more than a third.
 :::
 
-Which baseline is best? For a constant, minimizing the variance of the estimate gives the average of the returns weighted by the squared size of the score, $b_* = \mathbb E[\rew{G}\,\|\nabla \ln \pol{\pi}\|^2] / \mathbb E[\|\nabla \ln \pol{\pi}\|^2]$, for a single decision (Greensmith, Bartlett and Baxter, 2004). The minimum is flat: on the corridor, the best constant for whole episodes, about $-16.9$, gives a spread of 23.9, against 24.4 for $-13.9$. In practice the natural choice is the state value itself, $b(s) = \val{\hat v(s, \mathbf w)}$, close to the best and different in each state. With $b = \val{v_\pi}$, the weight $\rew{G_t} - \val{v_\pi(S_t)}$ is an unbiased estimate of the **advantage** of $A_t$, how much better it was than the policy's average action in $S_t$.
+### The baseline of least variance {#optimal}
+
+Every baseline leaves the average alone, so one may ask which makes the estimate least noisy. Take one step of \ref{eq-update}, in a state $s$, leaving out the factor $\gam^t$, which is fixed once $t$ is. Its term is the vector $\boldsymbol\ell\,(\rew{G} - b)$, where $\boldsymbol\ell = \nabla \ln \pol{\pi(A_t \mid s, \boldsymbol\theta)}$ is the score of the action taken and $\rew{G} = \rew{G_t}$. Measure its spread by the total variance, the sum of the variances of its components.
+
+::: theorem {#thm-optimal} The baseline of least variance
+Among baselines that do not depend on the action, the total variance of $\boldsymbol\ell\,(\rew{G} - b)$ given $S_t = s$ is smallest for
+
+$$b_*(s) = \frac{\mathbb E\big[\|\boldsymbol\ell\|^2\,\rew{G} \mid s\big]}{\mathbb E\big[\|\boldsymbol\ell\|^2 \mid s\big]} = \frac{\sum_a \pol{\pi(a \mid s)}\,\|\nabla \ln \pol{\pi(a \mid s, \boldsymbol\theta)}\|^2\,\val{q_\pi(s, a)}}{\sum_a \pol{\pi(a \mid s)}\,\|\nabla \ln \pol{\pi(a \mid s, \boldsymbol\theta)}\|^2}, \label{eq-optimal}$$
+
+and any other $b$ adds $(b - b_*(s))^2\,\mathbb E[\|\boldsymbol\ell\|^2 \mid s]$ to it. If each component $k$ of the gradient may have a baseline of its own, the best one for component $k$ is $b_{*,k}(s) = \mathbb E[\ell_k^2\,\rew{G} \mid s] / \mathbb E[\ell_k^2 \mid s]$.
+:::
+
+::: proof
+The mean $\mathbb E[\boldsymbol\ell\,(\rew{G} - b) \mid s]$ does not depend on $b$, because the score has mean zero ([[pg-theorem]]). The total variance is the mean squared norm minus the squared norm of the mean, so only $f(b) = \mathbb E[\|\boldsymbol\ell\|^2 (\rew{G} - b)^2 \mid s]$ depends on $b$. Expanded, $f(b) = \mathbb E[\|\boldsymbol\ell\|^2 \rew{G}^2] - 2b\,\mathbb E[\|\boldsymbol\ell\|^2 \rew{G}] + b^2\,\mathbb E[\|\boldsymbol\ell\|^2]$, a parabola in $b$ with its minimum at $b_*$; completing the square gives $f(b) = f(b_*) + (b - b_*)^2\,\mathbb E[\|\boldsymbol\ell\|^2]$. For the second form, condition on the action: $\|\boldsymbol\ell\|^2$ depends only on $A_t$, and $\mathbb E[\rew{G} \mid S_t = s, A_t = a] = \val{q_\pi(s, a)}$. With a baseline per component, each component's variance is a parabola of its own, $\mathbb E[\ell_k^2 (\rew{G} - b_k)^2 \mid s]$ minus a constant, minimized separately.
+:::
+
+So the best baseline is an average of the action values, each weighted by its probability *and* by the squared size of its score. For a softmax policy with one preference per action, the score of an action is larger the rarer the action, so rare actions count for more than their probability. If the score had the same size for every action, the weights would be the probabilities alone, and $b_*(s) = \sum_a \pol{\pi(a \mid s)}\,\val{q_\pi(s, a)} = \val{v_\pi(s)}$: the state value.
+
+That is the usual reason for using a state value as the baseline, and there are three more. The exact $b_*$ needs the value and the score of every action in every state, which a learner sampling one action at a time does not observe; a state value is learned by plain regression on the returns (\ref{eq-critic}). The excess variance is quadratic in the distance from $b_*$, so a baseline near it costs little: on the corridor, the best constant for whole episodes, about $-16.9$, gives a spread of 23.9, against 24.4 for $-13.9$. And a state value is what the next methods need anyway: with $b = \val{v_\pi}$, the weight $\rew{G_t} - \val{v_\pi(S_t)}$ is an unbiased estimate of the **advantage** of $A_t$, how much better it was than the policy's average action in $S_t$ ([[actor-critic]], [[gae]]).
+
+The theorem is about one step's term. An episode's estimate adds up the terms of all its steps, and they are correlated, so a baseline that is best step by step is not exactly best for the sum; the corridor's numbers above measure whole episodes. Greensmith, Bartlett and Baxter (2004) analyze baselines for the full estimators, the value baseline among them.
 
 ### Learning the baseline {#learned}
 
@@ -124,7 +146,7 @@ The same holds with a Gaussian policy. On the throw ([[policy-parameterization]]
 
 ### Historical remarks {#history}
 
-Baselines are as old as policy-gradient methods. Sutton (1984) studied reinforcement comparison, in which a reward is judged against a running average of past rewards, the baseline of the [[gradient-bandit|gradient bandit]]; Williams (1992) included a baseline, the *offset reinforcement*, in REINFORCE, and showed that it leaves the expected update unchanged. Greensmith, Bartlett and Baxter (2004) analyzed which baselines minimize the variance of the gradient estimate. Learning the baseline as a state-value function, as here, is the form given by Sutton and Barto (2018, §13.4), whose Figure 13.2 the Lab reproduces.
+Baselines are as old as policy-gradient methods. Sutton (1984) studied reinforcement comparison, in which a reward is judged against a running average of past rewards, the baseline of the [[gradient-bandit|gradient bandit]]; Williams (1992) included a baseline, the *offset reinforcement*, in REINFORCE, and showed that it leaves the expected update unchanged. Weaver and Tao (2001) asked which constant baseline is best, Greensmith, Bartlett and Baxter (2004) analyzed which baselines minimize the variance of the gradient estimate, and Peters and Schaal (2008) derived the best baseline for each component of the gradient. Learning the baseline as a state-value function, as here, is the form given by Sutton and Barto (2018, §13.4), whose Figure 13.2 the Lab reproduces.
 
 ## Card
 

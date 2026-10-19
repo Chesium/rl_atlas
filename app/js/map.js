@@ -2,7 +2,10 @@
    Metro: each part is a branch hanging from its family's line. Tree: one tree per line, of what builds on what.
    Unified: every algorithm, placed by how deep and how wide its updates are (after Sutton & Barto, Figure 8.11).
    Stations glide from one view to the next, part by part; the filters and the legend dim what does not match.
-   Drag to pan, scroll to move, Ctrl + scroll to zoom, click a station to open it. */
+   Drag to pan, scroll to move, Ctrl + scroll to zoom, click a station to open it.
+   A course build adds views of its own (RL.mapLenses: { id, tab, name, group, variant?, caption, layout(), drawing(L) }):
+   a layout places the stations it shows and leaves the others out; its drawing may hold nodes with data-href, which
+   open what they name. */
 (function (RL) {
   "use strict";
   const { esc, station, entry, store, lineColor } = RL;
@@ -175,7 +178,13 @@
   RL.views.map = function (host) {
     const C = RL.content;
     const layouts = { map: metroLayout(), tree: treeLayout(), unified: unifiedLayout() };
-    let lens = LENSES[store.get("lens")] ? store.get("lens") : "map";
+    const extra = RL.mapLenses || [], lenses = { ...LENSES };
+    for (const l of extra) { lenses[l.id] = l; layouts[l.id] = l.layout(); }
+    // the tabs of the course's views; a tab with several maps (variants) remembers the one last shown
+    const tabs = [...new Map(extra.map((l) => [l.tab, l])).values()];
+    const variants = (tab) => extra.filter((l) => l.tab === tab);
+    const tabOf = (id) => lenses[id]?.tab || id;
+    let lens = lenses[store.get("lens")] ? store.get("lens") : "map";
     const next = RL.order.find((s) => entry(s.id) && !store.visited(s.id)) || RL.order.find((s) => entry(s.id));
     const algorithms = RL.order.filter((s) => s.kind === "algorithm");
     const read = (line) => {
@@ -198,6 +207,9 @@
             <div class="lenses" role="tablist" aria-label="How to look at the atlas">
               ${Object.entries(LENSES).map(([id, l]) => `<button type="button" role="tab" data-lens="${id}">${l.name}</button>`).join("")}
             </div>
+            ${tabs.length ? `<div class="lens-group">${esc(tabs[0].group)}</div><div class="lenses course-lenses" role="tablist" aria-label="The course's views">
+              ${tabs.map((l) => `<button type="button" role="tab" data-lens="${l.id}" data-tab="${l.tab}">${esc(l.name)}</button>`).join("")}
+            </div><div class="lens-variants"></div>` : ""}
             <p class="lens-caption"></p>
           </section>
           <section class="mp-sec mp-lines">
@@ -217,6 +229,7 @@
           <g class="deco deco-map">${metroDrawing(layouts.map)}</g>
           <g class="deco deco-tree">${treeDrawing(layouts.tree)}</g>
           <g class="deco deco-unified">${unifiedDrawing(layouts.unified)}</g>
+          ${extra.map((l) => `<g class="deco" data-deco="${l.id}">${l.drawing(layouts[l.id])}</g>`).join("")}
           ${stations(next)}
         </g></svg>
         <div class="map-zoom" role="group" aria-label="Zoom">
@@ -250,8 +263,11 @@
       }
       svg.dataset.lens = lens;
       host.querySelector(".map-view").dataset.lens = lens;
-      host.querySelectorAll("[data-lens]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.lens === lens)));
-      host.querySelector(".lens-caption").textContent = LENSES[lens].caption;
+      host.querySelectorAll(".lenses [data-lens]").forEach((b) => b.setAttribute("aria-selected", String(tabOf(b.dataset.lens) === tabOf(lens))));
+      host.querySelector(".lens-caption").textContent = lenses[lens].caption;
+      svg.querySelectorAll("[data-deco]").forEach((g) => g.classList.toggle("on", g.dataset.deco === lens));
+      const vs = lenses[lens].tab ? variants(lenses[lens].tab) : [], box = host.querySelector(".lens-variants");
+      if (box) box.innerHTML = vs.length > 1 ? vs.map((l) => `<button class="chip" type="button" data-lens="${l.id}" aria-pressed="${l.id === lens}">${esc(l.variant)}</button>`).join("") : "";
     }
     // The part of the screen the map may use: below the floating buttons, and right of the panel when it is open
     // beside the map (on a narrow screen it covers the map instead, so the map keeps the whole width).
@@ -340,7 +356,10 @@
     }
     function switchTo(next) {
       if (next === lens) return;
+      // a course tab opens the map it showed last
+      if (lenses[next]?.tab && tabOf(next) !== tabOf(lens)) { const last = store.get(`lens:${lenses[next].tab}`); if (lenses[last]?.tab === lenses[next].tab) next = last; }
       lens = next;
+      if (lenses[lens].tab) store.set(`lens:${lenses[lens].tab}`, lens);
       store.set("lens", lens);
       arrange();
       svg.classList.remove("redraw");
@@ -393,7 +412,7 @@
     });
     host.querySelector(".mf-clear").addEventListener("click", () => { filters.clear(); filter(); });
     filter();
-    host.querySelector(".lenses").addEventListener("click", (e) => { const b = e.target.closest("[data-lens]"); if (b) switchTo(b.dataset.lens); });
+    host.querySelector(".mp-sec").addEventListener("click", (e) => { const b = e.target.closest("[data-lens]"); if (b) switchTo(b.dataset.lens); });
 
     // ---- the panel: views, filters and the legend, opened and closed by the button at the top left ----
     const toggle = host.querySelector(".panel-toggle"), panel = host.querySelector(".map-panel");
@@ -422,7 +441,7 @@
     let drag = null;
     svg.addEventListener("pointerdown", (e) => {
       if (!wide() && view$.dataset.panel === "open") setPanel(false); // on a small screen the panel covers the map
-      drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false, target: e.target.closest(".st:not(.out)") };
+      drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false, target: e.target.closest(".st:not(.out), .deco.on [data-href]") };
       svg.setPointerCapture(e.pointerId);
     });
     svg.addEventListener("pointermove", (e) => {
@@ -440,6 +459,7 @@
       drag = null;
       svg.classList.remove("dragging");
       if (d?.moved) keep();
+      else if (d?.target?.dataset.href) { RL.pendingAnchor = d.target.dataset.anchor || null; location.hash = d.target.dataset.href; }
       else if (d?.target) dive(d.target.dataset.id);
     });
     // Scrolling moves the map like a page; Ctrl + scroll (or a pinch) zooms.
@@ -456,8 +476,9 @@
       keep();
     }, { passive: false });
     svg.addEventListener("keydown", (e) => {
-      const st = e.target.closest?.(".st");
-      if (st && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); dive(st.dataset.id); }
+      const st = e.target.closest?.(".st"), go = e.target.closest?.("[data-href]");
+      if (go && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); RL.pendingAnchor = go.dataset.anchor || null; location.hash = go.dataset.href; }
+      else if (st && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); dive(st.dataset.id); }
     });
     host.querySelectorAll("[data-zoom]").forEach((b) => b.addEventListener("click", () => {
       if (b.dataset.zoom === "fit") return tween(fitted() || view, 400, keep);

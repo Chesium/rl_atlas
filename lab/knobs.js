@@ -28,6 +28,8 @@
     rewardScale: { sym: "c", name: "rewards × c (other units)", choices: [0.01, 0.1, 1, 10, 100] },
     normalize: { sym: "Â", name: "normalize advantages (1: yes)", choices: [0, 1] },
     doubt: { sym: "d", name: "doubt: extra cost of an unseen tile", min: 0, max: 3, step: 0.1, sweep: [0, 0.2, 0.4, 0.6, 0.8, 1, 2] },
+    // a grid world's slip: the chance a move goes to one of its two sides instead (lab/envs/grid.js)
+    slip: { sym: "slip", name: "chance a move slides sideways", min: 0, max: 0.5, step: 0.01, sweep: [0, 0.05, 0.1, 0.2, 0.3, 0.5] },
   };
   // The settings an algorithm reads in its first units on a world (a name, or a function that makes it): a knob it
   // never reads turns nothing for it.

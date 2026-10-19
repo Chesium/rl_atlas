@@ -32,6 +32,8 @@
     return `<nav class="entry-nav">${link(order[st.index - 1], "prev")}${link(order[st.index + 1], "next")}</nav>`;
   }
 
+  RL.wire = wire;
+
   const badge = (st) => `<a class="part-badge" href="#/"><i>${st.part}</i>${esc(st.partTitle)}</a>`;
 
   // Sections that take the whole width of a card; the others pair up two by two.
@@ -64,6 +66,8 @@
       .map((l) => `<a class="chip" href="#/e/${l.station}" data-term="${l.station}" data-tip="${esc(l.tip)}">${esc(l.text)}</a>`).join("");
     const parent = st.parent && e.change && station(st.parent);
     const modes = MODES.filter((m) => m.id === "card" || e[m.id]);
+    const course = RL.courseMode?.(id); // a course build: the course's tab comes after the Card
+    if (course) modes.push(course);
     host.innerHTML = `
       <article class="entry" style="--c:${lineColor(st.line)}">
         <header class="hero">
@@ -110,6 +114,7 @@
       body.className = `mode-body mode-${m}`;
       if (m === "story") current = RL.story(body, e);
       else if (m === "textbook") { current = RL.textbook(body, e); wire(body); }
+      else if (m === "course") current = RL.courseTab(body, id);
       else { body.innerHTML = card(e); wire(body); }
       body.insertAdjacentHTML("beforeend", onward(m));
       if (location.hash.startsWith(`#/e/${id}`)) history.replaceState(null, "", `#/e/${id}/${m}`);
@@ -144,6 +149,9 @@
 
   RL.views.symbols = function (host) {
     const N = RL.content.notation;
+    // a course build: the course's way of writing each symbol, where it differs
+    const course = RL.course?.notation?.length;
+    const courseSym = (tex) => { const c = RL.courseNotation(tex); return `<td class="sym c-sym">${c ? `<span class="tex">${esc(c.course)}</span>${c.note ? `<small>${esc(c.note)}</small>` : ""}` : ""}</td>`; };
     host.innerHTML = `
       <article class="entry symbols">
         <header class="hero">
@@ -156,8 +164,8 @@
         </section>
         <section class="notation card">
           <h2>Notation</h2>
-          <table>${N.symbol.map((s) => `<tr><td class="sym"><span class="tex">${esc(s.tex)}</span></td><td>${esc(s.text)}</td>
-            <td>${s.station ? `<a class="term" data-term="${s.station}" href="#/e/${s.station}">${esc(station(s.station).title)}</a>` : ""}</td></tr>`).join("")}</table>
+          <table>${course ? `<thead><tr><th>Atlas</th><th></th><th></th><th>${esc(RL.course.code)}</th></tr></thead>` : ""}${N.symbol.map((s) => `<tr><td class="sym"><span class="tex">${esc(s.tex)}</span></td><td>${esc(s.text)}</td>
+            <td>${s.station ? `<a class="term" data-term="${s.station}" href="#/e/${s.station}">${esc(station(s.station).title)}</a>` : ""}</td>${course ? courseSym(s.tex) : ""}</tr>`).join("")}</table>
         </section>
       </article>`;
     wire(host);

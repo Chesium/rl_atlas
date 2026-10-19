@@ -65,6 +65,9 @@
     const env = make(), rng = lab.rng(seed);
     const settings = { maxSteps: env.maxSteps || 5000, ...params }; // a world may cap its own episodes (Taxi: 200 steps)
     const p = reads ? new Proxy(settings, { get: (o, k) => (reads.add(k), o[k]) }) : settings;
+    // a world's own knobs (a grid's slip) come from the settings too, in every copy of the world the run makes
+    const tune = (e) => (e.configure?.(p), e);
+    tune(env);
     env.init?.(rng);
     const layout = algorithm.memory(env, p);
     const { buf, m } = lab.memory(layout);
@@ -124,8 +127,8 @@
       const end = { buf: Float64Array.from(buf), world: worldLen ? Float64Array.from(env.state) : null, rng: rng.state };
 
       // A working copy that can be moved to the start of any unit, and the world the views look at.
-      const work = { env: make(), ...lab.memory(layout), rng: lab.rng(), t: -1 };
-      const shown = make();
+      const work = { env: tune(make()), ...lab.memory(layout), rng: lab.rng(), t: -1 };
+      const shown = tune(make());
       function goTo(t) {
         if (t >= units) {
           work.buf.set(end.buf);

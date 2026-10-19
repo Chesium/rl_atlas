@@ -142,7 +142,8 @@
     if (!w) throw new Error(`unknown world '${name}'`);
     const rows = w.map.length, cols = w.map[0].length, first = w.map.join(""), later = w.change ? w.change.map.join("") : first;
     let cells = first;
-    const reward = w.reward, slip = w.slip || 0;
+    const reward = w.reward, key = typeof name === "string" ? name : JSON.stringify(w);
+    let slip = w.slip || 0;
     const wall = reward.wall ?? reward.step;
     const start = Math.max(0, cells.indexOf("S"));
     const jumps = Object.entries(w.jumps || {}).map(([from, [to, r]]) => ({ from: cells.indexOf(from), to: cells.indexOf(to), reward: r }));
@@ -172,7 +173,7 @@
     const sideways = (d) => [(d + 3) % 4, (d + 1) % 4];
 
     const env = {
-      name: typeof name === "string" ? name : "custom", key: typeof name === "string" ? name : JSON.stringify(w),
+      name: typeof name === "string" ? name : "custom", key,
       kind: "grid", title: w.title, rows, cols, nS: rows * cols, nA: 4,
       start, valueRange: w.valueRange ?? 10, jumps, slip, ice: !!w.ice, map: w.map, rewards: reward, wind,
       // Tiles an episode may start from (for exploring starts): anything that is not a wall, a cliff or an ending.
@@ -196,6 +197,14 @@
         env.version++;
         env.map = (now === first ? w.map : w.change.map);
         return true;
+      },
+      // A run's settings may turn the world's slip (p.slip, the chance a move goes to one of its two sides). A world
+      // turned away from its own slip gets a key of its own, so the truths worked out for it (lab.truth, the optimal
+      // values) are not mixed up with the world's.
+      configure(p) {
+        if (p.slip === undefined) return;
+        slip = env.slip = p.slip;
+        env.key = slip === (w.slip || 0) ? key : `${key}~slip=${slip}`;
       },
       terminal: isTerminal,
       blocked: (s) => cells[s] === "#" || cells[s] === "C",
@@ -232,6 +241,14 @@
   };
 
   for (const name of Object.keys(WORLDS)) lab.worlds[name] = () => lab.grid(name);
+
+  // A grid world added at run time (a course pack's, say), in the shape of the worlds above ({ title, map, reward,
+  // slip, … }): a preset with env = id then runs on it, and the grid view draws it.
+  lab.addGridWorld = function (id, spec) {
+    if (lab.worlds[id]) throw new Error(`there is already a world '${id}'`);
+    WORLDS[id] = spec;
+    lab.worlds[id] = () => lab.grid(id);
+  };
 
   // The sandbox: a world you draw in the Lab. lab.sandbox holds the current drawing.
   lab.SANDBOX = {

@@ -23,7 +23,9 @@
   const lose = (n, what = "episode") => ({ metric: "return", min: -n, text: `end up losing less than ${n} per ${what} on average, while still exploring` });
   const WORLDS = [
     { id: "cliff", group: "tables", blurb: "A cliff along the bottom edge; each step costs 1",
-      profile: { episode: 500, round: 60, sweep: 100, gamma: 1, maxSteps: 1000, charts: ["return"], domain: [-100, 0], success: lose(40), film: [1, 10, 100, 500] } },
+      // slip: a move goes to one of its two sides with this chance (0: the book's cliff), a knob to turn
+      profile: { episode: 500, round: 60, sweep: 100, gamma: 1, maxSteps: 1000, charts: ["return"], domain: [-100, 0], success: lose(40), film: [1, 10, 100, 500],
+        params: { slip: 0 } } },
     { id: "windy", group: "tables", blurb: "A wind pushes every move up; each step costs 1",
       profile: { episode: 170, round: 60, sweep: 100, gamma: 1, maxSteps: 1000, charts: ["steps"], success: { metric: "steps", max: 25, text: "end with episodes under 25 steps on average, while still exploring" }, film: [1, 10, 50, 170] } },
     { id: "dyna-maze", group: "tables", blurb: "Only the gem pays",

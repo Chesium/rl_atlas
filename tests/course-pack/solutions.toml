@@ -1,0 +1,4 @@
+[[solution]]
+at = "Quiz:1"
+answer = "A"
+text = "Sarsa uses the next action drawn from the policy."

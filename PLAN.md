@@ -345,7 +345,7 @@ animations and hover effects this guide relies on would not be smooth.
   does not help; no world here to randomize; a decision guide). What changed on the way, with the reasons, is at the
   end of `docs/control-tools.md`. Released as 1.1.0.
 
-- [ ] **M12 · The ESE3990 companion**: the atlas as a study companion for ESE 3990 (*Reinforcement Learning: In Theory
+- [x] **M12 · The ESE3990 companion**: the atlas as a study companion for ESE 3990 (*Reinforcement Learning: In Theory
   and In Practice*, Penn, fall 2026). From a station you reach the lecture slides, homework cells, quiz questions and
   textbook pages on its topic, each saying what it does there. From any of those you reach the stations that explain
   it. Maps follow the course's order as well as the book's. The proposal: `tmp/ese3990-integration-plan.md`. The
@@ -484,6 +484,20 @@ animations and hover effects this guide relies on would not be smooth.
   - Running the homework's Python in the page. It stays in the notebooks; the Lab runs the same experiments with its
     own engine.
   - Course material still to come (later problem sets and quizzes, the final project): added when it arrives.
+
+  **Delivered and checked, 2026-10-19.** All four phases are implemented. The ignored pack imports all 566 slides,
+  five notebooks (23 activities), both quizzes and the recitation, with 522 links to 80 stations, 38 course notes,
+  39 worked solutions and three homework Lab presets. The course's nine map views, search, notation column,
+  paired pseudocode and original code, hidden answers, solved ticks and exact PDF links work in the companion.
+  The public sections cover the optimal baseline, least-squares prediction and model-learning losses; the course's
+  notation and estimator differences stay in its notes. Comparison/derivation views remain in the course mechanism.
+  The invented pack tests run under `node --test`; real-pack checks skip when it is absent. Chrome and Edge each
+  passed 571 route checks and all nine map views, with screenshots reviewed; the pilot also checks keyboard
+  navigation, the 20-seed cliff bench and progress after reload. The default build remains deterministic and has
+  no course payload. See `docs/course-packs.md` and `docs/m12-review.md`.
+  Validation limits: Brave is not installed here; the checks establish PDF viewer URLs and page fragments, not its
+  displayed page counter. Automated revision flows were exercised; an actual student's revision session remains
+  a user acceptance check, not a claim made by these tests.
 
 - [ ] **M13 · Routes and results**: what the atlas needs before it can lead a reader to a paper's theorems. M12's
   derivation map uses it too. Today each station has one `parent` (for the family tree) and an untyped `prereqs`

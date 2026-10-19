@@ -596,8 +596,315 @@ def compile_content(problems: Problems) -> dict:
     }, recordings
 
 
-def bundle() -> int:
-    """Inline every stylesheet, script and font of app/index.html into one offline file."""
+# ---- course packs (build.py --course DIR): a course's links to the stations, kept out of the repository ----
+# What a link says it does with the stations it names.
+ROLES = ("introduces", "derives", "implements", "compares", "assesses")
+# A course item, as a link's `at` names it: L8 (a lecture), L8:31 or L8:31-34 (slides), Quiz2:11 or Rec:2c (a question),
+# PS2-control (a notebook), PS2-control:A2 (an activity), :Q2 (its question), :P1 (a "Predict first"), :#a0383157 (a
+# cell) or :sarsa_update (a function), and SB:6.4 (a section of the book).
+COURSE_REF = re.compile(r"(?P<lec>L\d+)(?::(?P<a>\d+)(?:-(?P<b>\d+))?)?$|(?P<head>[\w-]+)(?::(?P<tail>#?[\w.]+))?$")
+
+
+class LenientMarkdown(Markdown):
+    """Notebook text as the course wrote it: its links stay text, its headings become the page's small ones."""
+
+    def _link(self, m: re.Match) -> str:
+        href = m.group(2)
+        return f'<a href="{html.escape(href)}" target="_blank" rel="noopener">{m.group(1)}</a>' if href.startswith(("http://", "https://")) else m.group(1)
+
+    def _term(self, m: re.Match) -> str:
+        return m.group(0)
+
+    def notebook(self, text: str) -> str:
+        """Fenced code stays as written; quotes lose their marks; every heading is a #### heading."""
+        out = []
+        for k, part in enumerate(re.split(r"^```[^\n]*\n(.*?)^```[ \t]*$", text, flags=re.M | re.S)):
+            if k % 2:
+                out.append(f"<pre><code>{html.escape(part.rstrip())}</code></pre>")
+            else:
+                part = re.sub(r"^>\s?", "", part, flags=re.M)
+                part = re.sub(r"^#{1,6}\s+", "#### ", part, flags=re.M)
+                part = re.sub(r"^\s*[*-]\s+(?=\S)", "- ", part, flags=re.M)
+                out.append(self.blocks(part))
+        return "\n".join(o for o in out if o)
+
+
+def data_uri(path: Path) -> str:
+    kind = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}[path.suffix.lower()]
+    return f"data:{kind};base64,{base64.b64encode(path.read_bytes()).decode()}"
+
+
+def read_tomls(pack: Path, name: str, problems: Problems) -> list[tuple[str, dict]]:
+    """name.toml and every name/*.toml of the pack, each with where it came from."""
+    out = []
+    for path in [pack / f"{name}.toml", *sorted((pack / name).glob("*.toml"))]:
+        if path.exists():
+            where = f"{pack.name}/{path.relative_to(pack).as_posix()}"
+            try:
+                out.append((where, tomllib.loads(path.read_text(encoding="utf-8"))))
+            except tomllib.TOMLDecodeError as exc:
+                problems.error(where, str(exc))
+    return out
+
+
+def compile_course(pack: Path, data: dict, recordings: dict, problems: Problems) -> dict | None:
+    """Check a course pack and compile it into RL.course: its documents, the items its links name, the links (each
+    naming stations, a role and what the reader finds), course notes, worked solutions, presets, worlds and maps."""
+    from urllib.parse import quote
+
+    where = f"{pack.name}/course.toml"
+    if not (pack / "course.toml").exists():
+        problems.error(where, "no course.toml: is this a course pack?")
+        return None
+    spec = tomllib.loads((pack / "course.toml").read_text(encoding="utf-8"))
+    imported = pack / "import"
+    if not imported.exists():
+        problems.error(f"{pack.name}/import", "missing: run python tools/course-import.py first")
+        return None
+    load = lambda name: json.loads((imported / f"{name}.json").read_text(encoding="utf-8")) if (imported / f"{name}.json").exists() else []
+    slides, questions, book, notebooks = load("slides"), load("questions"), load("book"), load("notebooks")
+    for nb in notebooks:  # the notebooks write some activity titles in lower case
+        for a in nb["activities"]:
+            a["title"] = a["title"][:1].upper() + a["title"][1:]
+    if not slides and "slides" in spec:
+        problems.warn(f"{pack.name}/import", "no slides were read (Poppler's pdftotext was missing when the importer ran)")
+    pictures = imported / "pictures"
+    picture = lambda name: data_uri(pictures / name) if (pictures / name).exists() else None
+    href = lambda path: quote(path.replace("\\", "/"))
+    stations = {sid: st for part in data["parts"] for st in part["stations"] for sid in [st["id"]]}
+    site = {"stations": stations, "presets": data["presets"]}
+
+    # the pack's own Lab presets and worlds: course data, added to the page's presets only in the course build
+    presets = {}
+    for src, raw in read_tomls(pack, "lab", problems):
+        for pid, p in raw.items():
+            if pid in data["presets"] or pid in presets:
+                problems.error(src, f"preset '{pid}' is already a preset")
+            presets[pid] = compile_preset(pid, p, stations, recordings, problems)
+    site["presets"] = {**data["presets"], **presets}
+    worlds = {}
+    for src, raw in read_tomls(pack, "worlds", problems):
+        worlds.update(raw)
+
+    # the items, by the name a link gives them
+    items: dict[str, dict] = {}
+    lectures = []
+    for lec in spec.get("slides", {}).get("lectures", []):
+        own = [s for s in slides if s["lecture"] == lec["n"]]
+        items[f"L{lec['n']}"] = {"kind": "lecture", "n": lec["n"], "title": lec["title"]}
+        for s in own:
+            items[f"L{lec['n']}:{s['n']}"] = {"kind": "slide", "lecture": lec["n"], "n": s["n"], "page": s["page"], "title": s["title"]}
+        lectures.append({"n": lec["n"], "title": lec["title"], "pages": lec["pages"],
+                         "slides": [{"n": s["n"], "page": s["page"], "title": s["title"]} for s in own]})
+    papers = []
+    for paper in spec.get("paper", []):
+        own = [q for q in questions if q["paper"] == paper["id"]]
+        papers.append({"id": paper["id"], "title": paper["title"], "file": href(paper["path"]), "questions": [q["id"] for q in own]})
+        for q in own:
+            items[f"{paper['id']}:{q['id']}"] = {"kind": "question", "paper": paper["id"], "id": q["id"], "n": q["n"], "part": q["part"],
+                                                "page": q["page"], "text": q["text"], "options": q["options"]}
+    nbs = {}
+    for nb in notebooks:
+        nbs[nb["id"]] = nb
+        items[nb["id"]] = {"kind": "notebook", "id": nb["id"], "ps": nb["ps"], "title": nb["title"]}
+        for a in nb["activities"]:
+            items[f"{nb['id']}:{a['id']}"] = {"kind": "activity", "notebook": nb["id"], "id": a["id"], "n": a["n"], "title": a["title"]}
+        for q in nb["questions"] + nb["predicts"]:
+            items[f"{nb['id']}:{q['id']}"] = {"kind": "nb-question" if q["id"][0] == "Q" else "predict", "notebook": nb["id"], "id": q["id"], "activity": q["activity"]}
+        for name, f in nb["functions"].items():
+            items[f"{nb['id']}:{name}"] = {"kind": "function", "notebook": nb["id"], "name": name, "activity": f["activity"]}
+        for c in nb["cells"]:
+            items[f"{nb['id']}:#{c['id']}"] = {"kind": "cell", "notebook": nb["id"], "id": c["id"], "activity": c["activity"]}
+    bk = spec.get("book")
+    sections = {s["id"]: s for s in book}
+    if bk:
+        for s in book:
+            items[f"{bk['id']}:{s['id']}"] = {"kind": "section", "id": s["id"], "title": s["title"], "printed": s["printed"], "page": s["pdf"]}
+
+    def known(ref: str, src: str) -> bool:
+        m = COURSE_REF.match(ref)
+        if m and m.group("lec") and m.group("b"):  # printed slide numbers may skip; both endpoints must exist
+            ok = all(f"{m.group('lec')}:{n}" in items for n in (m.group("a"), m.group("b"))) and int(m.group("a")) <= int(m.group("b"))
+            if not ok:
+                problems.error(src, f"'{ref}' is not a range of slides of {m.group('lec')}")
+            return ok
+        if ref not in items:
+            problems.error(src, f"'{ref}' names no course item (a slide, question, notebook item or book section)")
+            return False
+        return True
+
+    # the links, each naming stations, a role and what the reader finds there
+    links = []
+    for src, raw in read_tomls(pack, "links", problems):
+        for k, link in enumerate(raw.get("link", []), 1):
+            here = f"{src} link {k} ({link.get('at', '?')})"
+            if set(link) - {"at", "stations", "role", "note", "pair"}:
+                problems.error(here, f"unknown keys: {', '.join(sorted(set(link) - {'at', 'stations', 'role', 'note', 'pair'}))}")
+            at, sts = link.get("at", ""), link.get("stations", [])
+            if not known(at, here):
+                continue
+            if not sts:
+                problems.error(here, "names no station")
+            for sid in sts:
+                if sid not in stations:
+                    problems.error(here, f"'{sid}' is not a station on the map (content/map.toml)")
+            if link.get("role") not in ROLES:
+                problems.error(here, f"role '{link.get('role')}' is not one of {', '.join(ROLES)}")
+            if not link.get("note"):
+                problems.error(here, "needs a note: one sentence on what the reader finds there")
+            pair = link.get("pair")
+            if pair is not None:  # pseudocode line → the line of the function that does it
+                item = items.get(at, {})
+                if item.get("kind") != "function" or len(sts) != 1:
+                    problems.error(here, "pair needs a function and one station")
+                else:
+                    code = nbs[item["notebook"]]["functions"][item["name"]]["source"]
+                    lines_ = set(re.findall(r'data-line="([\w-]+)"', data["entries"].get(sts[0], {}).get("pseudocode", "")))
+                    for lid, text in pair.items():
+                        if lid not in lines_:
+                            problems.error(here, f"pair: the pseudocode of '{sts[0]}' has no line '{lid}'")
+                        if text not in code:
+                            problems.error(here, f"pair: '{text}' is not in {item['name']}")
+            md = Markdown(stations, site["presets"], here, problems)
+            links.append({"at": at, "stations": sts, "role": link.get("role"), "note": md.inline(link.get("note", "")), **({"pair": pair} if pair else {})})
+
+    # the book's sections, worked out from the § numbers in every entry's sources
+    if bk:
+        for sid, e in data["entries"].items():
+            for s in e["sources"]:
+                if "Sutton & Barto" not in s.get("text", ""):
+                    continue
+                for num in re.findall(r"§\s*(\d+\.\d+)", s["text"]):
+                    if num in sections:
+                        sec = sections[num]
+                        links.append({"at": f"{bk['id']}:{num}", "stations": [sid], "role": "introduces", "book": True,
+                                      "note": html.escape(f"§{num} {sec['title']}, p. {sec['printed']}.")})
+                    else:
+                        problems.warn(f"content/{sid}.md", f"cites Sutton & Barto §{num}, which the book's contents lack")
+
+    # the Lab presets that run an activity's experiment
+    experiments = []
+    for src, raw in read_tomls(pack, "experiments", problems):
+        for k, ex in enumerate(raw.get("experiment", []), 1):
+            here = f"{src} experiment {k} ({ex.get('at', '?')})"
+            if known(ex.get("at", ""), here) and items[ex["at"]]["kind"] != "activity":
+                problems.error(here, "an experiment belongs to an activity")
+            if ex.get("lab") not in site["presets"]:
+                problems.error(here, f"lab preset '{ex.get('lab')}' is neither in content/lab.toml nor in the pack's lab.toml")
+            experiments.append({"at": ex.get("at"), "lab": ex.get("lab"), "note": Markdown(stations, site["presets"], here, problems).inline(ex.get("note", ""))})
+
+    linked = {l["at"] for l in links}
+    # course notes, beside the entries they are about
+    notes = []
+    for src, raw in read_tomls(pack, "notes", problems):
+        for k, note in enumerate(raw.get("note", []), 1):
+            here = f"{src} note {k}"
+            for sid in note.get("stations", []):
+                if sid not in stations:
+                    problems.error(here, f"'{sid}' is not a station on the map")
+            for ref in note.get("at", []):
+                known(ref, here)
+            md = Markdown(stations, site["presets"], here, problems)
+            notes.append({"stations": note.get("stations", []), "at": note.get("at", []), "title": md.inline(note.get("title", "")),
+                          "html": md.rich(note.get("text", ""))})
+    # worked solutions, hidden until asked for
+    solutions = {}
+    for src, raw in read_tomls(pack, "solutions", problems):
+        for k, sol in enumerate(raw.get("solution", []), 1):
+            at = sol.get("at", "")
+            here = f"{src} solution {k} ({at})"
+            if not known(at, here):
+                continue
+            if at in solutions:
+                problems.error(here, "a second solution for the same item")
+            md = Markdown(stations, site["presets"], here, problems)
+            solutions[at] = {"answer": sol.get("answer", ""), "html": md.rich(sol.get("text", ""))}
+    # links between pages: [text](#/c/<item>) must name an item
+    for text in [l["note"] for l in links] + [n["html"] for n in notes] + [s["html"] for s in solutions.values()]:
+        for ref in re.findall(r'href="#/c/([^"]+)"', text):
+            known(ref, "a link to a course page")
+
+    # what the pages show of each item: pictures of the linked slides and questions, the notebooks' text and code
+    for ref, item in items.items():
+        if item["kind"] == "slide":
+            item["pic"] = picture(f"slide-{item['page']}.jpg")
+        elif item["kind"] == "question":
+            item["pic"] = picture(f"{item['paper']}-{item['id']}.jpg")
+            if more := picture(f"{item['paper']}-{item['id']}-more.jpg"):
+                item["more"] = more
+    for item in items.values():
+        if item["kind"] == "slide" and not item["pic"]:
+            del item["pic"]
+    lenient = LenientMarkdown(stations, site["presets"], f"{pack.name}/notebooks", Problems())
+    used_nbs = {items[l["at"]].get("notebook") or (l["at"] if items.get(l["at"], {}).get("kind") == "notebook" else None) for l in links if l["at"] in items}
+    out_nbs = []
+    for nb in notebooks:
+        cells = {}
+        for c in nb["cells"]:
+            if c["type"] == "markdown":
+                cells[c["id"]] = {"md": lenient.notebook(c["source"])}
+            else:
+                outs = []
+                for o in c.get("outputs", []):
+                    if "picture" in o:
+                        if nb["id"] in used_nbs and (uri := picture(o["picture"])):
+                            outs.append({"pic": uri})
+                    else:
+                        outs.append({"text": o["text"], **({"error": True} if o.get("error") else {})})
+                cells[c["id"]] = {"code": c["source"], "out": outs}
+        out_nbs.append({
+            "id": nb["id"], "ps": nb["ps"], "title": nb["title"], "file": href(nb["path"]),
+            "order": [c["id"] for c in nb["cells"]], "act": {c["id"]: c["activity"] for c in nb["cells"] if c["activity"]}, "cells": cells,
+            "activities": [{k: a[k] for k in ("id", "n", "title", "points", "cell", "cells")} | {"tasks": [t["id"] for t in a["tasks"]]} for a in nb["activities"]],
+            "functions": {n: {k: f[k] for k in ("cell", "activity", "source", "doc")} for n, f in nb["functions"].items()},
+            "questions": [{k: q.get(k) for k in ("id", "n", "cell", "activity", "answerCell")} for q in nb["questions"]],
+            # a prediction written in its prompt's own cell: the prompt and the prediction apart, so a card can hide one
+            "predicts": [{k: q.get(k) for k in ("id", "cell", "activity", "answerCell")}
+                         | ({"prompt": lenient.notebook(f"**Predict first.** {q['text']}"), "said": lenient.notebook(q["answer"])} if q.get("answer") and not q.get("answerCell") else {})
+                         for q in nb["predicts"]],
+        })
+
+    # the course's notation beside the atlas's, and its maps
+    notation = []
+    atlas_tex = {s["tex"] for s in data["notation"].get("symbol", [])}
+    for src, raw in read_tomls(pack, "notation", problems):
+        for sym in raw.get("symbol", []):
+            if sym.get("atlas") not in atlas_tex:
+                problems.error(src, f"symbol {sym.get('atlas')!r} is not in content/notation.toml")
+            notation.append({"atlas": sym.get("atlas"), "course": sym.get("course", ""), "note": sym.get("note", "")})
+    maps = {"compare": [], "derive": []}
+    for src, raw in read_tomls(pack, "maps", problems):
+        for m in raw.get("compare", []):
+            for sid in m.get("stations", []):
+                if sid not in stations:
+                    problems.error(src, f"comparison map '{m.get('id')}': '{sid}' is not a station")
+            maps["compare"].append(m)
+        for m in raw.get("derive", []):
+            for step in m.get("steps", []):
+                for ref in step.get("at", []):
+                    known(ref, f"{src} derivation map '{m.get('id')}'")
+                sid, label = step.get("station"), step.get("label")
+                if sid not in stations:
+                    problems.error(src, f"derivation map '{m.get('id')}': '{sid}' is not a station")
+                elif label and label not in re.findall(r'data-anchor="([\w-]+)"', "".join(sec["html"] for sec in (data["entries"].get(sid, {}).get("textbook") or {}).get("sections", []))):
+                    problems.error(src, f"derivation map '{m.get('id')}': the Textbook of '{sid}' has no label '{label}'")
+            maps["derive"].append(m)
+
+    return {
+        "id": spec["id"], "code": spec.get("code", spec["id"]), "title": spec.get("title", ""), "school": spec.get("school", ""),
+        "term": spec.get("term", ""),
+        "files": {"slides": href(spec["slides"]["path"]) if "slides" in spec else None, "book": href(bk["path"]) if bk else None},
+        "book": {"id": bk["id"], "title": bk["title"], "offset": bk.get("offset", 0)} if bk else None,
+        "lectures": lectures, "papers": papers, "notebooks": out_nbs,
+        "items": {ref: item for ref, item in items.items() if item["kind"] not in ("cell", "section") or ref in linked},
+        "links": links, "experiments": experiments, "notes": notes, "solutions": solutions, "presets": presets, "worlds": worlds,
+        "notation": notation, "maps": maps,
+    }
+
+
+def bundle(out: Path = OUT, course: dict | None = None) -> int:
+    """Inline every stylesheet, script and font of app/index.html into one offline file. A course build adds its pack
+    (RL.course) right after the content, so that every script after it can read it."""
     page = (APP / "index.html").read_text(encoding="utf-8")
 
     def font(css_dir: Path):
@@ -617,15 +924,26 @@ def bundle() -> int:
         return "<script>\n" + code.replace("</script", "<\\/script") + "\n</script>"
 
     page = re.sub(r'<link rel="stylesheet" href="([^"]+)">', style, page)
+    if course is not None:
+        pack = json.dumps(course, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+        page = page.replace('<script src="content.js"></script>', f'<script src="content.js"></script>\n<script>\nglobalThis.RL.course = {pack};\n</script>', 1)
     page = re.sub(r'<script src="([^"]+)"></script>', script, page)
-    OUT.write_text(page, encoding="utf-8")
-    return OUT.stat().st_size
+    out.write_text(page, encoding="utf-8")
+    return out.stat().st_size
 
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)-7s %(message)s")
+    args = sys.argv[1:]
+    pack = None
+    if args[:1] == ["--course"] and len(args) == 2:
+        pack = Path(args[1]).resolve()
+    elif args:
+        log.error("usage: python build.py [--course DIR]")
+        return 2
     problems = Problems()
     data, recordings = compile_content(problems)
+    course = compile_course(pack, data, recordings, problems) if pack else None
     if problems.errors:
         log.error("%d error(s); nothing was written", problems.errors)
         return 1
@@ -660,6 +978,17 @@ def main() -> int:
         encoding="utf-8",
     )
     size = bundle()
+    if course is not None:
+        out = pack / f"rl_atlas-{course['id']}.html"
+        size = bundle(out, course)
+        per = {}
+        for link in course["links"]:
+            per[link["role"]] = per.get(link["role"], 0) + 1
+        log.info("course %s: %d links (%s), %d stations linked, %d notes, %d solutions, %d presets",
+                 course["code"], len(course["links"]), ", ".join(f"{n} {r}" for r, n in sorted(per.items())),
+                 len({s for l in course["links"] for s in l["stations"]}), len(course["notes"]), len(course["solutions"]), len(course["presets"]))
+        log.info("wrote %s (%.1f MB)", out, size / 1e6)
+        return 0
 
     kinds = [st["kind"] for part in data["parts"] for st in part["stations"]]
     written = set(data["entries"])

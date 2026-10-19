@@ -87,6 +87,38 @@ test("cliff walking: while learning, SARSA earns more reward per episode than Q-
   }
 });
 
+test("the cliff's slip: a move goes its way 1 − slip of the time and to each side slip/2, as the model says; slip 0 changes nothing", () => {
+  const env = lab.make("cliff");
+  env.configure({ slip: 0.2 });
+  const s = 2 * 12 + 5; // row 3, column 6, just above the cliff: moving right slides up, or down into the cliff
+  const model = env.model(s, 1);
+  assert.deepEqual(model.map((o) => [o.s2, o.r]), [[s + 1, -1], [s - 12, -1], [env.start, -100]]);
+  assert.deepEqual(model.map((o) => +o.p.toFixed(12)), [0.8, 0.1, 0.1]);
+  const rng = lab.rng(1), n = 20000, seen = new Map();
+  for (let i = 0; i < n; i++) { const { s2, r } = env.step(s, 1, rng); seen.set(`${s2} ${r}`, (seen.get(`${s2} ${r}`) || 0) + 1); }
+  assert.equal(seen.size, 3);
+  for (const o of model) assert.ok(Math.abs(seen.get(`${o.s2} ${o.r}`) / n - o.p) < 0.01, `${o.s2}: ${seen.get(`${o.s2} ${o.r}`) / n} against ${o.p}`);
+  // the optimal values follow the model: the safe top row once the edge is slippery
+  const best = (slip) => { const e = lab.make("cliff"); e.configure({ slip }); return Math.round(lab.valueIteration(e, 1)[e.start] * 10) / 10; };
+  assert.deepEqual([0, 0.05, 0.1, 0.2].map(best), [-13, -19, -23.3, -29.8]);
+  // a run's settings set it; at 0 the runs are those of the book's cliff, draw for draw
+  const sig = (params) => JSON.stringify(Array.from(run("cliff", "sarsa", { ...cliff, ...params }, 50).metrics.return));
+  assert.equal(sig({ slip: 0 }), sig({}));
+  assert.notEqual(sig({ slip: 0.1 }), sig({}));
+  assert.equal(run("cliff", "sarsa", { ...cliff, slip: 0.1 }, 2).env.slip, 0.1);
+});
+
+test("a grid world added at run time runs like the built-in ones", () => {
+  lab.addGridWorld("test-corridor", { title: "Test corridor", map: ["S..#G", "....."], reward: { step: -1 } });
+  assert.throws(() => lab.addGridWorld("test-corridor", { title: "Again", map: ["SG"], reward: { step: -1 } }));
+  const env = lab.make("test-corridor");
+  assert.equal(env.title, "Test corridor");
+  assert.equal(env.key, "test-corridor");
+  assert.equal(lab.valueIteration(env, 1)[env.start], -6); // round the wall: right, right, down, right, right, up
+  const q = run("test-corridor", "q-learning", { alpha: 0.5, epsilon: 0.1, gamma: 1 }, 100);
+  assert.equal(lab.greedyPath(q.env, q.at(100).Q).path.length - 1, 6);
+});
+
 // The 19-state random walk: the RMS error over the first 10 episodes, averaged over 100 runs, at the best of a few step sizes.
 const walkError = (id, params) => Math.min(...[0.1, 0.2, 0.4, 0.6, 0.8].map((alpha) =>
   lab.mean(lab.average({ world: "random-walk-19", algorithm: A[id], params: { gamma: 1, alpha, ...params }, units: 10, seeds: seeds(100), measures: ["error"] }).mean.error)));

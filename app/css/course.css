@@ -1,0 +1,151 @@
+/* A course pack (build.py --course): a station's course tab, the course's pages, and its views on the map.
+   Course items wear --course; stations keep their line's color. */
+
+.c-pill { color: var(--course-ink); box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--course) 55%, transparent); }
+.c-badge i { background: var(--course); }
+.c-eyebrow a { color: inherit; }
+.c-lead { max-width: 72ch; color: var(--ink-2); margin: 4px 0 18px; }
+
+/* sections */
+.c-sec { margin: 26px 0 0; animation: rise-in 0.5s var(--ease) both; }
+.c-sec > h2 { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; font-size: 22px; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 2px solid color-mix(in oklab, var(--course) 40%, var(--line)); }
+.c-sec > h2 small { font-size: 13px; font-weight: 500; color: var(--ink-3); }
+.c-sec h3 { font-size: 15.5px; margin: 18px 0 8px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.c-sec h3 a { color: var(--ink); text-decoration: none; }
+.c-sec h3 a:hover { text-decoration: underline; }
+.c-line1 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.c-line1 > a { color: var(--ink); font-weight: 600; text-decoration: none; }
+.c-line1 > a:hover { text-decoration: underline; }
+.c-pdf { font-size: 12px; font-weight: 600; color: var(--course-ink); text-decoration: none; white-space: nowrap; }
+.c-pdf:hover { text-decoration: underline; }
+.c-role { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 1px 7px; border-radius: 6px;
+  color: var(--course-ink); background: color-mix(in oklab, var(--course) 12%, transparent); }
+.c-also { display: inline-flex; gap: 4px; flex-wrap: wrap; align-items: center; font-size: 12.5px; color: var(--ink-3); }
+.c-st { display: inline-flex; align-items: center; gap: 5px; }
+.c-st i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.c-needs { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-3); }
+
+/* slides */
+.c-slides { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.c-slide { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 14px; align-items: start; padding: 10px; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+.c-slide p { margin: 4px 0; }
+.c-thumb { display: block; }
+.c-pic { display: block; max-width: 100%; border-radius: 8px; border: 1px solid var(--line); background: #fff; cursor: zoom-in; }
+.c-small { width: 200px; }
+.c-nopic { display: grid; place-items: center; width: 200px; aspect-ratio: 16 / 9; border-radius: 8px; background: var(--surface-3); color: var(--ink-3); font-weight: 700; }
+.c-book { margin: 0; padding-left: 18px; }
+.c-book li { margin: 4px 0; }
+.c-book .c-pdf { white-space: normal; }
+.c-booktitle { color: var(--ink-2); }
+
+/* homework */
+.c-act { margin: 10px 0 18px; padding: 4px 16px 12px; border-left: 3px solid var(--course); background: var(--surface); border-radius: 0 14px 14px 0; box-shadow: var(--shadow); }
+.c-hw { margin: 10px 0; }
+.c-hw p { margin: 4px 0; }
+.c-code { margin: 6px 0; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font: 12.5px/1.5 var(--mono); overflow-x: auto; white-space: pre; }
+.c-out { margin: 4px 0 8px; padding: 8px 12px; border-radius: 10px; background: var(--surface-3); font: 12px/1.45 var(--mono); overflow-x: auto; white-space: pre; max-height: 320px; }
+.c-out.err { color: var(--bad-ink); }
+.c-fig { display: block; max-width: min(100%, 720px); margin: 6px 0; border-radius: 8px; background: #fff; cursor: zoom-in; }
+details > summary { cursor: pointer; font-size: 13px; color: var(--ink-2); margin: 6px 0; }
+.c-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin: 10px 0; }
+.c-pair-side { min-width: 0; }
+.c-pair .pseudo { margin: 6px 0; }
+.c-pair .pseudo li.c-has-mate, .c-pair .c-line[data-mate] { cursor: default; border-radius: 4px; box-shadow: inset 2px 0 0 color-mix(in oklab, var(--course) 60%, transparent); }
+.c-line { display: inline-block; min-width: 100%; padding: 0 4px; }
+.c-hot { background: color-mix(in oklab, var(--course) 18%, transparent); box-shadow: inset 3px 0 0 var(--course) !important; }
+
+/* practice: the atlas's flip cards, with the question's picture */
+.c-prs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 430px), 1fr)); gap: 16px; }
+.c-q-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.c-q-head a { color: var(--ink); text-decoration: none; }
+.c-q-head a:hover { text-decoration: underline; }
+.c-tick { margin-left: auto; font-size: 12.5px; color: var(--ink-2); display: inline-flex; gap: 5px; align-items: center; cursor: pointer; }
+.c-tick input { accent-color: var(--course); }
+.c-flip .face.q .c-pic { cursor: pointer; }
+.c-flip .face.a { overflow: auto; }
+.c-question-text { white-space: pre-wrap; }
+.c-answer { font-size: 15px; }
+.c-why { font-size: 13.5px; color: var(--ink-2); margin: 8px 2px 0; }
+.c-qpage { max-width: 760px; }
+.c-flip .c-cell { font-size: 14.5px; }
+.c-flip .face.a .c-cell { color: inherit; }
+.c-note { padding: 4px 18px 10px; margin: 0 0 12px; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); border-left: 3px solid var(--course); }
+
+/* the pages */
+.c-index { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.c-index li { display: flex; gap: 12px; align-items: baseline; padding: 8px 12px; border-radius: 10px; background: var(--surface); }
+.c-index li a { color: var(--ink); text-decoration: none; }
+.c-index li a b { color: var(--course-ink); margin-right: 6px; }
+.c-index li a:hover { text-decoration: underline; }
+.c-index li .faint { margin-left: auto; font-size: 12.5px; text-align: right; }
+.c-links { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 8px; }
+.c-links li { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.c-links li p { flex-basis: 100%; margin: 0; font-size: 14px; color: var(--ink-2); }
+.c-deck { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 2px; }
+.c-dslide { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; padding: 6px 10px; border-radius: 10px; scroll-margin-top: 80px; }
+.c-dslide:not(.linked) { color: var(--ink-3); font-size: 14px; }
+.c-dslide:not(.linked) b { font-weight: 500; }
+.c-dslide.linked { background: var(--surface); box-shadow: var(--shadow); padding: 12px; margin: 6px 0; }
+.c-dslide.linked .c-pic { max-width: 560px; margin: 8px 0; }
+.c-dnum { font-weight: 800; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+.c-dslide.linked .c-dnum { color: var(--course-ink); }
+.c-nb { display: grid; gap: 6px; margin-top: 16px; }
+.c-nbrow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; scroll-margin-top: 90px; border-radius: 12px; }
+.c-nbrow.linked { grid-template-columns: minmax(0, 1fr) 300px; }
+.c-aside { padding: 8px 12px; border-left: 3px solid var(--course); background: var(--surface); border-radius: 0 12px 12px 0; align-self: start; font-size: 13.5px; }
+.c-md { padding: 2px 0; }
+.c-md h4 { margin: 14px 0 6px; }
+.c-flash { animation: c-flash 1.6s ease both; }
+@keyframes c-flash { 0%, 40% { box-shadow: 0 0 0 4px color-mix(in oklab, var(--course) 45%, transparent); } }
+.c-zoom { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 24px; background: rgb(0 0 0 / 0.6); cursor: zoom-out; animation: fade-in 0.15s ease both; }
+.c-zoom img { max-width: 100%; max-height: 100%; border-radius: 10px; background: #fff; box-shadow: var(--shadow-lg); }
+.symbols .c-sym small { display: block; font-size: 12px; color: var(--ink-3); }
+.palette li.course .title { font-variant-numeric: tabular-nums; }
+
+/* the map's course views */
+.lens-group { margin: 12px 2px 6px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--course-ink); }
+.course-lenses { grid-template-columns: repeat(3, 1fr); }
+.course-lenses button[aria-selected="true"] { box-shadow: 0 1px 3px rgb(0 0 0 / 0.12), inset 0 0 0 1.5px color-mix(in oklab, var(--course) 60%, transparent); }
+.lens-variants { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.lens-variants:empty { display: none; }
+.lens-variants .chip[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--course); }
+.metro [data-href] { cursor: pointer; }
+.metro .c-node rect { fill: var(--surface); stroke: var(--course); stroke-width: 2; }
+.metro .c-node text { font: 700 12px var(--font); fill: var(--course-ink); }
+.metro .c-node.c-hub rect { fill: var(--course); }
+.metro .c-node.c-hub text { fill: var(--bg); }
+.metro .c-node:hover rect, .metro .c-act-row:hover text, .metro .c-qnode:hover rect, .metro .c-step:hover > rect:first-child { filter: brightness(1.08); stroke-width: 3; }
+.metro .c-trunk { stroke: var(--course); stroke-width: 6; stroke-linecap: round; opacity: 0.85; }
+.metro .c-branch { stroke: color-mix(in oklab, var(--course) 45%, transparent); stroke-width: 3; stroke-linecap: round; }
+.metro .c-tie { fill: none; stroke: var(--course); stroke-width: 1.2; stroke-dasharray: 3 4; opacity: 0.32; }
+.metro .c-edge { fill: none; stroke: var(--ink-3); stroke-width: 1.1; opacity: 0.35; }
+.metro .c-hub-title { font: 700 13.5px var(--font); fill: var(--ink-2); }
+.metro .c-act-label { font: 600 13px var(--font); fill: var(--ink); }
+.metro .c-act-row:hover .c-act-label { text-decoration: underline; }
+.metro .c-fns { font: 11.5px var(--mono); fill: var(--ink-3); }
+.metro .c-qnode rect { fill: var(--surface); stroke: var(--line-2); stroke-width: 1.5; }
+.metro .c-qnode text { font: 12px var(--font); fill: var(--ink-2); }
+.metro .c-qnode .c-qn { font-weight: 800; fill: var(--course-ink); }
+.metro .c-qnode.solved rect { stroke: var(--course); fill: color-mix(in oklab, var(--course) 10%, var(--surface)); }
+.metro .c-check { font: 800 13px var(--font); fill: var(--course-ink); }
+.metro .c-target { font: 600 14px var(--serif); fill: var(--ink); }
+.metro .c-target-note, .metro .c-cmp-note { font: 12px var(--font); fill: var(--ink-3); }
+.metro .c-item rect { fill: var(--surface); }
+.metro .c-step > rect:first-child { fill: var(--surface); stroke: var(--line-2); stroke-width: 1.5; }
+.metro .c-step .c-step-bar { fill: var(--c); }
+.metro .c-step-st { font: 700 12.5px var(--font); fill: var(--ink); }
+.metro .c-step-text { font: 12.5px var(--font); fill: var(--ink-2); }
+.metro .c-step-at { font: 600 11px var(--font); fill: var(--course-ink); }
+.metro .c-arrow { fill: none; stroke: var(--ink-3); stroke-width: 1.6; marker-end: none; }
+.metro svg.backup { overflow: visible; }
+
+@media (max-width: 720px) {
+  .c-slide { grid-template-columns: minmax(0, 1fr); }
+  .c-small, .c-nopic { width: 100%; }
+  .c-pair { grid-template-columns: minmax(0, 1fr); }
+  .c-nbrow.linked { grid-template-columns: minmax(0, 1fr); }
+}
+.c-lab { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; font-size: 13.5px; }
+/* a long solution scrolls inside its card instead of stretching it */
+.c-flip { position: relative; }
+.c-flip .face.a { position: absolute; inset: 0; overflow: auto; }

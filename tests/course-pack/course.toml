@@ -1,0 +1,30 @@
+id = "invented"
+code = "TEST101"
+title = "Invented course for regression tests"
+school = "Example"
+term = "Test term"
+
+[slides]
+path = "slides.pdf"
+lectures = [
+  { n = 1, title = "First steps", pages = [1, 2] },
+  { n = 2, title = "Learning targets", pages = [3, 4] },
+]
+
+[[notebook]]
+id = "HW"
+ps = 1
+title = "A tiny update"
+path = "homework.ipynb"
+
+[[paper]]
+id = "Quiz"
+title = "Invented quiz"
+path = "quiz.pdf"
+style = "quiz"
+
+[book]
+id = "SB"
+path = "book.pdf"
+title = "Invented book contents"
+offset = 22

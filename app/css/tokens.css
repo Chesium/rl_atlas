@@ -25,6 +25,8 @@
   --trc: #14a874;  --trc-ink: #0b7a52;  /* eligibility traces */
   --err: #cc272f;  --err-ink: #df202e;
   --good-ink: #0b7d0b;  --bad-ink: #b52f2f;
+  /* a course pack's items (build.py --course): outside the quantity colors, checked with the validator against them */
+  --course: #a23c9a;  --course-ink: #a23c9a;
 
   /* value heatmap: diverging, neutral gray at zero */
   --v-pos: #2a78d6;
@@ -78,6 +80,7 @@
     --trc: #2ccf94;  --trc-ink: #47d9a2;
     --err: #d22d33;  --err-ink: #eb4848;
     --good-ink: #3fcf3f;  --bad-ink: #f07a7a;
+  --course: #cf67c4;  --course-ink: #d77ccf;
     --v-pos: #3987e5;
     --v-neg: #d95926;
     --v-mid: #383835;
@@ -119,6 +122,7 @@
     --trc: #2ccf94;  --trc-ink: #47d9a2;
   --err: #d22d33;  --err-ink: #eb4848;
   --good-ink: #3fcf3f;  --bad-ink: #f07a7a;
+  --course: #cf67c4;  --course-ink: #d77ccf;
   --v-pos: #3987e5;
   --v-neg: #d95926;
   --v-mid: #383835;

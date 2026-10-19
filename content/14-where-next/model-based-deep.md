@@ -8,6 +8,7 @@ sources = [
   { text = "Ha & Schmidhuber (2018), World models", url = "https://arxiv.org/abs/1803.10122" },
   { text = "Janner, Fu, Zhang & Levine (2019), When to trust your model: model-based policy optimization (MBPO), NeurIPS", url = "https://arxiv.org/abs/1906.08253" },
   { text = "Hafner, Pasukonis, Ba & Lillicrap (2023), Mastering diverse domains through world models (DreamerV3)", url = "https://arxiv.org/abs/2301.04104" },
+  { text = "Lambert, Amos, Yadan & Calandra (2020), Objective mismatch in model-based reinforcement learning, Learning for Dynamics and Control (L4DC)", url = "https://arxiv.org/abs/2002.04523" },
   { text = "Schrittwieser et al. (2020), Mastering Atari, Go, chess and shogi by planning with a learned model (MuZero), Nature 588", url = "https://www.nature.com/articles/s41586-020-03051-4" },
 ]
 
@@ -56,6 +57,15 @@ doubt = { algorithm = "model-planner", gamma = 1.0, doubt = 1.0, maxSteps = 500,
 ### Why learn a model {#why}
 
 The off-policy methods of Part 11 needed 6,000 to 9,000 steps of experience to swing up a pendulum; Atari agents use millions of frames. For a robot or any system where trying is slow or costly, that is too many. A **model** of the world, a function that predicts the next state and reward from a state and action, can be learned from the same experience and then queried as often as needed. Dyna showed the idea with tables: every real step also updates a model, and the model replays imagined steps to the learner ([[dyna-q]]). Deep model-based RL does the same with networks, in worlds too large for tables.
+
+### Fitting a model {#fitting}
+
+Learning a model is supervised learning on the agent's own transitions $(S_t, A_t, \rew{R_{t+1}}, S_{t+1})$, usually in two parts.
+
+- **Rewards** are learned by regression: a network $\hat r_\phi(s, a)$ minimizes the squared error $(\hat r_\phi(S_t, A_t) - \rew{R_{t+1}})^2$, which makes it estimate the expected reward, the quantity values are built from.
+- **Next states** are random, so the model predicts a distribution $\hat p_\phi(s' \mid s, a)$, fitted by maximum likelihood: minimize $-\ln \hat p_\phi(S_{t+1} \mid S_t, A_t)$ averaged over the data. In expectation this is the divergence $\mathrm{KL}(p \,\|\, \hat p_\phi)$ of the model from the world's transition distribution $p$, plus the entropy of $p$, which does not depend on $\phi$. A deterministic model trained with the squared error of the predicted next state is the special case of a Gaussian with fixed variance: it learns the *mean* next state. That is right for a deterministic world and wrong for a stochastic one, where the mean of two likely outcomes, a car swerving left or right, may be an outcome that never happens, the car going straight. PETS's networks output a Gaussian's mean and variance and are trained on the negative log-likelihood; their ensemble adds what one network cannot express, the uncertainty about the model itself where data is thin (Chua et al., 2018).
+
+Both losses are averages over the data, so the model is accurate where the data is: where the policy, and whatever exploration it did, has been. As the policy improves it moves to states the model has seen little of, so the model is refitted on fresh experience, and the data needs some exploration beyond the current policy's habits ([[dyna-q-plus]]). And a good fit is not the goal itself. The loss weighs all transitions alike, while the return may hinge on a few; a model with better likelihood need not give a better policy (Lambert, Amos, Yadan and Calandra, 2020). That gap is one reason for models trained on what the agent needs, rewards and values, instead of on the next state (below).
 
 ### Three ways to use a model {#uses}
 
@@ -112,6 +122,7 @@ Repeat for each later episode, from the start: {#start}
 - Optimizing against the model's errors: plans that only work in the model.
 - Long imagined rollouts: prediction errors compound step by step.
 - Spending the model's capacity on details that do not affect rewards.
+- Fitting a deterministic model by squared error to a stochastic world: it predicts the average outcome, which may never happen.
 
 ### Check yourself {#check}
 

@@ -1,0 +1,36 @@
+[[link]]
+at = "L1:1-2"
+stations = ["sarsa", "q-learning"]
+role = "compares"
+note = "PRIVATE_FIXTURE_MARKER: compare the targets."
+
+[[link]]
+at = "L2:1"
+stations = ["sarsa"]
+role = "introduces"
+note = "One sampled next action."
+
+[[link]]
+at = "HW:sarsa_update"
+stations = ["sarsa"]
+role = "implements"
+note = "The target and the update as written."
+pair = { update = "return q + alpha * (target - q)" }
+
+[[link]]
+at = "HW:A1"
+stations = ["sarsa"]
+role = "implements"
+note = "Write an update."
+
+[[link]]
+at = "HW:#answer"
+stations = ["sarsa"]
+role = "assesses"
+note = "An answer by stable cell id."
+
+[[link]]
+at = "Quiz:1"
+stations = ["sarsa", "q-learning"]
+role = "assesses"
+note = "Which action supplies the target?"

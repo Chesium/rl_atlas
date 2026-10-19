@@ -1,5 +1,5 @@
 /* The shell: header, routing, zoom transitions between views, search and theme.
-   Routes: #/ map · #/e/<id>[/story|/textbook|/card] entry · #/lab/<preset> lab · #/symbols symbols. */
+   Routes: #/ map · #/e/<id>[/story|/textbook|/card|/course] entry · #/lab/<preset> lab · #/symbols symbols · #/c/<item> a course page. */
 (function (RL) {
   "use strict";
   const { $, h, esc, station, entry, store, lineColor } = RL;
@@ -16,6 +16,7 @@
     <nav class="crumbs" aria-label="You are here"></nav>
     <span class="spacer"></span>
     <button class="pill search" type="button" aria-label="Search the atlas (Ctrl K)">${SEARCH}<span>Search</span><kbd>Ctrl K</kbd></button>
+    ${RL.course ? `<a class="pill c-pill" href="#/c/">${esc(RL.course.code)}</a>` : ""}
     <a class="pill" href="#/symbols">Symbols</a>
     <button class="icon-btn theme" type="button" aria-label="Switch between light and dark"></button>`;
 
@@ -23,9 +24,10 @@
   function parse() {
     const path = location.hash.replace(/^#/, "") || "/";
     let m;
-    if ((m = path.match(/^\/e\/([\w-]+)(?:\/(story|textbook|card))?$/))) return { name: "entry", id: m[1], mode: m[2], depth: 1 };
+    if ((m = path.match(/^\/e\/([\w-]+)(?:\/(story|textbook|card|course))?$/))) return { name: "entry", id: m[1], mode: m[2], depth: 1 };
     if ((m = path.match(/^\/lab\/([\w-]+)$/))) return { name: "lab", id: m[1], depth: 2 };
     if (path === "/symbols") return { name: "symbols", depth: 1 };
+    if (RL.course && (m = path.match(/^\/c\/(.*)$/))) return { name: "course", id: m[1], depth: 1 };
     return { name: "map", depth: 0 };
   }
 
@@ -40,6 +42,7 @@
       const last = preset?.racers.at(-1).algorithm, via = app.from?.name === "entry" ? app.from.id : RL.lab?.algorithms?.[last]?.station || last;
       html = `${home}${sep}${via && station(via) ? `<a href="#/e/${via}">${esc(station(via).title)}</a>${sep}` : ""}<span class="here">Lab${preset ? ` · ${esc(preset.title)}` : ""}</span>`;
     } else if (route.name === "symbols") html = `${home}${sep}<span class="here">Symbols and colors</span>`;
+    else if (route.name === "course") html = `${home}${sep}${route.id ? `<a href="#/c/">${esc(RL.course.code)}</a>${sep}` : ""}<span class="here">${esc(RL.courseTitle(route.id))}</span>`;
     $(".crumbs", top).innerHTML = html;
   }
 
@@ -59,7 +62,7 @@
     crumbs(next);
     current = RL.views[next.name](view, next.id, next.mode) || {};
     const st = next.id && station(next.id);
-    document.title = next.name === "entry" && st ? `${st.title} · RL Atlas` : next.name === "lab" ? "Lab · RL Atlas" : "RL Atlas";
+    document.title = next.name === "entry" && st ? `${st.title} · RL Atlas` : next.name === "lab" ? "Lab · RL Atlas" : next.name === "course" ? `${RL.courseTitle(next.id)} · RL Atlas` : "RL Atlas";
   }
 
   // Remember where the pointer was, so the next view grows out of what was clicked.
@@ -91,15 +94,19 @@
     const input = $("input", box), list = $("ul", box);
     let hits = [], on = 0;
     const close = () => box.remove();
-    const go = (s) => { close(); location.hash = `#/e/${s.id}`; };
+    const go = (s) => { close(); location.hash = s.href || `#/e/${s.id}`; };
     function render() {
       const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
       hits = RL.order.filter((s) => {
         const text = `${s.title} ${s.short || ""} ${s.id} ${s.partTitle}`.toLowerCase();
         return words.every((w) => text.includes(w));
       }).slice(0, 40);
+      // a course build: its lectures, slides, questions and functions too ("L8 46", "Quiz 2 Q11", td_control)
+      const course = RL.courseSearch?.(words) || [];
+      hits = course.length && !hits.length ? course : [...hits, ...course];
       on = Math.min(on, Math.max(0, hits.length - 1));
-      list.innerHTML = hits.map((s, i) => `<li class="${entry(s.id) ? "written" : "planned"}${i === on ? " on" : ""}" data-i="${i}" role="option" style="--c:${lineColor(s.line)}">
+      list.innerHTML = hits.map((s, i) => s.href ? `<li class="written course${i === on ? " on" : ""}" data-i="${i}" role="option" style="--c:var(--course)">
+        <span class="dot"></span><span class="title">${esc(s.label)}</span><span class="part">${esc(RL.course.code)}</span></li>` : `<li class="${entry(s.id) ? "written" : "planned"}${i === on ? " on" : ""}" data-i="${i}" role="option" style="--c:${lineColor(s.line)}">
         <span class="dot"></span><span class="title">${esc(s.title)}</span><span class="part">${entry(s.id) ? "" : "planned · "}Part ${s.part}</span></li>`).join("")
         || '<li class="planned">Nothing matches</li>';
       list.querySelector(".on")?.scrollIntoView({ block: "nearest" });

@@ -115,7 +115,7 @@
 
 /* the views: each one shows its own drawing; the stations are shared and glide between them */
 .metro .deco { transition: opacity 0.6s; }
-.metro:not([data-lens="map"]) .deco-map, .metro:not([data-lens="tree"]) .deco-tree, .metro:not([data-lens="unified"]) .deco-unified { opacity: 0; pointer-events: none; }
+.metro:not([data-lens="map"]) .deco-map, .metro:not([data-lens="tree"]) .deco-tree, .metro:not([data-lens="unified"]) .deco-unified, .metro .deco[data-deco]:not(.on) { opacity: 0; pointer-events: none; }
 .metro .edge { fill: none; stroke: var(--c); stroke-width: 3; stroke-linecap: round; opacity: 0.75; transition: stroke-width 0.2s, opacity 0.2s; }
 .metro .tree-hub rect { fill: var(--c); }
 .metro .tree-hub text { font: 750 13px var(--font); fill: var(--bg); text-anchor: middle; }

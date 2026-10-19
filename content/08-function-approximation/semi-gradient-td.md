@@ -10,6 +10,7 @@ sources = [
   { text = "Baird (1995), Residual algorithms: reinforcement learning with function approximation, Proceedings of the 12th International Conference on Machine Learning", url = "https://doi.org/10.1016/B978-1-55860-377-6.50013-X" },
   { text = "Bradtke & Barto (1996), Linear least-squares algorithms for temporal difference learning, Machine Learning 22", url = "https://doi.org/10.1007/BF00114723" },
   { text = "Boyan (2002), Technical update: least-squares temporal difference learning, Machine Learning 49", url = "https://doi.org/10.1023/A:1017936530646" },
+  { text = "Lagoudakis & Parr (2003), Least-squares policy iteration, Journal of Machine Learning Research 4", url = "https://www.jmlr.org/papers/v4/lagoudakis03a.html" },
 ]
 
 [story]
@@ -85,6 +86,32 @@ With linear features and on-policy data, semi-gradient TD(0) converges, but to t
 
 That bias is the price of bootstrapping. The return is the honest target and the TD target a cheaper, less noisy approximation of it; with function approximation the approximation does not wash out, because the estimates it relies on can never all be exact. What TD buys in exchange is the same as in the tabular case: learning during the episode, in tasks that never end, and with much lower variance, which often makes it faster in practice even though its destination is worse.
 
+### Least-squares TD {#lstd}
+
+With linear features, the TD fixed point is the solution of a linear system, $\mathbf A \mathbf w = \mathbf b$, with $\mathbf A = \mathbb E[\mathbf x_t (\mathbf x_t - \gam\,\mathbf x_{t+1})^\top]$ and $\mathbf b = \mathbb E[\rew{R_{t+1}}\,\mathbf x_t]$ ([[value-error]]), where $\mathbf x_t = \mathbf x(S_t)$ and the features of a terminal state are $\mathbf 0$. Semi-gradient TD reaches it by many small steps, each sample used once. **Least-squares TD** (LSTD) instead estimates $\mathbf A$ and $\mathbf b$ from all the transitions seen so far and solves for the fixed point directly:
+
+$$\hat{\mathbf A}_t = \sum_{k=0}^{t-1} \mathbf x_k (\mathbf x_k - \gam\,\mathbf x_{k+1})^\top + \varepsilon \mathbf I, \qquad \hat{\mathbf b}_t = \sum_{k=0}^{t-1} \rew{R_{k+1}}\,\mathbf x_k, \qquad \mathbf w_t = \hat{\mathbf A}_t^{-1}\,\hat{\mathbf b}_t. \label{eq-lstd}$$
+
+The sums estimate $t$ times $\mathbf A$ and $t$ times $\mathbf b$, and the factor cancels in $\mathbf w_t$; the small $\varepsilon \mathbf I$ keeps $\hat{\mathbf A}_t$ invertible from the start. The same equation comes from the batch view: $\mathbf w_t$ is the weight vector for which a sweep of semi-gradient TD updates over the stored transitions, $\sum_k \mathbf x_k\,\big(\rew{R_{k+1}} + \gam\,\mathbf x_{k+1}^\top \mathbf w - \mathbf x_k^\top \mathbf w\big)$, adds up to zero. With the return in place of the TD target, the same condition gives ordinary least squares, the Monte Carlo counterpart ([[gradient-mc]]). LSTD is not a least-squares fit in that plain sense, since its targets move with $\mathbf w$; Bradtke and Barto (1996) derived it as a regression with instrumental variables, and showed that on-policy it converges to the TD fixed point as data accumulates.
+
+Inverting a $d \times d$ matrix costs $O(d^3)$, but $\hat{\mathbf A}_t$ grows by one outer product per step, and the inverse of such a sum can be updated in $O(d^2)$ by the **Sherman–Morrison** formula. After a transition from features $\mathbf x$ to $\mathbf x'$, with $\mathbf v = (\hat{\mathbf A}^{-1})^\top (\mathbf x - \gam\,\mathbf x')$,
+
+$$\hat{\mathbf A}^{-1} \leftarrow \hat{\mathbf A}^{-1} - \frac{(\hat{\mathbf A}^{-1} \mathbf x)\,\mathbf v^\top}{1 + \mathbf v^\top \mathbf x}. \label{eq-sm}$$
+
+::: algorithm {#alg-lstd} LSTD for estimating $\val{v_\pi}$ ($O(d^2)$ per step)
+Input: the policy $\pol{\pi}$ to evaluate, features $\mathbf x(s) \in \mathbb R^d$ with $\mathbf x(\text{terminal}) = \mathbf 0$, a small $\varepsilon > 0$
+Set $\hat{\mathbf A}^{-1} \leftarrow \varepsilon^{-1} \mathbf I$ and $\hat{\mathbf b} \leftarrow \mathbf 0$
+Repeat for each episode:
+  Start: $S$; $\mathbf x \leftarrow \mathbf x(S)$
+  Repeat until $S$ is terminal:
+    Choose $A$ from $\pol{\pi}(\cdot \mid S)$; take it, observe $\rew{R}$ and $S'$; $\mathbf x' \leftarrow \mathbf x(S')$
+    $\mathbf v \leftarrow (\hat{\mathbf A}^{-1})^\top (\mathbf x - \gam\,\mathbf x')$; $\hat{\mathbf A}^{-1} \leftarrow \hat{\mathbf A}^{-1} - (\hat{\mathbf A}^{-1} \mathbf x)\,\mathbf v^\top / (1 + \mathbf v^\top \mathbf x)$
+    $\hat{\mathbf b} \leftarrow \hat{\mathbf b} + \rew{R}\,\mathbf x$; $\mathbf w \leftarrow \hat{\mathbf A}^{-1} \hat{\mathbf b}$
+    $S \leftarrow S'$; $\mathbf x \leftarrow \mathbf x'$
+:::
+
+LSTD is the most data-efficient form of linear TD(0): every transition keeps counting, and there is no step size to tune. The price is $O(d^2)$ memory and computation per step against the $O(d)$ of \ref{eq-update}, which rules it out for the millions of weights of a network and makes it attractive for a few hundred features when data is scarce. Two cautions temper "no step size" (Sutton and Barto, §9.8). The regularizer $\varepsilon$ is a knob too: too small and the early inverses swing wildly, too large and learning is slow. And LSTD never forgets: the statistics weigh the first transition as much as the last. That is right for evaluating one fixed policy, and wrong when the policy keeps changing, as in control, where some forgetting must be added. Boyan (2002) extended LSTD to eligibility traces, LSTD(λ), by replacing $\mathbf x_k$ in front of each term of \ref{eq-lstd} with the trace vector $\mathbf z_k$; Lagoudakis and Parr (2003) built a control method on its action-value version, least-squares policy iteration.
+
 ### $n$-step semi-gradient TD {#n-step}
 
 Between one step and the whole episode, the [[n-step-td|$n$-step return]] uses $n$ rewards and then bootstraps:
@@ -108,13 +135,12 @@ In expectation this corrects the targets, but not the distribution of the states
 
 ### Relatives {#relatives}
 
-- **Least-squares TD (LSTD).** For linear features, estimate $\mathbf A$ and $\mathbf b$ of the TD fixed point directly from the data seen so far and solve $\mathbf A \mathbf w = \mathbf b$ (Bradtke and Barto, 1996; Boyan, 2002). No step size, and much better use of each sample, at a cost per step that grows with the square of the number of features.
 - **TD(λ) with features.** The eligibility trace becomes a vector the size of the weights, $\mathbf z \leftarrow \gam\lam\,\mathbf z + \nabla \val{\hat v(S_t, \mathbf w)}$, and each step moves $\mathbf w$ by $\alp\,\del_t\,\mathbf z$ ([[td-lambda]]). True online TD(λ) refines it so that it matches the λ-return exactly, step by step.
 - **Gradient-TD methods** (GTD2, TDC) follow the true gradient of a different objective, the projected Bellman error, and stay stable off-policy ([[deadly-triad]]).
 
 ### Historical remarks {#history}
 
-Sutton (1988) introduced TD learning with linear function approximation and proved convergence in a special case; Dayan (1992) and others extended the result, and Tsitsiklis and Van Roy (1997) gave the general proof for linear on-policy TD(λ), together with the bound on its fixed point. Baird (1995) proposed residual-gradient algorithms, and with them the counterexample that bears his name. LSTD is due to Bradtke and Barto (1996), extended to traces by Boyan (2002).
+Sutton (1988) introduced TD learning with linear function approximation and proved convergence in a special case; Dayan (1992) and others extended the result, and Tsitsiklis and Van Roy (1997) gave the general proof for linear on-policy TD(λ), together with the bound on its fixed point. Baird (1995) proposed residual-gradient algorithms, and with them the counterexample that bears his name. LSTD is due to Bradtke and Barto (1996), extended to traces by Boyan (2002) and to control by Lagoudakis and Parr (2003).
 
 ## Card
 

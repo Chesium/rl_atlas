@@ -526,6 +526,7 @@
     // or the seed the reader chose.
     function simulate() {
       job?.cancel();
+      env.configure?.(paramsOf(racers[0])); // the world the page reads (its slip, for paths and references) follows the knobs
       startBench();
       played = trainable && knobs.seed === "typical" ? typicalDeep() ?? played : recorded ? knobs.seed : knobs.seed === "typical" ? (bench?.complete ? bench.typical() : bench?.seeds[0] ?? 1) : knobs.seed;
       playRuns();

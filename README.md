@@ -200,6 +200,12 @@ The Textbook numbers its sections, figures and statements, and any display equat
 `example` (all written `::: kind {#name} Title`), `remark`, `proof` (`::: proof Proof idea` renames it),
 `::: figure {#name}` (a `{{demo}}` line, then the caption) and `::: algorithm {#name} Title` (pseudocode lines).
 
+### Course companions
+
+Private course packs add lecture references, homework excerpts, hidden practice solutions and course maps beside
+the atlas. See [the pack format and build instructions](docs/course-packs.md). Course materials and generated
+companion files stay in the ignored `course/` folder; the public download contains no pack data.
+
 ## Credits
 
 The core of the guide follows Richard S. Sutton and Andrew G. Barto's *Reinforcement Learning: An Introduction*
