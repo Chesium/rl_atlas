@@ -265,3 +265,36 @@ station = "smooth-policies"
 tex = '\tfrac{\knob\lambda}{2}\|\mathbf w\|^2'
 text = "weight decay: a penalty on the size of the critic's weights, which pulls every weight a little toward 0 at each step (an ink λ, not the trace decay)"
 station = "critic-regularization"
+
+[[quantity]]
+key = "certificate"
+name = "Certificate"
+tex = '\cert{V(x)}'
+text = "A function whose positivity and decrease prove a stated property of a fixed dynamics. This V differs from policy value."
+
+[[quantity]]
+key = "metric"
+name = "Metric"
+tex = '\met{M(x)}'
+text = "A positive matrix measuring differential displacement. Dotted ellipses depict its local unit balls."
+
+[[quantity]]
+key = "violation"
+name = "Violation"
+tex = '\viol{h>0}'
+text = "Failure of a candidate certificate inequality. Filled squares mark sampled violations; red remains RL surprise."
+
+[[symbol]]
+tex = '\cert{V(x)}'
+text = "Lyapunov certificate; not a policy's expected reward"
+station = "lyapunov-functions"
+
+[[symbol]]
+tex = '\met{M(x)}'
+text = "positive contraction metric; length rate α uses −2αM in the matrix inequality"
+station = "contraction-metrics"
+
+[[symbol]]
+tex = '\viol{\operatorname{err}(V)}'
+text = "probability that a fresh independent trajectory violates the candidate condition"
+station = "trajectories-as-samples"

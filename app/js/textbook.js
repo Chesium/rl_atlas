@@ -8,7 +8,7 @@
   RL.textbook = function (host, e) {
     const tb = e.textbook;
     const prereqs = e.prereqs.filter(station).map((id) => `<a class="term" data-term="${id}" href="#/e/${id}">${esc(station(id).title)}</a>`);
-    const sources = e.sources.map((s) => `<li>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.text)}</a>` : esc(s.text)}</li>`).join("");
+    const sources = e.sources.map((s) => `<li>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.text)}</a>` : esc(s.text)}${s.kind || s.locator || s.review ? `<small class="source-provenance">${esc(s.kind || "Kind unspecified")} · ${esc(s.locator || "Locator unspecified")} · ${esc(s.review || "pending")}</small>` : ""}</li>`).join("");
     const contents = [...tb.sections, { id: "references", n: "", title: "References" }];
     host.innerHTML = `
       <div class="tb">

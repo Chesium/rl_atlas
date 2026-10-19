@@ -4,3 +4,5 @@ const FILES = ["core", "envs/grid", "envs/bandit", "envs/chain", "envs/blackjack
   "envs/control", "envs/deep", "recorded", "mcts", "bench", "worlds", "knobs"];
 for (const file of FILES) require(`./${file}.js`);
 module.exports = globalThis.RL.lab;
+require("./deep/dmath.js");
+require("./flows.js");

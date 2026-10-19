@@ -70,7 +70,7 @@
     const tip = target.dataset.tip;
     const parent = !tip && e?.change && st.parent && station(st.parent);
     card = h(`<div class="hovercard" style="--c:${lineColor(st.line)}">
-      <div class="meta">${tip ? "Label" : st.kind === "algorithm" ? "Algorithm" : "Concept"} · Part ${st.part} · ${esc(st.partTitle)}</div>
+      <div class="meta">${tip ? "Label" : st.kind === "algorithm" ? "Algorithm" : st.kind === "result" ? "Result" : "Concept"} · Part ${st.part} · ${esc(st.partTitle)}</div>
       <h4>${esc(tip ? target.textContent : st.title)}</h4>
       <p>${esc(tip || (e ? e.summary : ""))}</p>
       ${parent ? `<p class="chg"><b>One change from ${esc(parent.title)}:</b> ${esc(e.change)}</p>` : ""}
@@ -99,9 +99,9 @@
   document.addEventListener("pointerdown", hideCard);
 
   // ---- quantity highlighting: hover a colored term and every term of that kind lights up ----
-  const KINDS = ["val", "rew", "pol", "err", "knob"];
+  const KINDS = ["val", "rew", "pol", "err", "knob", "certificate", "metric", "violation"];
   document.addEventListener("pointerover", (ev) => {
-    const el = ev.target.closest?.(".q-val, .q-rew, .q-pol, .q-err, .q-knob, [data-q]");
+    const el = ev.target.closest?.(".q-val, .q-rew, .q-pol, .q-err, .q-knob, .q-certificate, .q-metric, .q-violation, [data-q]");
     const kind = el && (el.dataset.q || KINDS.find((k) => el.classList.contains(`q-${k}`)));
     if (kind) document.body.dataset.hot = kind;
     else delete document.body.dataset.hot;

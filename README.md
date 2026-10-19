@@ -23,33 +23,33 @@ Reinforcement learning is easier to understand when you can watch it happen. RL 
 every idea, takes every number it quotes from a real run, and lets you race the algorithms against each other right in
 your browser.
 
-- **103 stations in 15 parts**: the core of Sutton & Barto's *Reinforcement Learning: An Introduction*, then deep RL,
+- **140 stations in 19 parts**: the core of Sutton & Barto's *Reinforcement Learning: An Introduction*, then deep RL,
   the exploration noise and regularizers that make continuous control work, a toolbox for real experiments, and where
-  the field goes next.
+  the field goes next. A third row adds dynamics, contraction, statistical learning and data-driven certificates.
 - **Three ways to read every algorithm**: a story, a textbook chapter and a one-page card.
 - **63 experiments in the Lab**, from one pseudocode line at a time to 50 episodes a second, with the odds over 20 seeds.
+- **Flows and certificates**: linear systems, the damped pendulum and damped Van der Pol, with convex certificate fitting, independent holdout trajectories and 20-seed sweeps.
 - **Deep RL that runs in the page**: networks trained by the guide's own JavaScript trainer.
-- **Private and offline**: one 13 MB file, no server, no account. Your progress stays in your browser.
+- **Private and offline**: one 14 MB file, no server, no account. Your progress stays in your browser.
 
 ## A quick tour
 
 ### The map
 
-<img src="docs/images/map.png" alt="The whole metro map: 15 lines of stations from Start here to Where next, the first four parts read and filled with color">
+<img src="docs/images/map.png" alt="The RL portion of the metro map, from Start here to Where next; the guarantees row is added below it">
 
 Every station is one idea, in reading order: the agent–environment loop, bandits, dynamic programming, Monte Carlo,
 temporal difference, n-step methods and traces, planning, function approximation, deep value methods, policy
 gradients, continuous control and the tools that make it work (exploration noise, smooth policies, regularized
 critics), the toolbox, and where next (MCTS and AlphaZero, offline RL, imitation, RLHF). The stations you have read
-fill with color, and the next one pulses. Two more views draw a family tree for each line, and every algorithm on
-Sutton & Barto's unified map.
+fill with color, and the next one pulses. Three more views draw a family tree, Sutton & Barto's unified map, and the typed prerequisite route to a chosen destination. Supporting and optional branches open on request.
 
 ### Stories
 
 <img src="docs/images/story.gif" alt="The Q-learning story: as the text scrolls, the grid fills with values and the path along the cliff appears">
 
 Scroll the text and the picture follows, one step at a time: an agent takes its first steps, a value changes, a policy
-settles. There are 84 stories. Their runs are picked because they make their point clearly, and the Lab shows how
+settles. There are 87 stories. Their runs are picked because they make their point clearly, and the Lab shows how
 typical they are.
 
 <p align="center">
@@ -121,7 +121,7 @@ node --test
 ```
 
 `build.py` (Python 3.11+, standard library only) checks `content/`, writes `app/content.js`, `app/recordings.js`,
-`app/deep-worker.js` and `app/story-curves.js`, and bundles `rl_atlas.html`. It stops on broken links and lists what
+`app/deep-worker.js`, `app/flow-worker.js` and `app/story-curves.js`, and bundles `rl_atlas.html`. It stops on broken links and lists what
 is still missing. `node --test` (Node 22+) checks the Lab against the textbook results it teaches. After a build,
 `app/index.html` also opens directly, which is handier while editing.
 
@@ -199,6 +199,13 @@ The Textbook numbers its sections, figures and statements, and any display equat
 `\ref{name}` links to them (§2, (3), Figure 1, Theorem 1). Its blocks are `::: definition`, `theorem`, `lemma`,
 `example` (all written `::: kind {#name} Title`), `remark`, `proof` (`::: proof Proof idea` renames it),
 `::: figure {#name}` (a `{{demo}}` line, then the caption) and `::: algorithm {#name} Title` (pseudocode lines).
+
+### Routes, results and guarantees
+
+`content/routes.toml` adds typed station links and named destinations; `prereqs` remain required links. Result cards
+state their assumptions, domain, proof sketch and edition-specific sources. Source review status, personal proof
+progress and numerical evidence are separate. The guarantees Lab is available from **Flows** in the header.
+See [the authoring and numerical notes](docs/guarantees.md) and [the implementation review](docs/m13-m14-review.md).
 
 ### Course companions
 

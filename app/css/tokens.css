@@ -141,3 +141,8 @@
   --ice: #1f2a33;
   --hole: #04080c;
 }
+
+/* Learning with guarantees: validated text colors; shape distinguishes each quantity too. */
+:root { --certificate:#087681; --metric:#9b4775; --violation:#a45a0a; --line-dynamics:#087681; --line-contraction:#9b4775; --line-learning:#7a6200; --line-certificates:#a45a0a; }
+:root[data-theme="dark"] { --certificate:#60ced2; --metric:#e5a0c8; --violation:#edb56c; --line-dynamics:#60ced2; --line-contraction:#e5a0c8; --line-learning:#d5c565; --line-certificates:#edb56c; }
+@media(prefers-color-scheme:dark) { :root:not([data-theme="light"]) { --certificate:#60ced2; --metric:#e5a0c8; --violation:#edb56c; --line-dynamics:#60ced2; --line-contraction:#e5a0c8; --line-learning:#d5c565; --line-certificates:#edb56c; } }

@@ -4,8 +4,8 @@
 # Algorithms also name their `parent` (the algorithm they change in one way: the family tree)
 # and their `labels` (what kind of method they are: the map's filters and the chips on their page).
 
-rows = [[0, 1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14]]
-row_titles = ["Learning with tables", "Learning at scale"]
+rows = [[0, 1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14], [15, 16, 17, 18]]
+row_titles = ["Learning with tables", "Learning at scale", "Learning with guarantees"]
 
 [lines]
 foundations = "Foundations"
@@ -15,6 +15,10 @@ policy = "Policy gradients"
 continuous = "Continuous control"
 toolbox = "Toolbox"
 next = "Where next"
+dynamics = "Dynamics and stability"
+contraction = "Contraction"
+learning = "Learning theory"
+certificates = "Certificates"
 
 # Labels an algorithm can carry. Each one explains itself and points to the station that teaches it.
 [labels]
@@ -298,3 +302,72 @@ off-policy-mc = [0.02, 0.97]
 gradient-mc = [0.315, 0.82]
 reinforce = [0.475, 0.82]
 baseline = [0.475, 0.87]
+
+[[part]]
+n = 15
+title = "Dynamics and stability"
+line = "dynamics"
+folder = "15-dynamics"
+stations = [
+  { id = "dynamical-systems", title = "Dynamical systems and closed loops", short = "Dynamics & closed loops" },
+  { id = "stability", title = "Stability of an equilibrium", short = "Equilibrium stability" },
+  { id = "lyapunov-functions", title = "Lyapunov functions", short = "Lyapunov functions" },
+  { id = "lyapunov-equation", title = "The Lyapunov equation", short = "Lyapunov equation" },
+  { id = "comparison-functions", title = "Comparison functions and the comparison lemma", short = "Comparison functions" },
+  { id = "ode-sensitivity", title = "Existence, dependence and sensitivity", short = "ODE sensitivity" },
+  { id = "converse-iss", title = "Converse certificates and input-to-state stability", short = "Converse and ISS" },
+  { id = "time-dictionary", title = "Continuous and discrete time", short = "Continuous / discrete" },
+  { id = "two-values", title = "Two meanings of V", short = "Two meanings of V" },
+  { id = "controller-or-certificate", title = "A controller or a certificate", short = "Controller / certificate" },
+]
+
+[[part]]
+n = 16
+title = "Incremental stability and contraction"
+line = "contraction"
+folder = "16-contraction"
+stations = [
+  { id = "incremental-stability", title = "Incremental stability", short = "Incremental stability" },
+  { id = "variational-dynamics", title = "Variational dynamics", short = "Variational dynamics" },
+  { id = "contraction-metrics", title = "Contraction metrics", short = "Contraction metrics" },
+  { id = "three-contractions", title = "Three meanings of contraction", short = "Three contractions" },
+  { id = "imitation-deployment", title = "Incremental stability and imitation deployment", short = "Imitation deployment" },
+]
+
+[[part]]
+n = 17
+title = "Learning theory"
+line = "learning"
+folder = "17-learning-theory"
+stations = [
+  { id = "risk-erm", title = "Risk and empirical risk minimization", short = "Risk and ERM" },
+  { id = "concentration", title = "Hoeffding and McDiarmid inequalities", short = "Concentration" },
+  { id = "finite-classes", title = "Finite hypothesis classes", short = "Finite classes" },
+  { id = "uniform-convergence", title = "Uniform convergence", short = "Uniform convergence" },
+  { id = "rademacher-complexity", title = "Rademacher complexity", short = "Rademacher complexity" },
+  { id = "covering-dudley", title = "Covering numbers and Dudley’s integral", short = "Covers and Dudley" },
+  { id = "margin-bounds", title = "Margins and fast rates", short = "Margins and fast rates" },
+  { id = "trajectories-as-samples", title = "Trajectories as independent samples", short = "Trajectories as samples" },
+  { id = "rademacher-properties", title = "Properties and the contraction lemma", short = "Complexity properties" },
+  { id = "covering-properties", title = "Properties of covering numbers", short = "Cover properties" },
+  { id = "kernels-random-features", title = "Kernels and random features", short = "Kernels and features" },
+  { id = "dual-sudakov", title = "Dual Sudakov: structured entropy", short = "Dual Sudakov" },
+]
+
+[[part]]
+n = 18
+title = "Learning certificates"
+line = "certificates"
+folder = "18-certificates"
+stations = [
+  { id = "learning-certificates", title = "Learning a certificate from data", short = "Learning certificates" },
+  { id = "certificate-classes", title = "Certificate classes and their joint norm", short = "Joint certificate norm" },
+  { id = "certificates-in-practice", title = "Certificates in practice", short = "Certificates in practice" },
+  { id = "vdp-certificates", title = "Damped Van der Pol: violation sets", short = "Van der Pol experiment" },
+  { id = "boffi-lemma-4-1", title = "Boffi Lemma 4.1: a fast margin bound", short = "Lemma 4.1", kind = "result" },
+  { id = "boffi-thm-4-2", title = "Boffi Theorem 4.2: smooth parametric classes", short = "Theorem 4.2", kind = "result" },
+  { id = "boffi-thm-4-3", title = "Boffi Theorem 4.3: structured matrix classes", short = "Theorem 4.3", kind = "result" },
+  { id = "boffi-thm-4-4", title = "Boffi Theorem 4.4: a kernel class", short = "Theorem 4.4", kind = "result" },
+  { id = "boffi-thm-5-1", title = "Boffi Theorem 5.1: from probability to decrease", short = "Theorem 5.1", kind = "result" },
+  { id = "boffi-thm-5-2", title = "Boffi Theorem 5.2: a conditional metric guarantee", short = "Theorem 5.2", kind = "result" },
+]

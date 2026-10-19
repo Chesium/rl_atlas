@@ -40,7 +40,7 @@
   const FULL = new Set(["idea", "knobs", "check"]);
 
   function card(e) {
-    const sources = e.sources.map((s) => `<li>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.text)}</a>` : esc(s.text)}</li>`).join("");
+    const sources = e.sources.map((s) => `<li>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.text)}</a>` : esc(s.text)}${s.kind || s.locator || s.review ? `<small class="source-provenance">${esc(s.kind || "Kind unspecified")} · ${esc(s.locator || "Locator unspecified")} · ${esc(s.review || "pending")}</small>` : ""}</li>`).join("");
     // A half-width section left without a partner (the next one is full-width, or there is none) takes the whole row.
     const wide = new Set();
     let open = -1;
@@ -74,6 +74,7 @@
           ${badge(st)}
           <h1>${esc(st.title)}</h1>
           <p class="summary">${esc(e.summary)}</p>
+          ${e.time ? `<p class="faint">${esc({both:"Continuous and discrete time",continuous:"Continuous time",discrete:"Discrete time",statistical:"Statistical statement"}[e.time])}${st.kind === "result" ? " · Result" : ""}</p>` : ""}
           <div class="labels">${labels}</div>
           ${parent ? `<p class="change"><span class="eyebrow">One change from <a class="term as-is" data-term="${parent.id}" href="#/e/${parent.id}">${esc(parent.title)}</a></span>${esc(e.change)}</p>` : ""}
           <nav class="modes">
@@ -85,9 +86,12 @@
           ${!e.story && e.storyIn?.length ? `<p class="story-in">See this idea at work in the ${e.storyIn.length > 1 ? "stories" : "story"} of ${e.storyIn.map((s) => `<a class="term" data-term="${s}" href="#/e/${s}">${esc(station(s).title)}</a>`).join(e.storyIn.length > 2 ? ", " : " and ").replace(/, ([^,]*)$/, " and $1")}.</p>` : ""}
         </header>
         <div class="mode-body"></div>
+        ${st.kind === "result" ? `<p class="proof-progress"><label><input type="checkbox" data-proof="${id}" ${store.get(`proof:${id}`, false) ? "checked" : ""}> I have worked through this proof</label><small>Personal study progress. Source review status and numerical checks are recorded separately.</small></p>` : ""}
         ${neighbours(st)}
       </article>`;
     wire(host.querySelector(".hero"));
+    const proofTick = host.querySelector("[data-proof]");
+    if (proofTick) proofTick.addEventListener("change", () => store.set(`proof:${id}`, proofTick.checked));
     wire(host.querySelector(".entry-nav"));
 
     // Coming back from the Lab: the Lab shrinks back into its button.

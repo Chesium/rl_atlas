@@ -1,0 +1,48 @@
+/* Guarantees quantities use both color and geometry: contours, dotted metric balls, filled violation squares. */
+.q-certificate { color:var(--certificate); } .q-metric { color:var(--metric); } .q-violation { color:var(--violation); }
+body[data-hot="certificate"] .q-certificate, body[data-hot="certificate"] [data-q="certificate"] { background:color-mix(in oklab,var(--certificate) 15%,transparent); }
+body[data-hot="metric"] .q-metric, body[data-hot="metric"] [data-q="metric"] { background:color-mix(in oklab,var(--metric) 15%,transparent); }
+body[data-hot="violation"] .q-violation, body[data-hot="violation"] [data-q="violation"] { background:color-mix(in oklab,var(--violation) 15%,transparent); }
+.proof-progress { padding:20px; border:1px solid var(--line); border-radius:12px; }
+.proof-progress small { display:block; margin-top:8px; color:var(--ink-2); }
+.source-provenance { display:block; color:var(--ink-2); margin:4px 0 10px; overflow-wrap:anywhere; }
+.flow-lab { max-width:1400px; }
+.flow-controls { display:flex; flex-wrap:wrap; gap:14px; align-items:end; padding:20px; }
+.flow-controls label { display:grid; gap:6px; font-size:13px; font-weight:600; max-width:100%; }
+.flow-controls input[type=number] { width:110px; }
+.flow-controls input,.flow-controls select { padding:7px; background:var(--surface); color:var(--ink); border:1px solid var(--line-2); border-radius:6px; max-width:100%; }
+.flow-controls input,.flow-controls select,.flow-strip button { font-family:var(--font); }
+.flow-controls input[type=checkbox],.flow-transport input[type=checkbox] { accent-color:var(--certificate); }
+.flow-matrix { display:flex; flex-wrap:wrap; gap:8px; border:1px solid var(--line); }
+.flow-matrix input[type=number] { width:72px; }
+.flow-main { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:20px; margin:20px 0; }
+.flow-main>.card,.flow-method { padding:20px; min-width:0; }
+.flow-plane,.flow-chart { display:block; width:100%; height:auto; overflow:hidden; }
+.flow-plane text,.flow-chart text { fill:var(--ink-2); font:12px var(--font); }
+.flow-axis { fill:none; stroke:var(--line-2); stroke-width:1; }
+.flow-field { fill:none; stroke:var(--ink-3); stroke-width:1; }
+.flow-contour { fill:none; stroke:var(--certificate); opacity:.5; }
+.flow-trajectory { fill:none; stroke:var(--ink); stroke-width:1.5; opacity:.65; }
+.flow-state { fill:var(--certificate); }
+.flow-cloud { fill:none; stroke:var(--metric); stroke-width:1.5; }
+.flow-metric { fill:none; stroke:var(--metric); stroke-dasharray:2 2; }
+.flow-violation { fill:var(--violation); opacity:.25; }
+.flow-curve { fill:none; stroke:var(--certificate); stroke-width:3; }
+.flow-reference { fill:none; stroke:var(--ink-2); stroke-width:2; stroke-dasharray:7 5; }
+.flow-transport { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+.flow-transport label { font-size:13px; }
+.flow-legend { font-size:12px; color:var(--ink-2); }
+.flow-legend span { color:var(--certificate); } .flow-legend b { color:var(--violation); }
+.flow-strip { display:flex; flex-wrap:wrap; gap:4px; margin:12px 0; }
+.flow-strip button { background:var(--surface-2); color:var(--ink); border:1px solid var(--line-2); border-radius:6px; padding:6px; cursor:pointer; }
+.flow-strip small { display:block; font-size:10px; }
+.flow-results p,.flow-method p { line-height:1.6; }
+.flow-results table { width:100%; font-size:13px; }
+.rate-bars { display:grid; gap:12px; padding:20px 0; min-height:100px; }
+.rate-bars div { background:var(--certificate); color:var(--surface); min-width:125px; padding:8px; white-space:nowrap; box-sizing:border-box; }
+.rate-bars div+div { background:var(--metric); }
+.scene-flow { padding:12px; }
+.scene-flow .flow-plane { width:100%; }
+.lenses:not(.course-lenses) { grid-template-columns:repeat(4,minmax(0,1fr)); }
+@media(max-width:900px) { .flow-main { grid-template-columns:minmax(0,1fr); } .flow-controls { padding:12px; gap:10px; } }
+@media(max-width:600px) { .flow-matrix { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; } .flow-matrix input[type=number] { width:100%; } }

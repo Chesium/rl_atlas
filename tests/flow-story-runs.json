@@ -1,0 +1,17 @@
+{
+  "2": {
+    "Q": "4380dc688a5e9cea4ae418d235080bb2876d5dadcb5a05dad63a448e02406405",
+    "bad": 76,
+    "feasible": true
+  },
+  "8": {
+    "Q": "62fa4347d4ebbb92e22a3a4765e5ca2bb240a982600e6cad2c62e0e61bf17f41",
+    "bad": 6,
+    "feasible": true
+  },
+  "32": {
+    "Q": "c2349b2f1876fb48905197d2fca74f0271b1e7a12f5cd9c0eaf8cb6d81c475d0",
+    "bad": 0,
+    "feasible": true
+  }
+}

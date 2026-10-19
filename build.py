@@ -31,8 +31,10 @@ REQUIRED = {
         "card": ("idea", "update", "change", "backup", "pseudocode", "perks", "flaws", "knobs", "pitfalls", "check"),
     },
     "concept": {"fields": ("summary", "sources"), "card": ("idea",)},
+    "result": {"fields": ("summary", "sources", "time"),
+               "card": ("statement", "intuition", "assumptions", "proof", "uses")},
 }
-FRONT_MATTER = {"summary", "change", "prereqs", "lab", "sources", "story", "story_in"}
+FRONT_MATTER = {"summary", "change", "prereqs", "lab", "sources", "story", "story_in", "time"}
 # The keys of a Lab preset (content/lab.toml); any other key is a knob, and what its charts may plot.
 # Lab algorithms that teach a concept station, each with its station: DPG on the throw, offline RL on the cliff,
 # imitation on the ice bridge, planning in a learned model among hidden cliffs. Their pseudocode is the station's.
@@ -347,16 +349,26 @@ def compile_entry(path: Path, site: dict, problems: Problems) -> dict | None:
         problems.warn(where, f"belongs in content/{station['folder']}/")
 
     md = Markdown(site["stations"], site["presets"], where, problems)
-    need = REQUIRED[station["kind"]]
+    need = REQUIRED.get(station["kind"], REQUIRED["concept"])
     for field in need["fields"]:
         if field not in meta:
-            problems.warn(where, f"no '{field}' yet")
+            (problems.error if station["kind"] == "result" else problems.warn)(where, f"no '{field}' yet")
     for field in meta.keys() - FRONT_MATTER:
         note = " (parents and labels live in content/map.toml)" if field in ("parent", "labels") else ""
         problems.warn(where, f"unknown front matter field '{field}'{note}")
     for ref in meta.get("prereqs", []) + meta.get("story_in", []):
         if ref not in site["stations"]:
             problems.error(where, f"'{ref}' is not a station on the map")
+    if meta.get("time") not in (None, "continuous", "discrete", "both", "statistical"):
+        problems.error(where, "time must be continuous, discrete, both or statistical")
+    sources = meta.get("sources", [])
+    if not isinstance(sources, list) or (station["kind"] == "result" and not sources):
+        problems.error(where, "sources must be a list; results need at least one source")
+        sources = []
+    for source in sources:
+        validate_source(source, where, problems)
+        if station["kind"] == "result" and (not isinstance(source, dict) or not all(source.get(k) for k in ("kind", "locator", "review"))):
+            problems.error(where, "result sources require kind, locator and review")
     if station.get("parent") and not meta.get("change"):
         problems.warn(where, "has a parent but no 'change' saying what changed")
     if "lab" in meta and meta["lab"] not in site["presets"]:
@@ -392,8 +404,8 @@ def compile_entry(path: Path, site: dict, problems: Problems) -> dict | None:
             section["title"], section["html"] = tb.resolve(section["title"]), tb.resolve(section["html"])
         words = len(re.findall(r"[A-Za-z]+", MATH.sub(" ", body["textbook"])))
         textbook = {"minutes": max(1, round(words / 160)), "sections": sections}
-    elif station["kind"] == "algorithm":
-        problems.warn(where, "no '## Textbook' yet")
+    elif station["kind"] in ("algorithm", "result"):
+        (problems.error if station["kind"] == "result" else problems.warn)(where, "no '## Textbook' yet")
 
     card, pseudocode = [], ""
     for title, text in split_headings(body.get("card", ""), "###"):
@@ -404,10 +416,11 @@ def compile_entry(path: Path, site: dict, problems: Problems) -> dict | None:
             pseudocode = html_
     for cid in need["card"]:
         if cid not in {section["id"] for section in card}:
-            problems.warn(where, f"the card has no '{cid}' section")
+            (problems.error if station["kind"] == "result" else problems.warn)(where, f"the card has no '{cid}' section")
 
     return {
         "summary": meta.get("summary", ""),
+        "time": meta.get("time"),
         "change": meta.get("change", ""),
         "prereqs": meta.get("prereqs", []),
         # an entry without a story of its own can point to the stories that show its idea at work
@@ -507,6 +520,73 @@ def compile_preset(pid: str, raw: dict, stations: dict, recordings: dict, proble
     }
 
 
+SOURCE_KINDS = {"textbook", "paper", "course note", "personal note", "bridge explanation"}
+REVIEWS = {"located", "proof-checked", "pending"}
+LINK_ROLES = {"required", "sufficient", "illustrative", "motivation", "optional"}
+
+
+def validate_source(source: dict, where: str, problems: Problems) -> None:
+    if not isinstance(source, dict):
+        problems.error(where, "source must be a table")
+        return
+    if not isinstance(source.get("text"), str) or not source["text"].strip():
+        problems.error(where, "source needs nonempty text")
+    for key, allowed in (("kind", SOURCE_KINDS), ("review", REVIEWS)):
+        if key in source and source[key] not in allowed:
+            problems.error(where, f"source {key}: unknown value '{source[key]}'")
+    if "locator" in source and (not isinstance(source["locator"], str) or not source["locator"].strip()):
+        problems.error(where, "source locator must be a nonempty edition-specific string")
+
+
+def compile_routes(raw: dict, stations: dict, entries: dict, problems: Problems) -> dict:
+    """Arrows point from a prerequisite to its consumer; parent is deliberately independent."""
+    links = list(raw.get("link", []))
+    links += [{"from": ref, "to": sid, "role": "required", "at": "Prerequisites"}
+              for sid, entry in entries.items() for ref in entry["prereqs"]]
+    unique, seen = [], set()
+    for link in links:
+        if not isinstance(link, dict):
+            problems.error("content/routes.toml", "link must be a table")
+            continue
+        if any(link.get(k) not in stations for k in ("from", "to")):
+            problems.error("content/routes.toml", f"unknown station in {link}")
+            continue
+        if link.get("role") not in LINK_ROLES or not isinstance(link.get("at"), str) or not link["at"].strip():
+            problems.error("content/routes.toml", f"link needs a known role and nonempty at: {link}")
+            continue
+        key = tuple(link[k] for k in ("from", "to", "role", "at"))
+        if key not in seen:
+            unique.append(link)
+            seen.add(key)
+    incoming = {sid: [] for sid in stations}
+    for link in unique:
+        if link["role"] == "required":
+            incoming[link["to"]].append(link["from"])
+    state = {}
+    def visit(sid):
+        if state.get(sid) == 1:
+            problems.error("content/routes.toml", f"cycle of required links through '{sid}'")
+            return
+        if state.get(sid) == 2:
+            return
+        state[sid] = 1
+        for ref in incoming[sid]:
+            visit(ref)
+        state[sid] = 2
+    for sid in stations:
+        visit(sid)
+    routes, ids = [], set()
+    for route in raw.get("route", []):
+        if not isinstance(route, dict):
+            problems.error("content/routes.toml", "route must be a table")
+            continue
+        if not route.get("id") or route["id"] in ids or route.get("destination") not in stations or not route.get("title"):
+            problems.error("content/routes.toml", f"invalid or duplicate route: {route}")
+        ids.add(route.get("id"))
+        routes.append(route)
+    return {"links": unique, "named": routes}
+
+
 def compile_content(problems: Problems) -> dict:
     atlas = tomllib.loads((CONTENT / "map.toml").read_text(encoding="utf-8"))
     presets = tomllib.loads((CONTENT / "lab.toml").read_text(encoding="utf-8"))
@@ -520,6 +600,8 @@ def compile_content(problems: Problems) -> dict:
             if st["id"] in stations:
                 problems.error("content/map.toml", f"station '{st['id']}' appears twice")
             st.setdefault("kind", "concept")
+            if st["kind"] not in REQUIRED:
+                problems.error("content/map.toml", f"unknown station kind '{st['kind']}'")
             stations[st["id"]] = {**st, "part": part["n"], "folder": part["folder"]}
         parts.append({key: part[key] for key in ("n", "title", "line", "stations")})
     for label in atlas["labels"].values():
@@ -583,7 +665,10 @@ def compile_content(problems: Problems) -> dict:
             if not entries.get(RUNNABLE_CONCEPTS.get(algo, algo), {}).get("pseudocode"):
                 problems.warn("content/lab.toml", f"preset '{pid}' runs '{algo}', which has no written pseudocode yet")
 
+    routes_path = CONTENT / "routes.toml"
+    routes = compile_routes(tomllib.loads(routes_path.read_text(encoding="utf-8")) if routes_path.exists() else {}, stations, entries, problems)
     return {
+        "routes": routes,
         "rows": atlas["rows"],
         "rowTitles": atlas["row_titles"],
         "lines": atlas["lines"],
@@ -977,6 +1062,13 @@ def main() -> int:
         f"(globalThis.RL = globalThis.RL || {{}}).deepWorker = {json.dumps(worker)};\n",
         encoding="utf-8",
     )
+    flow_worker = "\n".join((ROOT / name).read_text(encoding="utf-8")
+                            for name in ("lab/core.js", "lab/deep/dmath.js", "lab/flows.js", "lab/flow-worker.js"))
+    (APP / "flow-worker.js").write_text(
+        "// Generated by build.py from the flow engine. Do not edit.\n"
+        f"(globalThis.RL = globalThis.RL || {{}}).flowWorker = {json.dumps(flow_worker)};\n",
+        encoding="utf-8",
+    )
     size = bundle()
     if course is not None:
         out = pack / f"rl_atlas-{course['id']}.html"
@@ -994,9 +1086,9 @@ def main() -> int:
     written = set(data["entries"])
     algos = sum(1 for part in data["parts"] for st in part["stations"] if st["kind"] == "algorithm" and st["id"] in written)
     log.info(
-        "%d stations, %d written (%d of %d algorithms, %d of %d concepts), %d lab preset(s), %d warning(s)",
+        "%d stations, %d written (%d of %d algorithms, %d concepts, %d results), %d lab preset(s), %d warning(s)",
         len(kinds), len(written), algos, kinds.count("algorithm"),
-        len(written) - algos, kinds.count("concept"), len(data["presets"]), problems.warnings,
+        kinds.count("concept"), kinds.count("result"), len(data["presets"]), problems.warnings,
     )
     log.info("wrote %s (%.1f MB)", OUT.name, size / 1e6)
     return 0

@@ -21,7 +21,7 @@ you learn by watching things happen, not only by reading.
 - The tabular / function-approximation split is a visible line on the map ("Learning with tables" / "Learning at scale").
 - Sources: Sutton & Barto (2018), OpenAI Spinning Up and the original papers, in our own words.
 
-The full curriculum, 103 stations in 15 parts, lives in [content/map.toml](content/map.toml).
+The full curriculum, 140 stations in 19 parts, lives in [content/map.toml](content/map.toml).
 
 ## Look and feel
 
@@ -499,7 +499,7 @@ animations and hover effects this guide relies on would not be smooth.
   displayed page counter. Automated revision flows were exercised; an actual student's revision session remains
   a user acceptance check, not a claim made by these tests.
 
-- [ ] **M13 · Routes and results**: what the atlas needs before it can lead a reader to a paper's theorems. M12's
+- [x] **M13 · Routes and results**: what the atlas needs before it can lead a reader to a paper's theorems. M12's
   derivation map uses it too. Today each station has one `parent` (for the family tree) and an untyped `prereqs`
   list, and comes in one of two kinds, algorithm or concept.
   - *Typed links.* `content/routes.toml` holds links between stations. Each link has a role: required (for a named
@@ -524,7 +524,13 @@ animations and hover effects this guide relies on would not be smooth.
   - Done when routes work over the RL stations already written (for example "everything leading to PPO", or to
     Q-learning), reviewed with screenshots.
 
-- [ ] **M14 · Learning with guarantees**: a third row on the map, after "Learning with tables" and "Learning at scale".
+  **Delivered and checked, 2026-10-19.** The fourth map view supports every station and seven named routes,
+  with five edge roles, folded supporting branches, deterministic closure/layout and required-cycle validation.
+  Result schema, edition-specific provenance and separate personal proof progress are implemented. PPO and
+  Q-learning routes work over the existing RL content. Chrome and Edge screenshots and offline checks were reviewed.
+  Details and validation limits: `docs/m13-m14-review.md` and `docs/guarantees.md`.
+
+- [x] **M14 · Learning with guarantees**: a third row on the map, after "Learning with tables" and "Learning at scale".
   It covers what control theory and learning theory say about learned systems, and leads to one paper: *Learning
   Stability Certificates from Data* (Boffi, Tu, Matni, Slotine & Sindhwani, CoRL 2020, PMLR 155, 2021). The proposal:
   `tmp/ese6180-boffi-prerequisite-map.md`. Needs M13. This milestone is the public atlas, written in its own words
@@ -633,6 +639,17 @@ animations and hover effects this guide relies on would not be smooth.
 
   **Left out, on purpose**: Hespanha and Khalil beyond the route; sum-of-squares programming beyond the small cases the
   Lab needs; the quadruped in the Lab.
+
+  **Delivered and checked, 2026-10-19.** All four parts are present: 37 new stations (including six results),
+  each with a Textbook and Card, and three stories. The flows/certificates Lab has fixed-step deterministic flows,
+  PSD/convex fitting, polynomial metrics, phase-plane evidence, an independent holdout and a 20-seed bench/sweep.
+  The Van der Pol story fits are pinned. The public build has 140 stations, 87 stories and no private course payload.
+  All 97 tests pass. Chrome and Edge each pass 148 new entry/mode/viewport checks, the full metric sweep, worker
+  cancellation, offline operation and exact Node/browser agreement; screenshots were reviewed in both themes.
+  Limits kept explicit: all six result sources are located, not independently proof-checked; the Lab uses relative
+  margins and sampled constraints; its Figure 1 route is an adapted experiment, not an exact numerical reproduction.
+  The original dynamics, ball, horizon and metric degree are retained; integration, derivative access and solver differ.
+  These distinctions and the source's sign/rate conventions are documented in `docs/m13-m14-review.md`.
 
 - [ ] **M15 · The ESE6180 companion**: the course pack for ESE 6180 (*Learning and Control*), built with M12's mechanism
   and M13's routes. From a station you reach the course notes and book pages on it; from the notes you reach the

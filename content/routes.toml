@@ -1,0 +1,125 @@
+# Links point from the idea used to the station using it. Existing prereqs are required links too.
+[[route]]
+id = "read-ppo"
+title = "Everything leading to PPO"
+destination = "ppo"
+
+[[route]]
+id = "read-q-learning"
+title = "Everything leading to Q-learning"
+destination = "q-learning"
+
+[[link]]
+from = "trpo"
+to = "ppo"
+role = "motivation"
+at = "Textbook: replacing a trust-region constraint with clipping"
+
+[[link]]
+from = "gae"
+to = "ppo"
+role = "optional"
+at = "Advantage estimation in a practical implementation"
+
+[[link]]
+from = "sarsa"
+to = "q-learning"
+role = "illustrative"
+at = "Card: changing the next-action target"
+
+[[route]]
+id = "read-thm-4-2"
+title = "Read Theorem 4.2"
+destination = "boffi-thm-4-2"
+
+[[route]]
+id = "understand-contraction"
+title = "Understand contraction certificates"
+destination = "contraction-metrics"
+
+[[route]]
+id = "read-matrix-bound"
+title = "Read the matrix bound"
+destination = "boffi-thm-4-3"
+
+[[route]]
+id = "read-kernel-bound"
+title = "Read the kernel bound"
+destination = "boffi-thm-4-4"
+
+[[route]]
+id = "reproduce-figure-1"
+title = "Reproduce Figure 1: an adapted experiment"
+destination = "vdp-certificates"
+
+[[link]]
+from = "imitation"
+to = "learning-certificates"
+role = "motivation"
+at = "Why certify a learned closed loop"
+
+[[link]]
+from = "lyapunov-equation"
+to = "contraction-metrics"
+role = "illustrative"
+at = "Constant-metric linear case"
+
+[[link]]
+from = "boffi-thm-4-4"
+to = "boffi-thm-4-2"
+role = "optional"
+at = "Alternative nonparametric class; not needed in Appendix B.1"
+
+[[link]]
+from = "boffi-thm-4-3"
+to = "boffi-thm-4-2"
+role = "optional"
+at = "Sharper structured alternative"
+
+[[link]]
+from = "lyapunov-functions"
+to = "stability"
+role = "sufficient"
+at = "Positive definite function with strict decrease, invariant domain and forward existence"
+
+[[link]]
+from = "time-dictionary"
+to = "contraction-metrics"
+role = "optional"
+at = "Discrete-time comparison"
+
+[[link]]
+from = "two-values"
+to = "learning-certificates"
+role = "motivation"
+at = "Certificate V versus policy value"
+
+[[link]]
+from = "three-contractions"
+to = "contraction-metrics"
+role = "optional"
+at = "Bellman and statistical meanings"
+
+[[link]]
+from = "generalization"
+to = "risk-erm"
+role = "motivation"
+at = "Bridge from RL generalization to statistical risk"
+
+[[link]]
+from = "features"
+to = "certificate-classes"
+role = "illustrative"
+at = "Feature maps in a certificate parameterization"
+
+[[link]]
+from = "policy"
+to = "controller-or-certificate"
+role = "motivation"
+at = "Certifying a fixed policy's closed loop"
+
+[[link]]
+from = "neural-networks"
+to = "boffi-thm-4-2"
+role = "optional"
+at = "Example class: smooth networks; not needed for the parametric proof"

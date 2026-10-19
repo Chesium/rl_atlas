@@ -18,6 +18,7 @@
     <button class="pill search" type="button" aria-label="Search the atlas (Ctrl K)">${SEARCH}<span>Search</span><kbd>Ctrl K</kbd></button>
     ${RL.course ? `<a class="pill c-pill" href="#/c/">${esc(RL.course.code)}</a>` : ""}
     <a class="pill" href="#/symbols">Symbols</a>
+    <a class="pill" href="#/flows">Flows</a>
     <button class="icon-btn theme" type="button" aria-label="Switch between light and dark"></button>`;
 
   // ---- routes ----
@@ -27,6 +28,7 @@
     if ((m = path.match(/^\/e\/([\w-]+)(?:\/(story|textbook|card|course))?$/))) return { name: "entry", id: m[1], mode: m[2], depth: 1 };
     if ((m = path.match(/^\/lab\/([\w-]+)$/))) return { name: "lab", id: m[1], depth: 2 };
     if (path === "/symbols") return { name: "symbols", depth: 1 };
+    if (path === "/flows") return { name: "flows", depth: 1 };
     if (RL.course && (m = path.match(/^\/c\/(.*)$/))) return { name: "course", id: m[1], depth: 1 };
     return { name: "map", depth: 0 };
   }
@@ -42,6 +44,7 @@
       const last = preset?.racers.at(-1).algorithm, via = app.from?.name === "entry" ? app.from.id : RL.lab?.algorithms?.[last]?.station || last;
       html = `${home}${sep}${via && station(via) ? `<a href="#/e/${via}">${esc(station(via).title)}</a>${sep}` : ""}<span class="here">Lab${preset ? ` · ${esc(preset.title)}` : ""}</span>`;
     } else if (route.name === "symbols") html = `${home}${sep}<span class="here">Symbols and colors</span>`;
+    else if (route.name === "flows") html = `${home}${sep}<span class="here">Flows and certificates Lab</span>`;
     else if (route.name === "course") html = `${home}${sep}${route.id ? `<a href="#/c/">${esc(RL.course.code)}</a>${sep}` : ""}<span class="here">${esc(RL.courseTitle(route.id))}</span>`;
     $(".crumbs", top).innerHTML = html;
   }

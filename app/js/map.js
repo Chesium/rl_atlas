@@ -14,6 +14,7 @@
     map: { name: "Metro", caption: "Every station is one idea, in reading order. Start at the top left: first the problem, then methods that keep a table, then methods that scale." },
     tree: { name: "Tree", caption: "One tree per line, read from the top. Each station grows from the one it builds on; an algorithm from the algorithm it changes." },
     unified: { name: "Unified", caption: "Every algorithm, by how far its update looks ahead (down) and whether it samples one outcome or averages over all of them (across)." },
+    route: { name: "Routes", caption: "Required ideas lead to the destination on the right; other branches open below. Solid: required; long dash: sufficient; short dash: illustrative; dotted: motivation; faint dash: optional. Hover a link for where it is used." },
   };
   const cameras = {}; // one camera per view, kept between visits
   let drawn = false; // the lines draw themselves only the first time
@@ -97,14 +98,14 @@
       });
     }
     // From the end of the first row to the start of the second: the journey continues.
-    if (L.rows.length > 1) {
-      const [r1, r2] = L.rows;
+    for (let ri = 0; ri < L.rows.length - 1; ri++) {
+      const [r1, r2] = L.rows.slice(ri, ri + 2);
       const a = L.pos.get(`part-${r1.parts[r1.parts.length - 1].n}`), b = L.pos.get(`part-${r2.parts[0].n}`);
       const right = L.width - 8, mid = r1.bottom + 58;
       // It ends where the second row's title begins, so the dotted line runs into that title.
       const titleEnd = LEFT + r2.title.length * 9.6 + 14;
       svg += `<path class="ribbon" d="M${a.x + 18} ${a.y} H${right - 24} Q${right} ${a.y} ${right} ${a.y + 24} V${mid - 24} Q${right} ${mid} ${right - 24} ${mid} H${titleEnd}"/>`;
-      svg += `<text class="ribbon-label" x="${right - 30}" y="${mid - 9}" text-anchor="end">When tables are not enough, the journey continues</text>`;
+      svg += `<text class="ribbon-label" x="${right - 30}" y="${mid - 9}" text-anchor="end">${ri === 0 ? "When tables are not enough, the journey continues" : "From learning behavior to understanding guarantees"}</text>`;
     }
     for (const p of C.parts) {
       const hub = L.pos.get(`part-${p.n}`), last = L.pos.get(p.stations[p.stations.length - 1].id);
@@ -177,7 +178,14 @@
 
   RL.views.map = function (host) {
     const C = RL.content;
-    const layouts = { map: metroLayout(), tree: treeLayout(), unified: unifiedLayout() };
+    let destination = RL.station(store.get("routeDestination")) ? store.get("routeDestination") : "ppo";
+    let optional = store.get("routeOptional", false);
+    const routeLayout = () => RL.routes.layout(destination, C.routes.links, optional);
+    const routeDrawing = (L) => '<defs><marker id="route-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink-2)"/></marker></defs>' + L.edges.map((e) => {
+      const a = L.pos.get(e.from), b = L.pos.get(e.to);
+      return `<path class="route-edge role-${e.role}" marker-end="url(#route-arrow)" aria-label="${esc(`${e.role}: ${e.at}`)}" d="M${a.x + 9} ${a.y} C${a.x + 120} ${a.y} ${b.x - 120} ${b.y} ${b.x - 10} ${b.y}"><title>${esc(`${e.role}: ${e.at}`)}</title></path>`;
+    }).join("");
+    const layouts = { map: metroLayout(), tree: treeLayout(), unified: unifiedLayout(), route: routeLayout() };
     const extra = RL.mapLenses || [], lenses = { ...LENSES };
     for (const l of extra) { lenses[l.id] = l; layouts[l.id] = l.layout(); }
     // the tabs of the course's views; a tab with several maps (variants) remembers the one last shown
@@ -211,6 +219,13 @@
               ${tabs.map((l) => `<button type="button" role="tab" data-lens="${l.id}" data-tab="${l.tab}">${esc(l.name)}</button>`).join("")}
             </div><div class="lens-variants"></div>` : ""}
             <p class="lens-caption"></p>
+            <div class="route-controls">
+              <label>Destination<select class="route-destination" aria-label="Route destination">
+              <optgroup label="Named routes">${C.routes.named.map((r) => `<option value="${r.destination}">${esc(r.title)}</option>`).join("")}</optgroup>
+              <optgroup label="Every station">${RL.order.map((s) => `<option value="${s.id}">${esc(s.title)}</option>`).join("")}</optgroup></select></label>
+              <label><input class="route-optional" type="checkbox" ${optional ? "checked" : ""}> Open supporting and optional branches</label>
+              <a class="route-read" href="#/e/${destination}/textbook">Read the destination →</a>
+            </div>
           </section>
           <section class="mp-sec mp-lines">
             <h2 class="mp-title">Lines <span>read</span></h2>
@@ -229,6 +244,7 @@
           <g class="deco deco-map">${metroDrawing(layouts.map)}</g>
           <g class="deco deco-tree">${treeDrawing(layouts.tree)}</g>
           <g class="deco deco-unified">${unifiedDrawing(layouts.unified)}</g>
+          <g class="deco deco-route">${routeDrawing(layouts.route)}</g>
           ${extra.map((l) => `<g class="deco" data-deco="${l.id}">${l.drawing(layouts[l.id])}</g>`).join("")}
           ${stations(next)}
         </g></svg>
@@ -253,6 +269,8 @@
       for (const [id, g] of nodes) {
         const at = pos.get(id);
         g.classList.toggle("out", !at);
+        g.setAttribute("tabindex", at ? "0" : "-1");
+        g.setAttribute("aria-hidden", String(!at));
         if (at) g.style.transform = `translate(${at.x}px, ${at.y}px)`;
       }
       // In the tree a name sits above its dot, so the branches can leave from the dot; a leaf keeps its name on
@@ -265,6 +283,7 @@
       host.querySelector(".map-view").dataset.lens = lens;
       host.querySelectorAll(".lenses [data-lens]").forEach((b) => b.setAttribute("aria-selected", String(tabOf(b.dataset.lens) === tabOf(lens))));
       host.querySelector(".lens-caption").textContent = lenses[lens].caption;
+      host.querySelector(".route-controls").hidden = lens !== "route";
       svg.querySelectorAll("[data-deco]").forEach((g) => g.classList.toggle("on", g.dataset.deco === lens));
       const vs = lenses[lens].tab ? variants(lenses[lens].tab) : [], box = host.querySelector(".lens-variants");
       if (box) box.innerHTML = vs.length > 1 ? vs.map((l) => `<button class="chip" type="button" data-lens="${l.id}" aria-pressed="${l.id === lens}">${esc(l.variant)}</button>`).join("") : "";
@@ -316,6 +335,22 @@
       apply();
       keep();
     }
+    const select = host.querySelector(".route-destination");
+    select.value = destination;
+    function changeRoute() {
+      cancelAnimationFrame(raf);
+      destination = select.value;
+      optional = host.querySelector(".route-optional").checked;
+      store.set("routeDestination", destination); store.set("routeOptional", optional);
+      layouts.route = routeLayout();
+      host.querySelector(".deco-route").innerHTML = routeDrawing(layouts.route);
+      host.querySelector(".route-read").href = `#/e/${destination}/textbook`;
+      delete cameras.route;
+      if (lens !== "route") switchTo("route");
+      else { arrange(); fit(); }
+    }
+    select.addEventListener("change", changeRoute);
+    host.querySelector(".route-optional").addEventListener("change", changeRoute);
     const resized = new ResizeObserver(() => {
       if (!view) return;
       if (!cameras[lens]?.moved) fit();
@@ -330,6 +365,7 @@
     }
     function tween(to, ms, done) {
       cancelAnimationFrame(raf);
+      if (RL.reducedMotion()) { view = to; apply(); done?.(); return; }
       const from = { ...view }, t0 = performance.now();
       const ease = (t) => 1 - (1 - t) ** 3;
       const frame = (t) => {
@@ -396,7 +432,7 @@
         if (ok && st.kind === "algorithm") matches += 1;
       }
       host.querySelectorAll("[data-label]").forEach((b) => b.setAttribute("aria-pressed", String(filters.has(b.dataset.label))));
-      host.querySelector(".mf-count").textContent = chosen.length ? `${matches} of ${algorithms.length} algorithms` : `${algorithms.length} algorithms, ${RL.order.length - algorithms.length} concepts`;
+      host.querySelector(".mf-count").textContent = chosen.length ? `${matches} of ${algorithms.length} algorithms` : `${algorithms.length} algorithms, ${RL.order.filter((s) => s.kind === "concept").length} concepts, ${RL.order.filter((s) => s.kind === "result").length} results`;
       host.querySelector(".mf-clear").hidden = !chosen.length;
       const badge = host.querySelector(".pt-badge");
       badge.hidden = !chosen.length;
