@@ -29,6 +29,16 @@ const url = pathToFileURL(file).href;
     assert.ok(await p.locator('.c-in-lectures .c-slide').count());
     assert.ok(await p.locator('.c-in-book .c-pdf').count());
     const pair = p.locator('.c-pair').first();
+    const pairedCode = pair.locator('.c-code > code.language-python');
+    assert.ok(await pairedCode.locator('.token.keyword').count());
+    assert.ok(await pairedCode.locator('.c-line[data-mate] .token').count());
+    assert.ok(await p.evaluate(() => {
+      const link = RL.course.links.find(l => l.stations.includes('sarsa') && l.pair);
+      const it = RL.course.items[link.at];
+      const nb = RL.course.notebooks.find(n => n.id === it.notebook);
+      const expected = nb.functions[it.name].source.split('\n').map(l => l || ' ').join('\n');
+      return document.querySelector('.c-pair .c-code code').textContent === expected;
+    }), 'highlighting preserves the paired function text and indentation');
     await pair.locator('[data-mate]').first().hover();
     assert.ok(await pair.locator('[data-line].c-hot').count());
     await pair.locator('[data-line].c-hot').first().hover();

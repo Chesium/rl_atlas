@@ -99,6 +99,10 @@
 
   // ---- pieces shared by the tab and the pages ----
   const pic = (src, alt, cls = "c-pic") => src ? `<img class="${cls}" src="${src}" alt="${esc(alt)}" loading="lazy">` : "";
+  // Explicit Python only; Keep Markup preserves the paired view's c-line/data-mate spans.
+  function highlightCode(root) {
+    root.querySelectorAll('.c-code > code.language-python').forEach((code) => Prism.highlightElement(code));
+  }
   function questionCard(at, opts = {}) {
     const it = item(at), sol = C.solutions[at];
     const needs = [...new Set((linksAt.get(at) || []).flatMap((l) => l.stations))];
@@ -117,7 +121,7 @@
     if (!c) return "";
     if (c.md !== undefined) return `<div class="c-cell c-md" data-cell="${id}">${c.md}</div>`;
     const lines = c.code.split("\n").length, out = (c.out || []).map((o) => o.pic ? pic(o.pic, "the cell's figure", "c-fig") : `<pre class="c-out${o.error ? " err" : ""}">${esc(o.text)}</pre>`).join("");
-    const code = `<pre class="c-code"><code>${esc(c.code)}</code></pre>`;
+    const code = `<pre class="c-code"><code class="language-python">${esc(c.code)}</code></pre>`;
     return `<div class="c-cell c-codecell" data-cell="${id}">${opts.fold && lines > 18 ? `<details><summary>Code, ${lines} lines</summary>${code}</details>` : code}${out}</div>`;
   }
   // The homework's function beside the Card's pseudocode: hover a line of either, and its partner lights up.
@@ -133,7 +137,7 @@
     }).join("\n");
     return `<div class="c-pair" data-pair>
       <div class="c-pair-side"><div class="eyebrow">The atlas's pseudocode</div>${e.pseudocode}</div>
-      <div class="c-pair-side"><div class="eyebrow">${esc(nbs[it.notebook].title)}, PS${nbs[it.notebook].ps} · as written</div><pre class="c-code"><code>${code}</code></pre></div>
+      <div class="c-pair-side"><div class="eyebrow">${esc(nbs[it.notebook].title)}, PS${nbs[it.notebook].ps} · as written</div><pre class="c-code"><code class="language-python">${code}</code></pre></div>
     </div>`;
   }
   function wirePairs(root) {
@@ -187,7 +191,7 @@
       return `<div class="c-act"><h3><a href="${page(act)}">${name(act, true)}</a>${pdfLink(act, "notebook")}</h3>
         ${ls.map((l) => { const it = item(l.at); return `<div class="c-hw">
           <div class="c-line1">${roleTag(l.role)}${it.kind === "activity" ? "" : `<a href="${page(l.at)}">${name(l.at)}</a>`}</div><p>${l.note}</p>${also(l)}
-          ${it.kind === "function" && l.pair && l.stations.includes(id) ? paired(id, l) : it.kind === "function" ? `<details><summary>The function as written</summary><pre class="c-code"><code>${esc(nbs[it.notebook].functions[it.name].source)}</code></pre></details>` : ""}
+          ${it.kind === "function" && l.pair && l.stations.includes(id) ? paired(id, l) : it.kind === "function" ? `<details><summary>The function as written</summary><pre class="c-code"><code class="language-python">${esc(nbs[it.notebook].functions[it.name].source)}</code></pre></details>` : ""}
           ${it.kind === "cell" ? `<details><summary>The experiment and what it printed</summary>${cell(it.notebook, it.id)}</details>` : ""}
           </div>`; }).join("")}
         ${a?.kind === "activity" ? labs(act) : ""}</div>`;
@@ -217,6 +221,7 @@
       ${sec("c-notes", "Course notes", "notation, assumptions, and where the course's version differs", notesHtml)}
     </div>`;
     RL.wire(host);
+    highlightCode(host);
     wirePairs(host);
     return {};
   };
@@ -317,6 +322,7 @@
     } else html = notebookPage(it.notebook);
     host.innerHTML = html;
     RL.wire(host);
+    highlightCode(host);
     wirePairs(host);
     if (focus) {
       const t = host.querySelector(focus);

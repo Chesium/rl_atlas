@@ -43,6 +43,13 @@
 .c-hw { margin: 10px 0; }
 .c-hw p { margin: 4px 0; }
 .c-code { margin: 6px 0; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font: 12.5px/1.5 var(--mono); overflow-x: auto; white-space: pre; }
+/* Python tokens inherit the atlas's light/dark text colors, without a Prism layout theme. */
+.c-code .token.comment { color: var(--ink-2); font-style: italic; }
+.c-code .token.keyword { color: var(--pol-ink); }
+.c-code .token.string { color: var(--trc-ink); }
+.c-code .token.number, .c-code .token.boolean { color: var(--rew-ink); }
+.c-code .token.function, .c-code .token.class-name, .c-code .token.builtin { color: var(--val-ink); }
+.c-code .token.decorator { color: var(--course-ink); }
 .c-out { margin: 4px 0 8px; padding: 8px 12px; border-radius: 10px; background: var(--surface-3); font: 12px/1.45 var(--mono); overflow-x: auto; white-space: pre; max-height: 320px; }
 .c-out.err { color: var(--bad-ink); }
 .c-fig { display: block; max-width: min(100%, 720px); margin: 6px 0; border-radius: 8px; background: #fff; cursor: zoom-in; }
