@@ -37,7 +37,7 @@ This is why a fixed policy can be *evaluated*: its expected returns are well-def
 
 ### Which policies are needed {#which}
 
-A policy could in principle depend on the whole history of the interaction and on the time step, not only on the current state. For the problems in the atlas this generality is unnecessary.
+A policy could in principle depend on the whole history of the interaction and on the time step, not only on the current state. For the fully observable, infinite-horizon discounted MDPs considered here, this generality is unnecessary.
 
 ::: theorem {#thm-stationary} Puterman, 1994, §6.2
 In a finite MDP with discount $\gam < 1$, there is an optimal policy that is **stationary** (it does not depend on $t$), **Markov** (it depends only on the current state) and **deterministic**.
@@ -45,7 +45,9 @@ In a finite MDP with discount $\gam < 1$, there is an optimal policy that is **s
 
 The Markov property of the state is what makes the history irrelevant, and the infinite, discounted horizon is what makes time irrelevant: from every state, the future looks the same at every step. In a problem with a fixed, finite number of steps this is no longer true, and the best action can depend on how many steps remain. In [[be-the-agent]], with only one press left, collecting $\rew{+2}$ beats a forward step that pays nothing, unless the agent is already in the last room.
 
-Stochastic policies are nevertheless useful, for four reasons: to explore ([[explore-exploit]]); against an adversary, where being predictable is exploitable, as in rock–paper–scissors; under partial observability, where randomizing can beat every deterministic choice; and for policy-gradient methods, which need the policy to change smoothly with its parameters ([[why-policy]]).
+**Full state versus shared observations.** The theorem allows a different action in each actual Markov state; stochastic transitions do not invalidate it. It does not guarantee a deterministic optimum within a restricted policy class that forces distinct states to share the same action distribution. In the short corridor of [[why-policy]], all cells have identical features and the policy is restricted to be stationary and memoryless. The best policy within that class is stochastic, even though the underlying corridor is an MDP with a deterministic optimal policy when the cells can be distinguished. Allowing memory or a step counter changes the policy class again.
+
+Stochastic policies are nevertheless useful, for four reasons: to explore ([[explore-exploit]]); against an adversary, where being predictable is exploitable, as in rock–paper–scissors; under partial observability, where randomizing can beat every deterministic stationary memoryless policy; and for policy-gradient methods, which need the policy to change smoothly with its parameters ([[why-policy]]).
 
 ### Representing a policy {#representing}
 
@@ -117,5 +119,5 @@ The state is Markov, so the history adds nothing about the future; and with an i
 ::: question
 Is a deterministic policy a special case of a stochastic one? When would you want a truly random one?
 ---
-Yes: in every state one action gets probability 1. A random policy is needed when being predictable is exploited (rock, paper, scissors) or when different states look the same to the agent, as in the short corridor of [[why-policy]].
+Yes: in every state one action gets probability 1. Randomness can be needed when being predictable is exploited (rock, paper, scissors), or to achieve the best stationary memoryless policy when different states share the same features, as in the short corridor of [[why-policy]]. This does not contradict the deterministic-optimum theorem for policies that can distinguish the full Markov state.
 :::

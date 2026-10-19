@@ -45,7 +45,7 @@ Preferring left with the same 5% of randomness is worse: $\rew{-82.1}$ on averag
 :::
 
 ::: step {run = "best", at = 0, play = 1, lead = 10, formula = 2}
-Now forget values, and choose the **chance** of stepping right directly. The landscape below is the value of the start for every chance $p$, worked out exactly. Its top is at $p = 2 - \sqrt 2 \approx 59\%$, worth $\rew{-11.7}$: a coin that lands right a little more often than left, far better than either ε-greedy policy. In this corridor the best policy is random, and no policy that commits to one action per cell can come close.
+Now forget values, and choose the **chance** of stepping right directly. The landscape below is the value of the start for every chance $p$, worked out exactly. Its top is at $p = 2 - \sqrt 2 \approx 59\%$, worth $\rew{-11.7}$: a coin that lands right a little more often than left, far better than either ε-greedy policy. With identical features and no memory or step counter, the best policy is random: committing to the same action in every cell never reaches the goal.
 :::
 
 ::: step {run = "learn", checkpoints = [1, 2, 3, 4, 5, 20, 50], hold = 1300}
@@ -76,11 +76,13 @@ with a stochastic estimate of the gradient in place of the gradient itself; they
 
 ### The best policy can be random {#random}
 
-For a finite Markov decision process there is always an optimal policy that is deterministic ([[policy]]), so value-based methods lose nothing by aiming at one. That guarantee rests on the agent knowing the state. When it does not, because states it cannot tell apart call for different actions, a random policy can be strictly better than every deterministic one.
+For a fully observable finite MDP with an infinite, discounted horizon, there is always an optimal policy that is stationary and deterministic ([[policy]]), even if transitions are stochastic. This guarantee allows the policy to choose different actions in different Markov states. When identical observations or features force states that call for different actions to share one action distribution, a stochastic policy can be strictly better than every deterministic stationary memoryless policy in that restricted class.
 
 ::: example {#ex-corridor} The short corridor (Sutton & Barto, Example 13.1)
 Three non-terminal cells in a row and a goal at the right end; every step pays $\rew{-1}$. The actions move one cell left or right, except that left in the first cell leaves the agent in place, and in the second cell the effects are swapped. The agent's features are the same in all three cells, $\mathbf x(s, \text{right}) = (1, 0)^\top$ and $\mathbf x(s, \text{left}) = (0, 1)^\top$, so any policy it can represent steps right with the same probability $p$ in every cell.
 :::
+
+**What is optimal here?** The underlying corridor is still an MDP when the state is the actual cell. If the policy can distinguish cells, the deterministic choices right in cell 1, left in cell 2, and right in cell 3 reach the goal in three steps, with return $\rew{-3}$. Here “best policy” means best among stationary memoryless policies using the identical features, with one shared probability $p$. The observation alone is not a Markov state: the same action can have different outcomes depending on the hidden cell. A controller allowed to remember a step count could also execute right, left, right from the fixed start; that controller is outside the policy class used below.
 
 Writing $v_i$ for the value of cell $i$ under such a policy, the [[bellman|Bellman equations]] are three linear equations,
 
@@ -145,7 +147,7 @@ A penalty taker who always shoots to the same side is easy to stop. The best str
 
 ### Why it matters {#why}
 
-- When the agent cannot tell states apart, the best policy can be random: on the short corridor it is worth $\rew{-11.7}$, against $\rew{-44.2}$ for the best ε-greedy policy. [See it](lab:corridor-reinforce)
+- When the agent cannot tell states apart and uses a stationary memoryless policy, the best policy can be random: on the short corridor it is worth $\rew{-11.7}$, against $\rew{-44.2}$ for the best ε-greedy policy with the fixed exploration rate used here. [See it](lab:corridor-reinforce)
 - All of modern deep policy optimization, from [[a2c]] to [[ppo]], starts here.
 
 ### Pitfalls
@@ -165,7 +167,7 @@ It can only step right with probability $1 - \eps/2$ or $\eps/2$, depending on w
 ::: question
 In a fully observable finite MDP, is a random policy ever strictly better than every deterministic one?
 ---
-No: there is always an optimal deterministic policy. Random policies win when states cannot be told apart, or against an opponent who adapts.
+No, under the usual finite, infinite-horizon discounted MDP assumptions: there is an optimal deterministic policy that can choose a different action in each full Markov state. In the corridor, randomness wins only within the restricted stationary memoryless class using identical features. The full-state deterministic policy reaches the goal in three steps; a controller with a step counter can also do so from the fixed start. Adaptive-opponent games involve a different setting as well.
 :::
 
 ::: question
