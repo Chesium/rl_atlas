@@ -344,3 +344,303 @@ animations and hover effects this guide relies on would not be smooth.
   recipe have none, on purpose (the trainer has weight decay alone of the critic's regularizers, and on Pendulum it
   does not help; no world here to randomize; a decision guide). What changed on the way, with the reasons, is at the
   end of `docs/control-tools.md`. Released as 1.1.0.
+
+- [ ] **M12 · The ESE3990 companion**: the atlas as a study companion for ESE 3990 (*Reinforcement Learning: In Theory
+  and In Practice*, Penn, fall 2026). From a station you reach the lecture slides, homework cells, quiz questions and
+  textbook pages on its topic, each saying what it does there. From any of those you reach the stations that explain
+  it. Maps follow the course's order as well as the book's. The proposal: `tmp/ese3990-integration-plan.md`. The
+  materials: `tmp/ese3990/` (the 13 lectures in one 566-page PDF, Quizzes 1 and 2, a recitation, Problem Sets 2 and 3
+  as five notebooks with PS3's `rl_lab.py`, and Sutton & Barto's PDF).
+
+  **Principles**
+  - *A course is a pack, kept out of the repository.* The public atlas gains a small, generic mechanism. The ESE3990
+    pack is a folder of data, `course/ese3990/`, which git ignores: its links, notes, worked solutions, pictures of
+    slides, and the PDFs. If it needs versioning, it gets a private repository of its own. `python build.py` still
+    builds `rl_atlas.html` byte for byte as before, so the release workflow's check holds. `python build.py --course
+    course/ese3990` writes `course/ese3990/rl_atlas-ese3990.html` next to the PDFs it links to. Nothing from the course
+    goes into a commit or a release: the slides, quizzes and book are not ours to publish, and the notebooks hold graded
+    answers. There is no fork: the mechanism is small, and a fork would need merging after every release.
+  - *Keyed to station ids.* Every link names stations from `map.toml`, and the build stops on any it does not know,
+    so a renamed station breaks the pack loudly. This replaces recording which atlas revision a pack was written against.
+  - *Exact places.* A slide is named by lecture, slide number and title, with its page in the combined PDF. A quiz or
+    recitation question is named by document, number and part, with its figure. A notebook item is named by problem
+    set, activity, cell id and function. The book is cited by section, printed page and PDF page (22 apart in the main
+    text).
+  - *Every link says its role* (introduces, derives, implements, compares or assesses), with one sentence on what the
+    reader finds there. One item can link several stations, such as a question that needs both the Bellman equation
+    and Q-learning. The build makes every link two-way.
+  - *Still one file, no server.* Links open the PDFs at the right page (`…pdf#page=330`) from the folder next to the
+    page. Notebook excerpts and pictures of the linked slides are compiled into the page. Phase 1 checks that Chrome,
+    Edge and Brave follow such links from a file:// page. If one does not, the fallback is `python -m http.server` in
+    the pack's folder.
+  - *The atlas's own words stay the reference.* Course material sits beside an entry, never inside it. Course code is
+    shown as written and labeled with its source. Where the code or the lectures' notation differs from the atlas, a
+    course note next to it says how. Two differences are known already. The lectures' A2C (L12) is a single-agent
+    actor–critic whose advantage comes from a learned value; the atlas's A2C is the synchronous method with many
+    workers. The lectures write $\mathcal P^a_{ss'}$ and $\mathcal R^a_s$, the atlas $p(s', r \mid s, a)$.
+  - Course items get a color of their own, outside the quantity colors, checked with the validator in both themes.
+
+  **Phase 1 · The pack and the build**
+  - `course.toml`: the course's documents, with each lecture's pages in the combined PDF (L1 1–22, L2 23–60, L3 61–115,
+    L4 116–170, L5 171–197, L6 198–244, L7 245–284, L8 285–344, L9 345–397, L10 398–445, L11 446–480, L12 481–518, L13
+    519–566), the quizzes, the recitation, the notebooks, and the book with its page offset.
+  - `tools/course-import.py` (standard library) reads the notebooks: each cell by id, the activities, the "Predict
+    first" prompts and questions, each function by its `def`, and the answers as written. It also reads the PDFs' text
+    when `pdftotext` is installed: slide titles and numbers, and quiz questions. When `pdftoppm` is installed, it draws
+    the linked slides and question figures as small pictures. Its output, `import/*.json`, is what the build reads.
+    Cell ids survive re-runs, so links survive a notebook changing.
+  - `links.toml` holds the links, written by hand, for example `{ at = "L8:46", stations = ["sarsa", "q-learning"],
+    role = "compares", note = "…" }`. Book links are worked out from the § numbers already in every entry's sources.
+  - `build.py --course DIR` checks the pack and compiles it into `RL.course`; without the flag, nothing changes. It stops
+    on an unknown station, slide, cell or question, and on a role outside the five.
+  - Tests: an invented two-lecture pack in `tests/course-pack/` covers the importer, the two-way links and the errors.
+    A test also checks that the default build contains no course data. Checks of the real pack (below) skip when it is
+    absent, so `main` stays green without it. `.gitignore` gains `course/`.
+  - PS2's own `rl_lab.py` (fog grid, cliff walk, random walk) is not among the materials; the one there is PS3's. The
+    notebooks describe their worlds in full and keep their outputs, so nothing here needs it.
+
+  **Phase 2 · The pilot: Sarsa, Expected Sarsa and Q-learning**
+  - Links for the slice: L8's TD control (pages 311–344: Sarsa, the windy gridworld, Q-learning, cliff walking,
+    Expected Sarsa, the unified view, maximization bias); L9's Q-learning as off-policy control (347–348, 384–390);
+    PS2's model-free control notebook, Activities 2 and 3 (`sarsa_update`, `q_learning_update`,
+    `expected_sarsa_update`, `td_control`, the slippery cliff and the sweep over α); Quiz 2's questions 9–12; recitation
+    Problem 2(c) (a max over actions that are not available); Sutton & Barto §6.4–6.7.
+  - On each station, an **ESE3990** tab after the Card, in course builds only, with four sections. *In lectures*:
+    the slides, each with its role and a picture. *In homework*: the activity, its function, and the experiment it
+    runs. *Practice*: the questions as the flip cards the atlas already has, solutions hidden. *Course notes*:
+    notation, assumptions, and where the course's version differs.
+  - The homework next to the pseudocode: the function beside the Card's pseudocode, lines paired so that hovering one
+    lights the other (the target line of each update).
+  - A page per course item, for the way back: a lecture (its slides in order, each with its stations), an activity
+    (instructions, functions, questions, stations, the Lab preset), a question (its figure, hidden solution, and the
+    stations it needs).
+  - Worked solutions for the pilot's questions, written for the pack. The quizzes come without a key, so a script
+    recomputes every numeric answer.
+  - The Lab: the cliff gains a slip knob. The grid engine already slips the way the homework does (the intended move
+    with probability 1 − slip, the rest split between the two sides), and the knob is generic, so it goes in the public
+    atlas. The pack's preset races Sarsa against Q-learning as the slip grows, with the bench's odds. The sweep over α
+    already exists as the `cliff-alpha` figure (Sutton & Barto's Figure 6.3).
+  - Two maps, enough to switch between them: the **lecture roadmap** at the level of lectures (the table below; slides
+    only for the slice), and the **comparison map** of Sarsa, Expected Sarsa, Q-learning and Double Q-learning, built on
+    the `backup` diagrams.
+  - Done when the four checks of the proposal work during real revision: open a station's exact course references;
+    compare its equation with the homework's code; go from a question to its explanation and back; switch between
+    lecture order and the comparison map. What that use shows is written down, and Phases 3 and 4 adjust to it.
+
+  **Phase 3 · The course maps**, new views in the map's view switch, each prototyped and reviewed with screenshots:
+  - *Lecture roadmap*, in full: L1–L13 as a line in course order. Each station appears once, under the lecture that
+    introduces it, with a faint tie to lectures that come back to it (DP in L4 and L5, maximization bias in L8 and L9).
+  - *Homework map*: problem sets, notebooks, activities, the functions they implement and the stations behind them,
+    with the Lab presets that run the same experiment.
+  - *Assessment map*: the questions of each quiz and the recitation, tied to the stations they need. Questions you
+    have solved are ticked, kept like visited stations.
+  - *Comparison maps*: MC, TD(0), n-step, λ and DP (the lectures' unified view, L7–L8); prediction against control
+    (TD(0) and Sarsa, MC prediction and MC control, policy evaluation and value iteration); on- against off-policy.
+  - *Derivation map*: chains of the Textbooks' numbered statements. Bellman expectation equation, matrix form,
+    iterative evaluation, contraction, then the convergence of evaluation, policy iteration and value iteration (L3–L5).
+    Score-function identity, gradient over trajectories, policy gradient theorem, REINFORCE, then baselines, the
+    advantage, A2C and λ in policy gradients (L11–L12).
+  - `Ctrl K` finds course items ("L8 46", "Quiz 2 Q11", `td_control`), and the symbols page gains a column for the
+    course's notation.
+  - The comparison and derivation maps are not specific to the course. If they prove useful, they move into the
+    public atlas, defined in `map.toml`.
+
+  **Phase 4 · The whole course**: links for every lecture, both problem sets, both quizzes and the recitation, from
+  this coverage (read off the slides; the pilot refines it):
+
+  | Lecture | Stations |
+  | --- | --- |
+  | L1 Introduction | welcome, agent-environment, explore-exploit |
+  | L2 Basic definitions | state-action-reward, reward-design, agent-environment, mdp, policy, value-functions, models, model-based-free, on-off-policy, explore-exploit |
+  | L3 Markov decision processes | mdp, return, discount, value-functions, bellman, optimality |
+  | L4–L5 Dynamic programming | bellman, policy-evaluation, policy-improvement, policy-iteration, gpi, value-iteration, dp-limits, prioritized-sweeping |
+  | L6–L7 Model-free prediction | mc-prediction, incremental-mean, td0, td-error, mc-vs-td, bootstrapping, bias-variance, n-step-td, lambda-return, td-lambda |
+  | L8 Model-free control | gpi, mc-control, exploring-starts, epsilon-greedy, sarsa, n-step-sarsa, sarsa-lambda, q-learning, expected-sarsa, double-q |
+  | L9 Off-policy learning | on-off-policy, importance-sampling, off-policy-mc, q-learning, double-q |
+  | L10 Value function approximation | why-approximate, features, value-error, gradient-mc, semi-gradient-td, semi-gradient-sarsa, generalization, experience-replay, deadly-triad, dqn |
+  | L11 Policy gradients | why-policy, policy-parameterization, pg-theorem, reinforce |
+  | L12 Bias and variance in policy gradients | baseline, bias-variance, actor-critic, a2c, gae |
+  | L13 Model-based RL | model-based-free, models, dyna-q, dyna-q-plus, model-based-deep, mcts |
+
+  - Homework: PS2's dynamic programming (5 activities: policy-evaluation, policy-iteration, value-iteration, gpi),
+    model-free prediction (5: mc-prediction, td0, mc-vs-td, n-step-td, lambda-return) and model-free control (3:
+    mc-control, sarsa, q-learning, expected-sarsa). PS3's off-policy learning (5: importance-sampling, off-policy-mc,
+    expected-sarsa, double-q) and policy gradients (5: policy-parameterization, pg-theorem, reinforce, baseline).
+  - Homework worlds in the Lab where the engine already allows. The fog grid and the depot are grid specs, which
+    `lab/envs/grid.js` already accepts, so the pack defines them with presets on them. The twin rooms, the sprinkler and
+    the casino stay in the notebooks. Course notes point to their atlas counterparts: the short corridor (aliased
+    states), the throw (a Gaussian policy) and the maximization-bias world.
+  - Gaps, each decided on its own. When it is general RL, a section goes into the public atlas, in its own words with
+    its sources; when it is the course's own angle, a course note goes in the pack. Known so far:
+    - the baseline that minimizes the gradient's variance (L12; a candidate section for `baseline`);
+    - least-squares prediction (L10; a candidate section for `semi-gradient-td`, Sutton & Barto §9.8);
+    - ergodic chains and MDPs (L3; a note);
+    - the policy gradient derived over trajectories (L11; a note, unless `pg-theorem` turns out to need it);
+    - model-learning losses (L13; check against `model-based-deep`).
+
+  **Left out, on purpose**
+  - A fork, the Astro/React rewrite and website integration: postponed, as the proposal suggests. The pack is plain
+    data, so it can move later.
+  - Running the homework's Python in the page. It stays in the notebooks; the Lab runs the same experiments with its
+    own engine.
+  - Course material still to come (later problem sets and quizzes, the final project): added when it arrives.
+
+- [ ] **M13 · Routes and results**: what the atlas needs before it can lead a reader to a paper's theorems. M12's
+  derivation map uses it too. Today each station has one `parent` (for the family tree) and an untyped `prereqs`
+  list, and comes in one of two kinds, algorithm or concept.
+  - *Typed links.* `content/routes.toml` holds links between stations. Each link has a role: required (for a named
+    result), sufficient, illustrative (a special case), motivation or optional. It also has `at`, saying where the link
+    is used ("Lemma 4.1, proof"; "Appendix B.1"). An entry's `prereqs` count as required links. The build stops on an
+    unknown station, and on a cycle of required links. `parent` and the family tree stay as they are.
+  - *Results.* A third kind of station, `result`, for a theorem or lemma from a book or paper. Its card has a
+    statement, intuition (with an example), assumptions and domain, a proof sketch, where it is used, and sources with
+    their review status. Where it applies, a section pairs continuous and discrete time. Concepts may take those last
+    sections too. The build only knows the fields it was taught (`REQUIRED`, `FRONT_MATTER`), so its schema grows for
+    this on purpose.
+  - *Provenance.* A source gains a `kind` (textbook, paper, course note, personal note, bridge explanation), a `locator`
+    (edition or version, section, statement or equation, page) and a `review` status (located, proof-checked,
+    pending). The card shows all three. A source that has been located is not a checked proof, so there is no single
+    confidence score.
+  - *The route view*, a fourth view in the map's switch. Pick a destination (a station, or a route named in
+    `routes.toml`), and the map lays out everything it needs in layers, with the destination on the right, links drawn
+    by role, and optional branches folded until opened. Elementary linear algebra, calculus and probability stay
+    leaves: a source link on the station that needs them. Layouts are computed and never stored with the stations, so
+    one station can serve every route.
+  - Tests: closures and layouts are deterministic, and required links are acyclic.
+  - Done when routes work over the RL stations already written (for example "everything leading to PPO", or to
+    Q-learning), reviewed with screenshots.
+
+- [ ] **M14 · Learning with guarantees**: a third row on the map, after "Learning with tables" and "Learning at scale".
+  It covers what control theory and learning theory say about learned systems, and leads to one paper: *Learning
+  Stability Certificates from Data* (Boffi, Tu, Matni, Slotine & Sindhwani, CoRL 2020, PMLR 155, 2021). The proposal:
+  `tmp/ese6180-boffi-prerequisite-map.md`. Needs M13. This milestone is the public atlas, written in its own words
+  from the books and papers; the course's own material stays in its pack (M15).
+
+  **The row.** Part 15, *Dynamics and stability*; Part 16, *Incremental stability and contraction*; Part 17, *Learning
+  theory*; Part 18, *Learning certificates*. About 35 stations. The proposal's 56-node seed is missing (M15), so its
+  list is drafted again here, phase by phase.
+
+  **Principles**
+  - *Destinations, not a syllabus.* The row holds what the paper's results need, and no more. The destinations: the
+    formulation (equations 3.1–3.3); Lemma 4.1 and Theorem 4.2 (the main, parametric route); Theorem 4.3 (sharper, for
+    matrix-structured classes); Theorem 4.4 (kernels); Theorems 5.1 and 5.2 (from a small probability of violation to
+    Lyapunov and contraction guarantees); and the damped Van der Pol experiment (Figure 1). The paper's reference list
+    is not a prerequisite list. Observability, transfer functions, LQR and feedback linearization stay off the route.
+  - *Two editions, never mixed.* There is the 10-page conference paper, and the 30-page extended version
+    (arXiv:2008.05952v2) with the proofs and experiment details; the extended version's page records corrections to
+    Theorems 5.1 and 5.2 and Proposition D.1. Every locator names its edition, and statements follow v2 where it
+    corrects. The paper is cited by title and identifier, never as `boffi21a` alone, since PMLR 144 has another Boffi
+    paper under that name.
+  - *Ids that can't be mistaken.* The paper's results carry its name (`boffi-thm-4-2`). New concepts get ids that
+    can't be confused with RL ones (`contraction-metrics`, never `contraction`). Shared ideas link to the RL stations
+    that already exist: `policy`, `agent-environment`, `models`, `features`, `neural-networks`, `imitation`,
+    `generalization`.
+  - *Bridges where words collide.* Three stations hold the distinctions a reader coming from RL will trip on:
+    - *two V's*: a policy's value against a Lyapunov certificate (with positive costs, a stabilizing policy's cost-to-go
+      is itself a certificate);
+    - *three contractions*: the Bellman operator in the max norm, trajectories in a metric, and the contraction lemma
+      of Rademacher complexity;
+    - *a controller or a certificate*: learning a policy against certifying a fixed closed loop. A violated
+      certificate shows that the candidate failed, not that the system is unstable.
+  - *Cautions kept in sight.* The bounds count independent trajectories: n trajectories, never n times their samples.
+    The fast rate, about 1/n, comes from Lemma 4.1's margin argument with zero empirical violations, not from a
+    generic 1/√n bound. The norm on certificates controls V and its derivative together, and gets its own station,
+    because approximating values alone does not control a Lie derivative. A small probability of violation is not a
+    certificate valid everywhere, so Theorem 5.1's assumptions and domain are stated in full.
+  - *Proofs and numbers are tracked separately.* Reading a proof and reproducing an experiment count as separate
+    progress. A check on a dense grid is evidence, not a theorem, and the Lab says so.
+  - *Continuous and discrete time side by side.* The paper works in continuous time, the course notes mostly in
+    discrete time. One station sets out the dictionary between them (dynamics, decrease condition, Lyapunov equation,
+    variational dynamics, metric contraction), with each inequality's rate convention. Every statement says which time
+    it is in.
+  - Stories go where a picture proves the point: a bowl the state rolls into, nearby trajectories closing in, violation
+    sets shrinking as data grows. There are none for a proof step (Lemma 4.1, Dudley's integral, Theorems 4.3 and
+    4.4), decided station by station as in M7.
+  - New quantities (certificate, metric, violation) get colors of their own, checked with the validator in both
+    themes. Red stays RL's surprise.
+
+  **The Lab: flows and certificates**
+  - A new kind of world, a *flow*: a small system in continuous or discrete time with no actions, or a closed loop
+    with a fixed policy. The flows: linear systems with the matrix as a knob, the damped pendulum, and the damped Van
+    der Pol oscillator. They are integrated by a fixed-step Runge–Kutta method in the atlas's deterministic math, so a
+    seed gives the same run everywhere.
+  - A phase-plane view: the vector field, trajectories, a certificate's level sets, where its decrease holds and where
+    it fails, a cloud of nearby states that shrinks or doesn't, and a metric's ellipses.
+  - A certificate learner. The certificate is linear in its parameters (quadratic forms, polynomial features, Gram
+    matrices that keep it positive), fitted with a margin to sampled trajectories. The fitting uses a small convex
+    solver of our own, a few hundred lines like the 3D renderer, built on eigen-decompositions of small symmetric
+    matrices. Tests pin its results and check them against closed forms, such as the Lyapunov equation of a 2 × 2
+    system.
+  - The bench is the atlas's own: seeds draw the initial conditions, the measure is the violation rate on fresh
+    trajectories, and a sweep over n shows how fast that rate falls.
+
+  **Phase 1 · The first route: Theorem 4.2.** The slice the proposal starts with: a stable linear system and a
+  quadratic certificate, then the parametric learning argument.
+  - Stations, each with a Textbook and a Card, and a story where it shows something:
+    - Part 15: dynamical systems and closed loops, stability, Lyapunov functions, the Lyapunov equation;
+    - Part 17: risk and ERM, uniform convergence, Rademacher complexity, covering numbers and Dudley's integral,
+      margin bounds, trajectories as samples;
+    - Part 18: learning a certificate, certificate classes and their norm, Lemma 4.1, Theorem 4.2.
+  - Lab: linear flows and the damped pendulum, and learning a quadratic certificate from n trajectories.
+  - Done when the "Read Theorem 4.2" route reads from start to end, and the Lab measures how the violation rate falls
+    with n over the bench, set against the bound's k/n and labeled as evidence.
+
+  **Phase 2 · Stability and contraction in full**
+  - The remaining stations:
+    - comparison functions (K and KL) and the comparison lemma;
+    - existence, continuous dependence and sensitivity equations (Khalil §§3.1–3.4);
+    - converse theorems and input-to-state stability, as deep as the routes need (Khalil §§4.7–4.9);
+    - incremental stability (δISS and EISS, as stability of the doubled system);
+    - variational dynamics;
+    - contraction metrics (Lohmiller & Slotine 1998), with the Lyapunov equation as the constant-metric case;
+    - the dictionary between continuous and discrete time;
+    - the three bridges;
+    - from incremental stability to a deployment bound for imitation, linked from `imitation`.
+  - Lab: the damped Van der Pol oscillator, and the contraction view.
+  - Route: "Understand contraction certificates".
+
+  **Phase 3 · Learning theory in full**
+  - The remaining stations: concentration (Hoeffding, McDiarmid); finite classes; the properties of Rademacher
+    complexity, the contraction lemma among them; the properties of covering numbers; kernels and random features (a
+    folded branch that Theorem 4.4 needs); dual Sudakov (on Theorem 4.3's route only). Sources: Shalev-Shwartz &
+    Ben-David (Chapters 4, 16, 26, 27, Appendix B) and the papers each result cites.
+  - Demos: fitting random labels to estimate a class's Rademacher complexity; 1/√n against 1/n on the same class,
+    first without a margin, then with a margin and zero errors.
+
+  **Phase 4 · The rest of the paper**
+  - Theorems 4.3, 4.4, 5.1 and 5.2. Each Textbook draws where each assumption enters the proof (the proposal's "where
+    each assumption enters").
+  - Certificates in practice: positivity constraints, semidefinite and sum-of-squares programs, numerical derivatives,
+    approximations from nearby trajectories, and holdout estimates of violation.
+  - Lab: learn a contraction metric for the damped Van der Pol oscillator and watch the violation sets shrink with n
+    (Figure 1), with the route "Reproduce Figure 1". The quadruped experiment (PyBullet) is told in words.
+  - Review: every result's statement checked against the extended version, with its status shown (located,
+    proof-checked or pending).
+
+  **Left out, on purpose**: Hespanha and Khalil beyond the route; sum-of-squares programming beyond the small cases the
+  Lab needs; the quadruped in the Lab.
+
+- [ ] **M15 · The ESE6180 companion**: the course pack for ESE 6180 (*Learning and Control*), built with M12's mechanism
+  and M13's routes. From a station you reach the course notes and book pages on it; from the notes you reach the
+  stations; and a view follows the course's order. Needs M12's Phase 1 and M13, and grows alongside M14's phases.
+  - `course/ese6180/` is ignored by git, like the ESE3990 pack. It holds:
+    - Chapters 3–7 of the notes (files 02–06): dynamics, stability and Lyapunov theory; parametric learning for system
+      identification and imitation learning; empirical risk minimization; imitation learning from training to
+      deployment; trajectory-wise stability and stability-constrained imitation learning;
+    - Hespanha's *Linear Systems*, Khalil's *Nonlinear Systems* (PDF page = printed page + 16 in Chapters 3–4), and
+      Shalev-Shwartz & Ben-David;
+    - the paper, and Lohmiller & Slotine.
+
+    File prefixes and chapter numbers differ (file 02 holds Chapter 3), so links name the chapter and section. The
+    manifest's SHA-256 hashes are checked before every import.
+  - Links carry M12's roles and M13's provenance. The importer reads the notes' sections, numbered statements and pages.
+  - The bridge view: the chapters in course order, each section with its stations, and the dictionary between
+    continuous and discrete time beside it.
+  - Chapters 6 and 7 relate to the paper as motivation, not as prerequisites. Chapter 4 (system identification) is
+    in `tmp/` but missing from the proposal's map; it links to `models` and `model-based-deep`.
+  - Chapter 7's technical appendix (§7.6) is a draft by its own account: written on request, and flagged "TO BE
+    CHECKED 7.1". It stays in the pack with status pending. No public station rests on it until it has been checked
+    against primary sources (Angeli 2002; Lohmiller & Slotine 1998).
+  - Missing, and not needed to start: the proposal's seed (56 nodes, 85 typed edges, six views), which is in neither the
+    source folder nor here, so M14 drafts its stations again; and the extended paper, linked by its version
+    (arXiv:2008.05952v2).
