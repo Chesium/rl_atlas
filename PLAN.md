@@ -651,6 +651,10 @@ animations and hover effects this guide relies on would not be smooth.
   The original dynamics, ball, horizon and metric degree are retained; integration, derivative access and solver differ.
   These distinctions and the source's sign/rate conventions are documented in `docs/m13-m14-review.md`.
 
+  **Educational follow-up.** M14's implementation delivery does not complete beginner education. The current
+  Textbooks are highly compressed, and many repeat their Cards. M16 below develops the explanations while
+  preserving this milestone's source qualifications, numerical evidence, and validation history.
+
 - [x] **M15 · The ESE6180 companion**: the course pack for ESE 6180 (*Learning and Control*), built with M12's mechanism
   and M13's routes. From a station you reach the course notes and book pages on it; from the notes you reach the
   stations; and a view follows the course's order. Needs M12's Phase 1 and M13, and grows alongside M14's phases.
@@ -680,3 +684,69 @@ animations and hover effects this guide relies on would not be smooth.
   with the time dictionary beside it and links into M13's prerequisite routes. Chapter 4 links to model learning;
   Chapters 6–7 stay motivational, and §7.6 and its descendants stay pending and optional. The public build includes
   no pack payload. Validation and limits are recorded in `docs/m15-review.md`.
+
+- [ ] **M16 · Teach the guarantees track from the ground up**: rewrite and expand Parts 15–18 so a reader with
+  basic calculus, linear algebra and elementary probability, but no control or learning-theory background, can
+  follow the existing destinations. Depends on M13/M14; M15 is an optional local source companion, not a public
+  prerequisite. M14/M15 remain completed implementation milestones; this educational milestone is separate.
+
+  **Authoring contract.** Use [atlas-writing](.agents/skills/atlas-writing/SKILL.md) and its
+  [multi-agent workflow](.agents/skills/atlas-writing/references/rewrite-workflow.md). The local skill adapts
+  bottom-up construction and rigorous-explainer pedagogy to the atlas's Story → Textbook → Card → Lab sequence.
+  Upstream documentation is pinned, attributed and hashed under the skill's `references/upstream/`; its standalone
+  templates, fixed stage/example quotas, cleanup commands and MathJax-specific checks are not repo requirements.
+  Develop the Textbook as the complete lesson, then summarize it in the Card. Keep stories purposeful, including
+  the existing no-story exceptions for proof steps. Preserve Markdown/TOML, KaTeX and the offline build.
+
+  **Multi-agent execution is required for this rewrite.** A coordinator owns the route contract, shared metadata,
+  integration and acceptance. Writers own disjoint station files. Separate beginner and mathematical reviewers
+  review material they did not author; they report findings for writers to patch and recheck. With four available
+  slots, use the coordinator + at most two writers + one reviewer, rotating review roles in successive waves.
+  Parallelize only dependency-ready slices; Part 18 must reconcile both foundational tracks before acceptance.
+  Every assignment specifies owned files, prerequisite revisions, source editions, deliverables, report/handoff
+  paths and acceptance criteria. No untracked nested delegation or simultaneous edits to shared files. If agents
+  are unavailable, record the missing independent review and leave that gate pending. Full instructions and the
+  assignment packet are in the workflow; a second complete competing rewrite is not the default.
+
+  - [x] **Preparation · Local adapted workflow**: upstream skill docs and three relevant editorial references
+    downloaded verbatim at recorded commits; a repo-specific skill, multi-agent protocol, discovery instructions,
+    and this pending rewrite plan are present. This completes planning only, not the pilot or chapter rewrites.
+  - [ ] **Phase 0 · Route contract and baseline audit**: inventory all 37 stations (10/5/12/10 across Parts 15–18),
+    learning objectives, prerequisite gaps, consumed/introduced notation, source locators, worked examples,
+    exercises/solutions, and the purpose of each visual/Lab. Record `docs/m16/route-contract.md` and
+    `docs/m16/task-ledger.md`. Agree shared examples and notation before parallel drafts; retain destination-led
+    scope and distinguish optional branches from required dependencies.
+  - [ ] **Phase 1 · Pilot and review**: develop Lyapunov functions, Rademacher complexity and Theorem 4.2, including
+    the intermediate bridges those lessons need. Use the shared examples, full consequential derivations, local
+    definitions, counterexamples and exercises. Independent beginner and mathematical reviewers test the stated
+    objectives and source fidelity. Integrate and inspect the rendered pilot; record `docs/m16/pilot-review.md`.
+    Resolve critical/moderate findings before rollout and revise the authoring workflow if needed.
+  - [ ] **Phase 2 · Part 15, dynamics and stability**: rewrite all ten stations, including the pilot's Lyapunov
+    lesson. Build from closed loops and flows to stability, Lyapunov functions/equation, comparison, sensitivity,
+    converse/ISS ideas, continuous/discrete time and the RL bridges. Derive claims and show computed examples
+    instead of substituting short theorem summaries for instruction.
+  - [ ] **Phase 3 · Part 16, incremental stability and contraction**: rewrite all five stations. Connect paired
+    trajectories, variational dynamics, metric differential lengths and finite-distance bounds; derive the key
+    inequality and its assumptions. Develop the imitation deployment bridge and distinguish three contractions.
+  - [ ] **Phase 4 · Part 17, learning theory**: rewrite all twelve stations, including the random-sign pilot.
+    Develop risk/ERM, uniform convergence, concentration, finite classes, Rademacher complexity/properties,
+    covers/Dudley, margins, trajectories as samples, and the kernel/structured branches. Use small calculable
+    classes before general bounds; explain consequential expectation, supremum and inequality steps.
+  - [ ] **Phase 5 · Part 18, learning certificates**: rewrite all ten stations, including the theorem pilot.
+    Develop the formulation, derivative-aware class norm, Lemma 4.1 and Theorems 4.2–4.4/5.1–5.2 with explicit
+    proof dependencies and where each assumption enters. Connect practice and the adapted Van der Pol experiment.
+    Preserve independent-trajectory counts, margin conventions, norm/energy rates, feasibility conditions and
+    the distinction between small violation probability and a certificate valid everywhere.
+  - [ ] **Phase 6 · Cross-route integration and acceptance**: audit every station and the Theorem 4.2, contraction,
+    matrix, kernel and adapted Figure 1 routes for continuity, notation, definitions, links, examples, exercises,
+    Cards and visual/experimental consistency. Keep per-station coverage and review dispositions in
+    `docs/m16/coverage.md`, with a final `docs/m16/rewrite-review.md`. Run build/tests and the guarantees browser
+    checks, extending checks where new content needs them; inspect every changed lesson on desktop/mobile in
+    both themes. Preserve source-review status unless an independent proof audit supports a recorded change.
+
+  **Done when** every station has a developed lesson distinct from its Card; independent reviewers can complete
+  its reader tasks from the declared prerequisites and reproduce consequential calculations; all critical/moderate
+  teaching and mathematical findings are resolved; and integrated route/rendering checks pass. Keep review and
+  validation evidence explicit: agent beginner review is not a student study, browser checks are not proof audits,
+  and a sampled grid or holdout is not a universal guarantee. No exact Figure 1 reproduction or human review is
+  claimed by this milestone without separate evidence. Progress is tracked per phase, not inferred from length.

@@ -1,0 +1,46 @@
+{
+  "retrieved_on": "2026-10-19",
+  "description": "Verbatim reference snapshots, not executable local skill entrypoints. See SOURCES.md for adaptation and omitted resources.",
+  "files": [
+    {
+      "path": "bottom-up/UPSTREAM_SKILL.md",
+      "repository": "https://github.com/panpanc/math-skills",
+      "revision": "f96707ab1104d52487dbbfecaba8deca2f98a88a",
+      "upstream_path": ".claude/skills/bottom-up/SKILL.md",
+      "url": "https://raw.githubusercontent.com/panpanc/math-skills/f96707ab1104d52487dbbfecaba8deca2f98a88a/.claude/skills/bottom-up/SKILL.md",
+      "sha256": "878289287def67d84f74c87390a1724af6f8de9e1850ca39e1f32df29742bc1f"
+    },
+    {
+      "path": "rigorous-explainer/UPSTREAM_SKILL.md",
+      "repository": "https://github.com/az9713/writing-skills",
+      "revision": "367bd4ccaaad42023dfc647a5c29d40e611e5866",
+      "upstream_path": "skills/rigorous-explainer/SKILL.md",
+      "url": "https://raw.githubusercontent.com/az9713/writing-skills/367bd4ccaaad42023dfc647a5c29d40e611e5866/skills/rigorous-explainer/SKILL.md",
+      "sha256": "73c0ed8401257c9a9877855737511ecc473f6c1f8e990fcea4f4c4eb6280d441"
+    },
+    {
+      "path": "rigorous-explainer/references/textbook-style.md",
+      "repository": "https://github.com/az9713/writing-skills",
+      "revision": "367bd4ccaaad42023dfc647a5c29d40e611e5866",
+      "upstream_path": "skills/rigorous-explainer/references/textbook-style.md",
+      "url": "https://raw.githubusercontent.com/az9713/writing-skills/367bd4ccaaad42023dfc647a5c29d40e611e5866/skills/rigorous-explainer/references/textbook-style.md",
+      "sha256": "9494e4427b471a6feee1b1ce3ea1062f8e3de1345f0d31f21a88d7ee61bdad4d"
+    },
+    {
+      "path": "rigorous-explainer/references/technical-writing-guides.md",
+      "repository": "https://github.com/az9713/writing-skills",
+      "revision": "367bd4ccaaad42023dfc647a5c29d40e611e5866",
+      "upstream_path": "skills/rigorous-explainer/references/technical-writing-guides.md",
+      "url": "https://raw.githubusercontent.com/az9713/writing-skills/367bd4ccaaad42023dfc647a5c29d40e611e5866/skills/rigorous-explainer/references/technical-writing-guides.md",
+      "sha256": "130b498fb2ae4743add08b2bf803a1cc442b7d6866ba0246f0253702b0cade82"
+    },
+    {
+      "path": "rigorous-explainer/references/pedagogy-checklist.md",
+      "repository": "https://github.com/az9713/writing-skills",
+      "revision": "367bd4ccaaad42023dfc647a5c29d40e611e5866",
+      "upstream_path": "skills/rigorous-explainer/references/pedagogy-checklist.md",
+      "url": "https://raw.githubusercontent.com/az9713/writing-skills/367bd4ccaaad42023dfc647a5c29d40e611e5866/skills/rigorous-explainer/references/pedagogy-checklist.md",
+      "sha256": "97a7b1baaa74ff07caf7ae34a8ef2fa327072ea048206e8863c4aafac19de2cf"
+    }
+  ]
+}
