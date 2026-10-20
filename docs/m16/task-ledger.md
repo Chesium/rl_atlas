@@ -1,5 +1,22 @@
 # M16 task ledger
 
+## Phase 6 execution, 2026-10-20
+
+Baseline clean `main` at `f2e18dc`. Current Phase 6 evidence supersedes earlier
+statements that Phase 6 has not started; historical rows below are preserved.
+
+| ID | Agent / role | Exclusive ownership | Status | Report / handoff |
+| --- | --- | --- | --- | --- |
+| P6-B | `/root/phase6_beginner`, independent beginner | beginner report and own handoff | Complete: all 37 inspected; B1–B5 closed after exact-diff recheck | `beginner-phase6.md`; `../handoffs/m16-phase-6/agents/beginner.md` |
+| P6-W | `/root/phase6_repairs`, repair writer | dual-sudakov, kernels-random-features, vdp-certificates; writer report/handoff | Complete: three narrow repairs; independently beginner-rechecked | `writer-phase6.md`; `../handoffs/m16-phase-6/agents/writer.md` |
+| P6-M | `/root/phase6_math`, independent mathematics | math report and own handoff | Complete: all 37 integrated interfaces; five repairs accepted, no new findings | `math-phase6.md`; `../handoffs/m16-phase-6/agents/math.md` |
+| P6-I | `/root`, coordinator | shared metadata, two notation/convention repairs, browser checker, build and acceptance | Complete: all gates pass; Phase 6/M16 accepted | `rewrite-review.md`; `../handoffs/m16-phase-6.md` |
+
+Beginner and mathematical roles run in successive waves, with distinct identities
+from authors. No nested agents, commit, push or publication. Coordinator owns
+the 60-second team usage checks. Final candidate hashes and review scope belong
+to each report, not inherited baseline pass labels.
+
 Phase 0/1 baseline `2f72fc274169b6702d4b7ec9fe4a13b1d110011f`, initially clean. Contract v1 is [route-contract.md](route-contract.md). Shared metadata, PLAN, generated builds and integration belong only to the coordinator. Writer ownership is exclusive; reviewers write reports only. The initial Phase 2/3 request authorized those phases; subsequent Phase 4/5 requests and acceptance records appear below. Phase 6 remains pending.
 
 ## Phase 2 / 3 execution, 2026-10-19

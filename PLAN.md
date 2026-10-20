@@ -685,7 +685,7 @@ animations and hover effects this guide relies on would not be smooth.
   Chapters 6–7 stay motivational, and §7.6 and its descendants stay pending and optional. The public build includes
   no pack payload. Validation and limits are recorded in `docs/m15-review.md`.
 
-- [ ] **M16 · Teach the guarantees track from the ground up**: rewrite and expand Parts 15–18 so a reader with
+- [x] **M16 · Teach the guarantees track from the ground up**: rewrite and expand Parts 15–18 so a reader with
   basic calculus, linear algebra and elementary probability, but no control or learning-theory background, can
   follow the existing destinations. Depends on M13/M14; M15 is an optional local source companion, not a public
   prerequisite. M14/M15 remain completed implementation milestones; this educational milestone is separate.
@@ -762,12 +762,17 @@ animations and hover effects this guide relies on would not be smooth.
     [phase5-review.md](docs/m16/phase5-review.md): all ten station records, final review repairs,
     build, 97 tests, Chrome/Edge regressions and rendered-view checks pass. Source discrepancies and
     the explicitly reconstructed Theorem 5.2 remain visible; source status stays `located`.
-  - [ ] **Phase 6 · Cross-route integration and acceptance**: audit every station and the Theorem 4.2, contraction,
+  - [x] **Phase 6 · Cross-route integration and acceptance**: audit every station and the Theorem 4.2, contraction,
     matrix, kernel and adapted Figure 1 routes for continuity, notation, definitions, links, examples, exercises,
     Cards and visual/experimental consistency. Keep per-station coverage and review dispositions in
     `docs/m16/coverage.md`, with a final `docs/m16/rewrite-review.md`. Run build/tests and the guarantees browser
     checks, extending checks where new content needs them; inspect every changed lesson on desktop/mobile in
     both themes. Preserve source-review status unless an independent proof audit supports a recorded change.
+    Accepted 2026-10-20: independent beginner and mathematical integration reviews cover all 37 stations and
+    five destinations; five findings repaired and rechecked. Build, 97 tests, Chrome/Edge route/guarantees
+    regressions and full-track rendered sweeps pass, with final edited-view and passage/tail inspection in
+    both sizes/themes. Evidence and limits are in [rewrite-review.md](docs/m16/rewrite-review.md).
+    Source status remains `located`; no human/student study or exact Figure 1 reproduction is claimed.
 
   **Done when** every station has a developed lesson distinct from its Card; independent reviewers can complete
   its reader tasks from the declared prerequisites and reproduce consequential calculations; all critical/moderate

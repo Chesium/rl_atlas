@@ -1,6 +1,6 @@
 +++
 summary = "Finite random features approximate a kernel class; certificates require derivative approximation too."
-prereqs = ["rademacher-properties", "covering-properties"]
+prereqs = ["rademacher-properties", "covering-properties", "boffi-thm-4-2"]
 time = "statistical"
 sources = [{ text = "Shalev-Shwartz and Ben-David, Understanding Machine Learning", kind = "textbook", locator = "2014, Chapter 16", review = "located", url = "https://www.cs.huji.ac.il/~shais/UnderstandingMachineLearning/understanding-machine-learning-theory-algorithms.pdf" }, { text = "Boffi, Tu, Matni, Slotine and Sindhwani, Learning Stability Certificates from Data", kind = "paper", locator = "arXiv:2008.05952v2, September 2020, §4.2 and Theorem 4.4, p.7; Appendix B.3, pp.20–23", review = "located", url = "https://arxiv.org/abs/2008.05952v2" }]
 +++
@@ -9,7 +9,7 @@ sources = [{ text = "Shalev-Shwartz and Ben-David, Understanding Machine Learnin
 
 ### An infinite class with a finite proxy {#motivation}
 
-*Reading note.* This optional station is best read after [[boffi-thm-4-2]]. Its later sections use Part 18 objects (certificates $V$, trajectory residuals $h$ with Lipschitz constant $L_h$ and bound $B_h$, the margin $\gamma$, the reachable set $S$, the joint value-gradient norm and Lemma 4.1), all defined there. The constructions of \ref{statement} and \ref{reasoning} need only the declared prerequisites.
+*Reading note.* Read [[boffi-thm-4-2]] before this optional station. It supplies the Part 18 objects used in the later sections (certificates $V$, trajectory residuals $h$ with Lipschitz constant $L_h$ and bound $B_h$, the margin $\gamma$, the reachable set $S$, the joint value-gradient norm and Lemma 4.1). The constructions of \ref{statement} and \ref{reasoning} need only [[rademacher-properties]] and [[covering-properties]]. This branch builds on Theorem 4.2; it is not a prerequisite for that theorem.
 
 The parametric bound of [[boffi-thm-4-2]] grows with the number of parameters (written $k$ there). A richer certificate family needs more parameters, and an infinite-dimensional family, such as a kernel class, has no finite parameter count at all. In this lesson $k(x,y)$ always denotes a kernel, features are indexed by $j$, and $K$ is the number of features, not the universal constant of Lemma 4.1. Boffi et al. (arXiv:2008.05952v2, §4.2 and Theorem 4.4, p. 7; proof in Appendix B.3, pp. 20–23) handle such a class in three moves:
 
@@ -140,9 +140,9 @@ No. The residual increases by up to $9.74$, so at some points it is positive, fa
 :::
 
 ::: question
-**Choosing among dictionaries.** A colleague draws ten dictionaries before seeing any data, fits a certificate in each finite class, and keeps the dictionary whose fit has the largest margin. Is Lemma 4.1 still usable, and at what cost?
+**Choosing among dictionaries.** A colleague fixes a common margin $\gamma>0$ and draws ten dictionaries before seeing any data, fits a certificate in each finite-feature class, and keeps the fit with the largest achieved margin. If that fit meets $\gamma$ on every training trajectory, is Lemma 4.1 still usable at the fixed margin $\gamma$, and at what cost?
 ---
-Yes, with a union bound. Each of the ten classes is fixed before the data and independent of it, so Lemma 4.1 applies to each at confidence $\delta/10$, and with probability at least $1-\delta$ all ten statements hold together; the chosen one is among them. The cost is $\log(10/\delta)$ in place of $\log(1/\delta)$. What is not allowed is drawing or modifying dictionaries after looking at the trajectories, which makes the class depend on the data.
+Yes, with a union bound. Conditional on the ten independently drawn dictionaries, each class is fixed before the trajectories. Apply Lemma 4.1 to each class at confidence $\delta/10$, using the common fixed $\gamma$. With probability at least $1-\delta$ all ten statements hold together; the selected fit satisfies its class's bound because it meets $\gamma$. The confidence term replaces $\delta$ by $\delta/10$, increasing the outer logarithm by $\log 10$. This does not justify substituting the data-selected largest margin for $\gamma$: [[margin-bounds]] requires a margin fixed in advance. Drawing or modifying a dictionary after seeing the trajectories also loses this fixed-class argument.
 :::
 
 ### Where it is used {#uses}

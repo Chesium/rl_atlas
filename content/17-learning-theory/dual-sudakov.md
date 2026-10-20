@@ -1,6 +1,6 @@
 +++
 summary = "A Gaussian norm estimate can sharpen matrix-class entropy beyond counting every free entry."
-prereqs = ["covering-properties"]
+prereqs = ["covering-properties", "boffi-thm-4-2"]
 time = "statistical"
 sources = [{ text = "Boffi, Tu, Matni, Slotine and Sindhwani, Learning Stability Certificates from Data", kind = "paper", locator = "arXiv:2008.05952v2, September 2020, Appendix B.2, p.19; cited Vershynin lectures", review = "located", url = "https://arxiv.org/abs/2008.05952v2" }]
 +++
@@ -9,7 +9,7 @@ sources = [{ text = "Boffi, Tu, Matni, Slotine and Sindhwani, Learning Stability
 
 ### Counting entries is too pessimistic {#motivation}
 
-*Reading note.* This optional station is best read after [[boffi-thm-4-2]]. It uses Part 18 objects (certificates, the reachable set $S$, the joint value-gradient norm $\lVert\cdot\rVert_{\mathcal V}$, the residual constants $L_h$ and $B_h$, the margin $\gamma$ and Lemma 4.1), all defined there. The covering estimates themselves need only [[covering-properties]].
+*Reading note.* Read [[boffi-thm-4-2]] before this optional station. It supplies the Part 18 objects used here (certificates, the reachable set $S$, the joint value-gradient norm $\lVert\cdot\rVert_{\mathcal V}$, the residual constants $L_h$ and $B_h$, the margin $\gamma$ and Lemma 4.1). The covering estimates themselves need only [[covering-properties]]. This branch builds on Theorem 4.2; it is not a prerequisite for that theorem.
 
 Sum-of-squares certificates have the form
 $$V_Q(x)=m(x)^{\mathsf T}Q\,m(x),$$

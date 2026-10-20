@@ -31,7 +31,7 @@ where $\sigma_1,\dots,\sigma_n$ are independent signs, each $\pm1$ with probabil
 2. it takes the **absolute value** of the signed sum;
 3. it takes the **worst sample** in $X$, not the observed one.
 
-Each change can only increase the number, so this is the largest of the conventions. The absolute value matters even for one function: a class whose only residual is the constant $b$ has signed complexity $0$ but $\mathfrak R_n=|b|\,\mathbb E|\sigma_1+\dots+\sigma_n|/n$, which is $|b|/2$ for $n=2$ and about $|b|\sqrt{2/(\pi n)}$ for large $n$ ([[rademacher-complexity]]).
+For the same residual class, taking the absolute value and then the worst sample can only increase complexity relative to the signed empirical convention. Replacing certificates by residual functions changes the class being measured and has no general monotonicity rule; the later lessons bound that change using regularity of $h$. The absolute value matters even for one function: a class whose only residual is the constant $b$ has signed complexity $0$ but $\mathfrak R_n=|b|\,\mathbb E|\sigma_1+\dots+\sigma_n|/n$, which is $|b|/2$ for $n=2$ and about $|b|\sqrt{2/(\pi n)}$ for large $n$ ([[rademacher-complexity]]).
 
 ### Statement {#statement}
 

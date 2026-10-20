@@ -14,7 +14,16 @@ try{
  assert.ok((await p.locator('.st[data-id="dynamical-systems"] .dot').boundingBox()).x>320,'route camera clears the panel');assert.ok(await p.locator('.route-edge[marker-end]').count());
  const count=await p.locator('.st:not(.out)').count();assert.ok(count>=14&&count<25);await shot('route-4-2');
  await p.locator('.route-optional').check();assert.ok(await p.locator('.st:not(.out)').count()>count);await p.locator('.route-optional').uncheck();
- await p.locator('.route-destination').selectOption('contraction-metrics');await shot('route-contraction');
+ for(const destination of ['boffi-thm-4-2','contraction-metrics','boffi-thm-4-3','boffi-thm-4-4','vdp-certificates']){
+  await p.locator('.route-destination').selectOption(destination);
+  const expected=await p.evaluate(id=>RL.routes.closure(id,RL.content.routes.links).ids,destination);
+  const visible=await p.locator('.st:not(.out)').evaluateAll(nodes=>nodes.map(n=>n.dataset.id).sort());
+  assert.deepEqual(visible,expected,`${destination}: required route closure`);
+  await p.locator('.route-optional').check();
+  const expanded=await p.evaluate(id=>RL.routes.closure(id,RL.content.routes.links,true).ids,destination);
+  assert.deepEqual(await p.locator('.st:not(.out)').evaluateAll(nodes=>nodes.map(n=>n.dataset.id).sort()),expanded,`${destination}: supporting route closure`);
+  await p.locator('.route-optional').uncheck();await shot(`route-${destination}`);
+ }
  await p.locator('[data-lens="map"]').click();await p.locator('.mp-close').click();await shot('metro');await p.locator('.panel-toggle').click();await p.locator('.mp-lines button[data-line="dynamics"]').click();await p.waitForTimeout(550);await p.locator('.mp-close').click();await shot('guarantees-row');
  let visits=0;
  const ids=await p.evaluate(()=>RL.content.parts.filter(p=>p.n>=15).flatMap(p=>p.stations.map(s=>s.id)));

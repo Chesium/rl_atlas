@@ -84,9 +84,25 @@ view checks pass. Source status remains `located`.
 The one-sentence `kernels-random-features` consistency correction tracks the
 feature event 2/n² and is independently checked in `math-phase5.md`.
 
-## Remaining rollout
+## Phase 6 cross-route integration
 
-Phase 5 is accepted with the evidence above. Phase 6 must reconcile all 37 lessons and every
+The independent [beginner audit](beginner-phase6.md) records inspection and raw
+hashes for all 37 station rows above, cross-route reader tasks and repair rechecks.
+P6-B1–B5 are closed: matrix/kernel prerequisite order, fixed-margin dictionary
+selection, metric tangent slack, risk notation and residual-class conventions.
+The [writer report](writer-phase6.md) records the three owned lesson repairs;
+the coordinator owns the other two. The independent
+[mathematical integration audit](math-phase6.md) accepts all five repairs and
+records current hashes for all 37 stations, with no new findings. All five routes
+pass their relevant gates in [rewrite-review.md](rewrite-review.md).
+
+The 37 station rows retain their earlier independent proof/teaching scope;
+Phase 6 adds whole-route continuity evidence rather than upgrading source status.
+Product checks and final route acceptance are recorded in the final review.
+
+## Historical rollout boundary
+
+Phase 5 was accepted before Phase 6 reconciled all 37 lessons and every
 destination route, including matrix, kernel and adapted Figure 1 branches.
 Source records remain `located`; none of these agent reviews alone upgrades
 source status or supplies human review.

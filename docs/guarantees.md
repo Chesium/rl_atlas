@@ -58,8 +58,9 @@ The Boffi results cite *Learning Stability Certificates from Data*, **arXiv:2008
 page locators. The ten-page conference paper is PMLR 155, pp.1341–1350 (2021); its numbering and page locators must
 not be mixed with the extended paper. The v2 record reports corrections to Theorems 5.1, 5.2 and Proposition D.1.
 The theorem entries explain the negative-decrease convention from the proofs where the displayed violation-set
-signs are inconsistent. Theorem 5.2 states the differential-energy inequality explicitly: norm decay is half the
-energy decay rate. All six result source records currently say **located**, not proof-checked.
+signs are inconsistent. Theorem 5.2's lesson distinguishes a counterexample to the printed radius from a labelled
+reconstruction with added assumptions. It states the differential-energy inequality explicitly: norm decay is half
+the energy decay rate. All six result source records currently say **located**, not proof-checked.
 
 ## The flow engine
 
@@ -115,5 +116,6 @@ The browser command uses `playwright-core` and installed browsers. It writes ign
 `browser-check-results/m13-m14-<browser>/`. It checks both themes, mobile and desktop math/layout, route folding,
 proof progress after reload, worker cancellation/restart, 20-seed replay, a full metric sweep, the pinned story,
 external requests, page errors and exact Node/browser numeric agreement. It also saves screenshots for visual review.
+The route check compares the visible required and expanded supporting closures for all five guarantees destinations.
 `tests/flow-story-runs.json` fingerprints the three fits in the Van der Pol story. Review the story against the bench
 before deliberately changing those fingerprints. Source/proof review remains a separate scholarly task.

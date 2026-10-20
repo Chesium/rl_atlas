@@ -1,0 +1,12 @@
+# P6-M mathematical integration handoff
+
+- Agent: `/root/phase6_math`, independent mathematical reviewer. Date: 2026-10-20. No descendants or background jobs.
+- Owned files: this handoff and `docs/m16/math-phase6.md`; no lesson/shared metadata edits, commits or publication.
+- Baseline: `f2e18dc` plus coordinator's five narrow lesson repairs (`dual-sudakov`, `kernels-random-features`, `rademacher-complexity`, `boffi-lemma-4-1`, `vdp-certificates`). Current lesson hashes for all37 are in the report.
+- Result: bounded cross-route mathematical integration review complete; no new critical/moderate/minor finding. All five repairs independently accepted. This is not a replacement all-station source proof audit or human proof audit.
+- Work completed: all37 current prerequisite/Card inspections, cross-part Textbook seam checks, five destination checks; direct re-derivations of class conventions, derivative-aware cover transfer, zero reference/internal centers, matrix norm factors, fixed dictionary/margin selection, feature-event/data-only probability, metric rates/path invariance and reconstructed5.2/counterexample.
+- Raw sources refreshed: actual local Boffi v2 pp6–7,18–19,23,27–28; UML printed331–332/PDF349–350; Lohmiller–Slotine preprint pp4–6. Other source-proof scope stays with earlier reports and their exclusions.
+- Validation: inline Python/Numpy assertions passed for shared matrix/rates, constants/integral, singleton signs, matrix dimension factors, finite-horizon example, bump enclosure, holdout limits, tangent slack and rescaling. Initial SciPy import failed (not installed); successful rerun used no SciPy. No scratch file retained.
+- Quota policy: codex-usage-guard defaults (document<10%5h or<6%weekly; stop<3%5h or<2%weekly; unavailable stops). Fresh initial check22:01:54 UTC gave22%5h/88%weekly; recheck22:03:00 UTC16%/87%, both ok. Coordinator owns60s team checks and relayed14% at22:03:39. No quota alert independently observed by this agent.
+- Next step: coordinator aggregates `docs/m16/math-phase6.md` with beginner review and product checks. Recheck affected passages if any meaning-changing content edit follows these hashes. Do not rerun completed source audits merely to recreate this assignment.
+- Skipped: build/browser/layout/engine reruns and external recalled-result proofs; those are separately owned or explicitly outside this audit. Risk: the source's printed5.2 remains false, and the reconstruction is an agent-checked argument with no human proof audit; current content says so.
