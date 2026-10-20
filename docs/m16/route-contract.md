@@ -4,6 +4,11 @@ Coordinator contract v1, 2026-10-19. Baseline HEAD: `2f72fc274169b6702d4b7ec9fe4
 
 **Phase 0–1 closure, 2026-10-19:** the three pilot lessons were accepted after independent beginner and mathematical reviews at the hashes in [pilot-review.md](pilot-review.md). The baseline inventory and proposed work below stay unchanged as the planning record. The accepted Theorem 4.2 lesson explicitly adds a zero-residual hypothesis and identifies its fixed-horizon adaptation; these source qualifications supersede the original proof plan where they differ. All other stations remain rollout work. Phases 2–6 are pending.
 
+**Phase 2/3 rollout, 2026-10-19:** Parts 15 and 16 are accepted at the final
+hashes in the independent Phase 2/3 reports. See [phase2-3-review.md](phase2-3-review.md)
+and [coverage.md](coverage.md). The inventory below remains the original planning
+contract; its pending Phase 2/3 wording is historical. Phases 4–6 remain pending.
+
 ## Audience, shared notation and examples
 
 Assume differentiation, vectors, matrix multiplication and elementary probability. Define gradients, positive definiteness, suprema, operator norms, independence, covers and probability quantifiers locally when first needed. Use scalar `xdot=-x`, then the existing nonnormal `A=[-1,3;0,-2]`, then a three-parameter quadratic certificate. State dimension is p, parameter dimension k, independent trajectory count n. The initial state is xi, flow phi_t(xi), common reachable compact set S, initial distribution D, horizon T. V is a certificate; policy reward value retains its RL meaning. Gradient is with respect to x unless marked theta. Euclidean vector and induced operator norms are the defaults; state exceptions explicitly.

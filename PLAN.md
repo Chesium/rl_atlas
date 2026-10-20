@@ -728,13 +728,21 @@ animations and hover effects this guide relies on would not be smooth.
     the source's Dudley step for the absolute convention, is resolved by an explicit added hypothesis. Build, Node tests,
     Chrome/Edge guarantees checks and changed-view screenshots pass. Evidence and rollout carry-overs are in
     `docs/m16/pilot-review.md`; workflow lessons were added to the rewrite workflow.
-  - [ ] **Phase 2 · Part 15, dynamics and stability**: rewrite all ten stations, including the pilot's Lyapunov
+  - [x] **Phase 2 · Part 15, dynamics and stability**: rewrite all ten stations, including the pilot's Lyapunov
     lesson. Build from closed loops and flows to stability, Lyapunov functions/equation, comparison, sensitivity,
     converse/ISS ideas, continuous/discrete time and the RL bridges. Derive claims and show computed examples
     instead of substituting short theorem summaries for instruction.
-  - [ ] **Phase 3 · Part 16, incremental stability and contraction**: rewrite all five stations. Connect paired
+    Accepted 2026-10-19: nine nonpilot lessons developed; the accepted Lyapunov pilot retained with one numerical
+    rounding correction. Independent beginner and mathematical rechecks cover all ten final hashes. The discrete
+    Lyapunov proof deferred by the pilot is now developed in `time-dictionary`.
+  - [x] **Phase 3 · Part 16, incremental stability and contraction**: rewrite all five stations. Connect paired
     trajectories, variational dynamics, metric differential lengths and finite-distance bounds; derive the key
     inequality and its assumptions. Develop the imitation deployment bridge and distinguish three contractions.
+    Accepted 2026-10-19: all five lessons independently reviewed and reconciled with Part 15; path invariance,
+    nonconvex geometry, energy/norm rates and visited-state deployment premises are explicit. All critical/moderate
+    findings closed. Build, 97 Node tests, Chrome/Edge guarantees checks and 128 changed-view checks per browser
+    pass, with desktop/mobile and both-theme screenshot inspection. Scoped evidence and source-access limits are
+    in `docs/m16/phase2-3-review.md`; source records remain `located`. Phases 4–6 remain pending.
   - [ ] **Phase 4 · Part 17, learning theory**: rewrite all twelve stations, including the random-sign pilot.
     Develop risk/ERM, uniform convergence, concentration, finite classes, Rademacher complexity/properties,
     covers/Dudley, margins, trajectories as samples, and the kernel/structured branches. Use small calculable

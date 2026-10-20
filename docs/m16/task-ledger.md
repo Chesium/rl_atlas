@@ -1,8 +1,22 @@
-# M16 Phase 0 / 1 task ledger
+# M16 task ledger
 
-Baseline `2f72fc274169b6702d4b7ec9fe4a13b1d110011f`, initially clean. Contract v1 is [route-contract.md](route-contract.md). Shared metadata, PLAN, generated builds and integration belong only to the coordinator. Writer ownership is exclusive; reviewers write reports only. Phase 2–6 rollout is outside this request.
+Phase 0/1 baseline `2f72fc274169b6702d4b7ec9fe4a13b1d110011f`, initially clean. Contract v1 is [route-contract.md](route-contract.md). Shared metadata, PLAN, generated builds and integration belong only to the coordinator. Writer ownership is exclusive; reviewers write reports only. The current request authorizes Phases 2 and 3; Phases 4–6 remain outside its implementation scope.
 
-**Current status, 2026-10-19:** Phases 0 and 1 are complete. The accepted wave-2 assignments and independent rechecks appear below and in [pilot-review.md](pilot-review.md). The user has now authorized committing the scoped changes; no push is requested. The first table and shutdown section preserve the earlier interrupted run, not outstanding assignments.
+## Phase 2 / 3 execution, 2026-10-19
+
+Baseline `9764c85` on `main`, clean. The accepted pilot is the dependency input; its source statuses and numerical settings stay unchanged. Part 16 drafts use the agreed dynamics notation in route-contract v1 and must be reconciled against the final Part 15 before acceptance. No commit or publication requested.
+
+| ID | Agent / role | Exclusive ownership | Dependency input | Status | Report / handoff |
+| --- | --- | --- | --- | --- | --- |
+| P2-W | `/root/writer_dynamics`, writer | ten `content/15-dynamics/*.md` files; writer report and own handoff | `9764c85`; contract Part 15; accepted pilot hash c29da439… | Accepted at final hashes; reports/handoff saved; turn completed | `writer-phase2.md`; `../handoffs/m16-phase-2-3/agents/writer-dynamics.md` |
+| P3-W | `/root/writer_contraction`, writer | five `content/16-contraction/*.md` files; writer report and own handoff | `9764c85`; contract Part 16, agreed Part 15 notation | Accepted after M23-2 patch and both reviews; turn completed | `writer-phase3.md`; `../handoffs/m16-phase-2-3/agents/writer-contraction.md` |
+| P23-B | `/root/review_beginner`, independent beginner reviewer | beginner report and own handoff only | mobile-checked draft hashes, declared prerequisites and reader tasks | Complete; all fifteen pass at final hashes, B1/B2 rechecked, turn completed | `beginner-phase2-3.md`; `../handoffs/m16-phase-2-3/agents/review-beginner.md` |
+| P23-M | `/root/review_math`, independent mathematical reviewer | mathematical report and own handoff only | mobile-checked draft hashes, raw primary editions and workflow acceptance rubric | Complete; all fifteen pass at final hashes, M23-1/2/3 rechecked, turn completed | `math-phase2-3.md`; `../handoffs/m16-phase-2-3/agents/review-math.md` |
+| P23-I | `/root`, coordinator | shared files, build, browser tools, integration reports and main handoff | patched/rechecked final hashes | Complete; phases accepted, build/tests/browser evidence saved | `phase2-3-review.md`; `../handoffs/m16-phase-2-3.md` |
+
+Writers cannot accept their own material. Beginner and mathematical review identities must be distinct. With four slots the coordinator runs at most two writers and one reviewer; roles rotate in successive waves. No nested delegation. Guard checks every 60 seconds while agents run; document/stop/unavailable starts ordered team shutdown. Reports retain hashes and finding dispositions.
+
+**Phase 0/1 archival status, 2026-10-19:** Phases 0 and 1 are complete and committed in `9764c85`. The accepted wave-2 assignments and independent rechecks appear below and in [pilot-review.md](pilot-review.md). The commit authorization belonged to that earlier task; the current Phase 2/3 request does not ask for a commit. The historical table and shutdown section preserve the interrupted first run, not outstanding assignments.
 
 ## Initial Codex run (historical)
 

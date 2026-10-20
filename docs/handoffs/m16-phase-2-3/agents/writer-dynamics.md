@@ -1,0 +1,21 @@
+# P2-W dynamics writer handoff
+
+Identity `/root/writer_dynamics`; workspace `C:\C\rl_atlas`; input HEAD `9764c85`; 2026-10-19. Own only the ten `content/15-dynamics/*.md` files, `docs/m16/writer-phase2.md`, this handoff, and illustrative ignored scratch checks. No nested agents.
+
+All nine nonpilot station drafts are complete; the accepted lyapunov-functions pilot is substantively retained with one coordinator-authorized illustration rounding repair. The exact per-station changes, primary-source sections, derivations, calculations and evidence limits are in [writer-phase2.md](../../../m16/writer-phase2.md). That report is writer evidence, not an independent review.
+
+Current operation: lessons frozen for coordinator build/mobile gate while writer report is saved. Next operation: receive beginner and mathematics findings, patch only owned lessons, report changed hashes, then ask the originating reviewer to recheck. The coordinator owns shared files, build/generated bundles, cross-part integration, acceptance and any commit. No background job is running under this writer.
+
+After the first freeze, reviewer M23-1 required the dynamical-systems Card to qualify its continuation claim by a compact invariant subset of the open domain. This was repaired and the new raw SHA-256 is `157d87fdd2ae36924f96520b9f4e9285b94f4120efaaa7b8b3078e7184232068`. Coordinator and reviewer notified; reviewer recheck pending. Other lessons remain at the hashes printed in the current computation output.
+
+Bounded followup: M23-1 is rechecked and closed. Beginner B1's early-use Jacobian gap was repaired in ode-sensitivity `statement` and its later `sensitivity` reminder. Final raw hash is `0c8a1dacd1180c8359f3a64a225cd34a84b1387f10a8fca69f01983cd4d10652`; both reviewers and coordinator notified, final-hash rechecks pending. No other lesson changed in this followup. Computation/preservation output refreshed and passing. Fresh quota at 2026-10-20 02:45:56 UTC: status ok, five-hour 33%, weekly 63%. No jobs running. End turn as requested; await a bounded followup for any further finding.
+
+Second bounded patch: B2 expanded only lyapunov-equation `experiment` with actual inline/bench settings, trajectory failure definition, and Node-recomputed quantitative observations; final hash `bfba965a84f9cb20d054bfb08353e05d6411e12ce7d41315ab31fec0c41aaf2b`. Coordinator also authorized pilot `nonnormal` t=1 norm rounding to approximately 0.7175; final pilot hash `d9dbaca10fe3d12f86065eb659ceb1433a5f169180ec280afc7dbc559efe9a75`. Its developed argument and every other passage remain intact. The scratch preservation script now checks exactly that single sentence repair against the accepted baseline, and passes. Both reviewers and root notified for final-hash recheck. No remaining writer-owned job is running; lessons frozen again and ending turn.
+
+Constraints: preserve IDs, old anchors, all source editions and metadata review statuses; preserve Story/engine settings and pilot developed argument. Keep continuous norm versus energy rates explicit, maps distinct from velocities, and derivative estimates separate from exact residual assumptions. Never infer global certification from sampled checks. Do not run shared build while another writer edits.
+
+Verification completed: `python tmp/m16-phase2-checks.py` passes exact matrix/scalar computations and preservation checks. Output is `tmp/m16-phase2-checks.txt`. No independent review or rendered/browser check is claimed by this writer. The coordinator has begun those integration tasks.
+
+Latest observed live guard: status ok, five-hour remaining 66%, weekly remaining 68%, checked 2026-10-20 02:38:42 UTC. Initial check was 90%/72% at 02:33:22 UTC. Default remaining thresholds: document below 10% five-hour or 6% weekly; stop below 3% or 2%; unavailable stops substantive work. The coordinator owns the active-team 60-second timer and a document alert latches team shutdown. Relay any alert immediately, save this handoff, stop substantive work, and end the turn.
+
+No user changes were reverted, no commit was made, and no source status was upgraded. The writer changed only the assigned nine lessons plus its report/handoff and ignored scratch script/output.
