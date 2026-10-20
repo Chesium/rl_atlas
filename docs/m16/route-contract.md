@@ -11,6 +11,20 @@ contract; its pending Phase 2/3 wording is historical. Phases 4–6 remain pendi
 
 ## Audience, shared notation and examples
 
+**Phase 5 contract amendment, 2026-10-20:** the original Part 18 records below
+are planning hypotheses, not verified source claims. Independent review of the
+actual v2 statements and derivations is recorded in `math-phase5.md`. In
+particular, the proposed zero exclusion radius for linear dynamics in 5.2 is
+false: the lesson now exhibits a counterexample to the printed theorem and
+separately develops a reconstructed result with explicit added hypotheses and
+a nonzero transfer radius. The true norm rate is `lambda_star`, distinct from
+the learned energy rate `lambda`. This supersedes that planned worked case.
+The 5.1 application additionally requires positivity/regularity, a compatible
+initial-state measure, convex-domain gradient bounds and the stated strictness
+repair. Lemma 4.1 retains its printed factor 2 and 4B_h; the 4.4 feature-event
+factor and data-only probability reading are explicit. Source status remains
+`located`; an independent agent check does not establish human proof review.
+
 Assume differentiation, vectors, matrix multiplication and elementary probability. Define gradients, positive definiteness, suprema, operator norms, independence, covers and probability quantifiers locally when first needed. Use scalar `xdot=-x`, then the existing nonnormal `A=[-1,3;0,-2]`, then a three-parameter quadratic certificate. State dimension is p, parameter dimension k, independent trajectory count n. The initial state is xi, flow phi_t(xi), common reachable compact set S, initial distribution D, horizon T. V is a certificate; policy reward value retains its RL meaning. Gradient is with respect to x unless marked theta. Euclidean vector and induced operator norms are the defaults; state exceptions explicitly.
 
 Statistical signed empirical complexity fixes Z first, then averages signs after maximizing over the class. The Boffi convention additionally takes absolute values and a worst-case sample; it must be defined again at use. Gamma is a positive fixed scalar residual margin, not RL discount. Alpha is a physical norm decay rate where the metric inequality uses -2 alpha M; scalar energy rate and norm rate differ by two. Delta in a confidence statement is a failure probability, not TD surprise. Preserve the three meanings of contraction.

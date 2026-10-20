@@ -752,12 +752,16 @@ animations and hover effects this guide relies on would not be smooth.
     M4 findings minor). Massart and Dudley are now proved. The constant 24 holds with in-class cover centers
     (48 otherwise), and Theorem 4.2 Step 5 is aligned. Build, 97 Node tests, the Chrome/Edge guarantees
     checks and the full desktop/mobile, both-theme Chrome/Edge lesson sweep (308 views each) pass, and the
-    screenshots were inspected. Evidence and limits are in `docs/m16/phase4-review.md`. Phases 5–6 remain pending.
-  - [ ] **Phase 5 · Part 18, learning certificates**: rewrite all ten stations, including the theorem pilot.
+    screenshots were inspected. Evidence and limits are in `docs/m16/phase4-review.md`.
+  - [x] **Phase 5 · Part 18, learning certificates**: rewrite all ten stations, including the theorem pilot.
     Develop the formulation, derivative-aware class norm, Lemma 4.1 and Theorems 4.2–4.4/5.1–5.2 with explicit
     proof dependencies and where each assumption enters. Connect practice and the adapted Van der Pol experiment.
     Preserve independent-trajectory counts, margin conventions, norm/energy rates, feasibility conditions and
     the distinction between small violation probability and a certificate valid everywhere.
+    Accepted 2026-10-20 within the independent agent-review scope in
+    [phase5-review.md](docs/m16/phase5-review.md): all ten station records, final review repairs,
+    build, 97 tests, Chrome/Edge regressions and rendered-view checks pass. Source discrepancies and
+    the explicitly reconstructed Theorem 5.2 remain visible; source status stays `located`.
   - [ ] **Phase 6 · Cross-route integration and acceptance**: audit every station and the Theorem 4.2, contraction,
     matrix, kernel and adapted Figure 1 routes for continuity, notation, definitions, links, examples, exercises,
     Cards and visual/experimental consistency. Keep per-station coverage and review dispositions in

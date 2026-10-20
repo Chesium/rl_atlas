@@ -4,7 +4,8 @@ The Phase 0 inventory remains [route-contract.md](route-contract.md), covering
 37 stations. This ledger records delivered reader-task and review evidence;
 planned examples alone do not pass a station. Phase 2/3 acceptance is recorded in
 [phase2-3-review.md](phase2-3-review.md), with candidate hashes in the independent
-reports. Phases 4–6 remain pending except for their three accepted pilot lessons.
+reports. Phase 4 is accepted below. Phase 5's saved reviews and final integration
+are recorded below; Phase 6 whole-track acceptance remains separate.
 
 ## Phases 2 and 3
 
@@ -56,12 +57,36 @@ screenshot inspection.
 | kernels-random-features | Explain why value approximation alone does not transfer a certificate; bounded-frequency features | Pass B | Pass M | Pass |
 | dual-sudakov | Compare d(d+1)/2 entry counting with structured dimension d, keeping logs and the normalization | Pass B | Pass M | Pass |
 
+## Phase 5: Part 18
+
+The original independent beginner and mathematical reports cover all ten lessons
+at their recorded final hashes. Final minor changes are separately reviewed in
+the continuation reports linked from [phase5-review.md](phase5-review.md).
+All ten stations are accepted within the checked scope in
+[phase5-review.md](phase5-review.md). Final minor repairs and the analytic
+counterexample measure bound (M5-R1) passed both distinct continuation reviews.
+Build, 97 tests, Chrome/Edge guarantees regressions and desktop/mobile light/dark
+view checks pass. Source status remains `located`.
+
+| Station | Reader task / teaching target | Beginner | Mathematics | Integration |
+| --- | --- | --- | --- | --- |
+| learning-certificates | Compute a trajectory residual and binomial holdout bound; explain fixed-margin infeasibility near equilibrium | Pass B | Pass M | Pass |
+| certificate-classes | Compute value-and-gradient bounds for the quadratic class; explain why value-only control fails | Pass B | Pass M | Pass |
+| boffi-lemma-4-1 | Assemble the fast margin bound, factor 2 and 4B_h; count independent trajectories | Pass B | Pass M, external theorem recalled | Pass |
+| boffi-thm-4-2 (pilot) | Follow parameter cover to derivative-aware residual cover to complexity and margin bound; check feasible annulus | Pass B, consistency diff | Pass M, consistency diff | Pass |
+| boffi-thm-4-3 | Compare matrix dimension and parametric dimension; derive product-rule transfer and cover split | Pass B | Pass M | Pass |
+| boffi-thm-4-4 | Transfer value and derivative approximation; explain shifted margin and data-only probability | Pass B + BR | Pass M + MR | Pass |
+| boffi-thm-5-1 | Transport nearby-good-point decrease; compute epsilon^(1/4) radius; identify extra assumptions for the 4.2 chain | Pass B + BR | Pass M + MR | Pass |
+| boffi-thm-5-2 | Reproduce prolonged block-metric reasoning; distinguish printed false claim from reconstruction and energy/norm rates | Pass B + BR, including analytic measure bound | Pass M + MR, including M5-R1 | Pass |
+| certificates-in-practice | Explain Gram positivity, sampled feasibility, independent holdout and selection corrections | Pass B | Pass M | Pass |
+| vdp-certificates | Derive energy/Jacobian checks and predict interventions; interpret 76/6/0 finite holdout failures | Pass B | Pass M | Pass |
+
+The one-sentence `kernels-random-features` consistency correction tracks the
+feature event 2/n² and is independently checked in `math-phase5.md`.
+
 ## Remaining rollout
 
-Part 18 (10 stations) remains Phase 5. Its `boffi-thm-4-2` pilot lesson has the bounded
-acceptance scope in [pilot-review.md](pilot-review.md), plus the Phase 4 integration
-edits recorded in [phase4-review.md](phase4-review.md). The other nine Part 18 lessons
-remain unaccepted for M16. Phase 6 must reconcile all 37 lessons and every
+Phase 5 is accepted with the evidence above. Phase 6 must reconcile all 37 lessons and every
 destination route, including matrix, kernel and adapted Figure 1 branches.
 Source records remain `located`; none of these agent reviews alone upgrades
 source status or supplies human review.
