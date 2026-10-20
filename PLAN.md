@@ -711,16 +711,23 @@ animations and hover effects this guide relies on would not be smooth.
   - [x] **Preparation · Local adapted workflow**: upstream skill docs and three relevant editorial references
     downloaded verbatim at recorded commits; a repo-specific skill, multi-agent protocol, discovery instructions,
     and this pending rewrite plan are present. This completes planning only, not the pilot or chapter rewrites.
-  - [ ] **Phase 0 · Route contract and baseline audit**: inventory all 37 stations (10/5/12/10 across Parts 15–18),
+  - [x] **Phase 0 · Route contract and baseline audit**: inventory all 37 stations (10/5/12/10 across Parts 15–18),
     learning objectives, prerequisite gaps, consumed/introduced notation, source locators, worked examples,
     exercises/solutions, and the purpose of each visual/Lab. Record `docs/m16/route-contract.md` and
     `docs/m16/task-ledger.md`. Agree shared examples and notation before parallel drafts; retain destination-led
     scope and distinguish optional branches from required dependencies.
-  - [ ] **Phase 1 · Pilot and review**: develop Lyapunov functions, Rademacher complexity and Theorem 4.2, including
+    Recorded 2026-10-19: all 37 station records, baseline gaps and the 16-station pilot closure are in
+    `docs/m16/route-contract.md` and `docs/m16/baseline-audit.md`; ownership and review dispositions are in the ledger.
+  - [x] **Phase 1 · Pilot and review**: develop Lyapunov functions, Rademacher complexity and Theorem 4.2, including
     the intermediate bridges those lessons need. Use the shared examples, full consequential derivations, local
     definitions, counterexamples and exercises. Independent beginner and mathematical reviewers test the stated
     objectives and source fidelity. Integrate and inspect the rendered pilot; record `docs/m16/pilot-review.md`.
     Resolve critical/moderate findings before rollout and revise the authoring workflow if needed.
+    Recorded 2026-10-19: the three lessons were rewritten with local bridges. Independent agent beginner (B1) and
+    mathematical (M1) reviews passed at the accepted hashes after patches and rechecks; the critical finding, a gap in
+    the source's Dudley step for the absolute convention, is resolved by an explicit added hypothesis. Build, Node tests,
+    Chrome/Edge guarantees checks and changed-view screenshots pass. Evidence and rollout carry-overs are in
+    `docs/m16/pilot-review.md`; workflow lessons were added to the rewrite workflow.
   - [ ] **Phase 2 · Part 15, dynamics and stability**: rewrite all ten stations, including the pilot's Lyapunov
     lesson. Build from closed loops and flows to stability, Lyapunov functions/equation, comparison, sensitivity,
     converse/ISS ideas, continuous/discrete time and the RL bridges. Derive claims and show computed examples

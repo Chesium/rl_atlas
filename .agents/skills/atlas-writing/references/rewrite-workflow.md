@@ -198,3 +198,12 @@ Theorem 4.2, contraction, matrix, kernel, and adapted Figure 1 routes pass their
 relevant gates. Report tests and browser checks actually rerun, remaining limits,
 and any outstanding human feedback. Commit/push/publication require the user's
 task authorization; this workflow itself grants none.
+
+## Lessons from the pilot
+
+The Phase 1 pilot exposed four repeatable problems. Apply these in rollout:
+
+- **Edit math with the file-editing tool, not shell text substitution.** Heredocs and `sed` silently ate backslashes twice (`\ref`, `\frac`, `\`). After any scripted edit, rebuild and check that every `\ref` resolves and that the file contains no control characters.
+- **Run the mobile math-overflow check before review.** Wide one-line displays and Markdown tables with inline math fail the 390px check in `tools/guarantees-check.js`. Use `aligned` multi-line displays and lists instead of math-heavy tables, so reviewers do not review a layout that must change.
+- **Check paper derivations, not only paper statements.** The math review found a gap in the source's own Dudley step for its absolute-value convention. When a lesson rebuilds a source proof, the mathematical reviewer recomputes each transition, and the lesson labels any added hypothesis visibly.
+- **A worked example must satisfy the theorem it illustrates.** Choose its domain, horizon and margin so that the premises hold, and show the check; otherwise label it as constant bookkeeping only.
