@@ -62,7 +62,7 @@ The finite case keeps the mathematics simple, but nothing essential depends on i
 
 ### The Markov property {#markov}
 
-Definition \ref{def-mdp} contains a strong assumption: the probabilities in \ref{dynamics} depend only on the current state and action. In full,
+\ref{def-mdp} contains a strong assumption: the probabilities in \ref{dynamics} depend only on the current state and action. In full,
 
 $$\Pr\{S_{t+1}, \rew{R_{t+1}} \mid S_t, A_t, \rew{R_t}, S_{t-1}, A_{t-1}, \ldots, S_0, A_0\} = \Pr\{S_{t+1}, \rew{R_{t+1}} \mid S_t, A_t\}. \label{markov-eq}$$
 

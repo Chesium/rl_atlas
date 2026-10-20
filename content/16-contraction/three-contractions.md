@@ -63,7 +63,7 @@ $$\mathfrak R(\psi(\mathcal A))\le L_\psi\mathfrak R(\mathcal A),$$
 
 where $\mathfrak R$ uses the same normalized signed definition on a set of vectors. It does not require $L_\psi<1$. It bounds a change in complexity after composition; it does not assert convergence of an iterative algorithm.
 
-For this signed convention, fixed offsets $\psi_i(0)$ do not change complexity: their sign-weighted sum is independent of the supremum and has mean zero. The **absolute-value** convention used by Boffi is different; an offset can contribute there, and the lemma must be restated with its corresponding hypotheses and constants. A scalar lemma also does not automatically control vector-valued composition. This bridge invokes the scalar theorem; its general proof is deferred to Shalev-Shwartz and Ben-David (2014), Lemma 26.9, pp.331–332. [[rademacher-properties]] is the related atlas station, whose fuller Phase 4 development remains pending.
+For this signed convention, fixed offsets $\psi_i(0)$ do not change complexity: their sign-weighted sum is independent of the supremum and has mean zero. The **absolute-value** convention used by Boffi is different; an offset can contribute there, and the lemma must be restated with its corresponding hypotheses and constants. A scalar lemma also does not automatically control vector-valued composition. This bridge invokes the scalar theorem (Shalev-Shwartz and Ben-David (2014), Lemma 26.9, pp.331–332). [[rademacher-properties]] proves it for this signed convention and treats offsets under the absolute convention and vector-valued composition separately.
 
 ### Calculate the constants before interpreting the word {#examples}
 

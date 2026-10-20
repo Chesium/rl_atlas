@@ -129,7 +129,7 @@ Suppose the trajectory leaves the ball at some time in $[0,t^\ast)$. The distanc
 Both restrictions in \ref{omega} matter. Without the ball, the set $\{x\in U: V(x)\le c\}$ can be unbounded or reach the edge of $U$, where the decrease hypothesis says nothing. For example, $V(x)=\frac{x_1^2}{1+x_1^2}+x_2^2$ is positive definite on $\mathbb R^2$, yet every point $(x_1,0)$ has $V<1$; for $c\ge1$ the set $\{V\le c\}$ contains the whole $x_1$-axis. A trajectory could keep $V$ decreasing while running off to infinity inside that set. The ball together with the choice $c<m_r$ carves out the bounded piece around the origin that a trajectory provably cannot leave.
 
 ::: proof Proof of part 1 (stability)
-Let $\epsilon>0$ be given. Choose $r$ with $0<r<\epsilon$ and $\bar B_r\subseteq U$, and choose a level $0<c<m_r$. Because $V$ is continuous with $V(0)=0$, there is a $\delta$ with $0<\delta<r$ such that $\|x\|<\delta$ implies $V(x)<c$. Now take $\|\xi\|<\delta$. Then $\xi\in\Omega_c$, so by Lemma \ref{lem-trap} the trajectory stays in $\Omega_c\subseteq\bar B_r$, and $\|\phi_t(\xi)\|\le r<\epsilon$ for all $t\ge0$. This is the definition of stability.
+Let $\epsilon>0$ be given. Choose $r$ with $0<r<\epsilon$ and $\bar B_r\subseteq U$, and choose a level $0<c<m_r$. Because $V$ is continuous with $V(0)=0$, there is a $\delta$ with $0<\delta<r$ such that $\|x\|<\delta$ implies $V(x)<c$. Now take $\|\xi\|<\delta$. Then $\xi\in\Omega_c$, so by \ref{lem-trap} the trajectory stays in $\Omega_c\subseteq\bar B_r$, and $\|\phi_t(\xi)\|\le r<\epsilon$ for all $t\ge0$. This is the definition of stability.
 :::
 
 Stability needed only $\dot V\le0$. Convergence needs more, and the proof shows exactly where the strict inequality enters.
@@ -192,7 +192,7 @@ $$A^TP+PA=\begin{pmatrix}-2p_{11}&3p_{11}-3p_{12}\\3p_{11}-3p_{12}&6p_{12}-4p_{2
 Setting this equal to $-I$ gives three linear equations: $-2p_{11}=-1$, $3p_{11}-3p_{12}=0$ and $6p_{12}-4p_{22}=-1$. Their solution is $p_{11}=\tfrac12$, $p_{12}=\tfrac12$, $p_{22}=1$:
 $$P=\begin{pmatrix}\tfrac12&\tfrac12\\\tfrac12&1\end{pmatrix},\qquad V(x)=\tfrac12x_1^2+x_1x_2+x_2^2=\tfrac12(x_1+x_2)^2+\tfrac12x_2^2.$$
 
-The completed square shows positivity directly: $V(x)=0$ forces $x_2=0$ and $x_1+x_2=0$, so $x=0$. A symmetric matrix $P$ is called **positive definite** when the quadratic function $x^TPx$ is positive definite in the sense of Definition \ref{def-posdef}; this $P$ is.
+The completed square shows positivity directly: $V(x)=0$ forces $x_2=0$ and $x_1+x_2=0$, so $x=0$. A symmetric matrix $P$ is called **positive definite** when the quadratic function $x^TPx$ is positive definite in the sense of \ref{def-posdef}; this $P$ is.
 
 The constants $c_1,c_2$ come from the eigenvalues of $P$. For a $2\times2$ matrix $M$, the eigenvalues $\lambda$ solve $\det(M-\lambda I)=0$, which reads $\lambda^2-(\operatorname{tr}M)\,\lambda+\det M=0$, where the trace $\operatorname{tr}M$ is the sum of the diagonal entries. Here $\operatorname{tr}P=\tfrac32$ and $\det P=\tfrac12-\tfrac14=\tfrac14$, so $\lambda^2-\tfrac32\lambda+\tfrac14=0$ and $\lambda=(3\pm\sqrt5)/4\approx0.191$ and $1.309$. A symmetric $p\times p$ matrix has real eigenvalues $\lambda_i$ with orthonormal eigenvectors $u_i$, $Pu_i=\lambda_iu_i$. Writing $x=\sum_ia_iu_i$ gives $\|x\|^2=\sum_ia_i^2$ and $x^TPx=\sum_i\lambda_ia_i^2$, and therefore
 $$\lambda_{\min}(P)\,\|x\|^2\le x^TPx\le\lambda_{\max}(P)\,\|x\|^2. \label{rayleigh}$$
@@ -209,7 +209,7 @@ If decimals are wanted, round in the safe direction: slower rates and a larger p
 
 ### When a hypothesis fails {#failures}
 
-Each hypothesis of Theorem \ref{thm-lyapunov} does work; removing one breaks a conclusion.
+Each hypothesis of \ref{thm-lyapunov} does work; removing one breaks a conclusion.
 
 **Decrease that is not strict.** For the rotation with $V=\|x\|^2$, $V$ is positive definite and $\dot V=0\le0$. Part 1 applies, and the origin is indeed stable. Part 2 does not apply, and the origin is indeed not attractive. So $\dot V\le0$ alone cannot establish convergence. Sometimes the conclusion is true but this $V$ cannot show it. For the damped oscillator $\dot x_1=x_2,\ \dot x_2=-x_1-x_2$, the same $V$ gives $\dot V=2x_1x_2+2x_2(-x_1-x_2)=-2x_2^2$. This is zero on the whole $x_1$-axis, so part 2 fails, yet every trajectory does converge (the eigenvalues have real part $-\tfrac12$). LaSalle's invariance principle repairs such cases (Khalil, Theorem 4.4 and Corollary 4.1, printed p. 128). If no trajectory other than $x\equiv0$ can remain in the set where $\dot V=0$, attraction still follows. Here a trajectory staying on $x_2=0$ would need $\dot x_2=-x_1=0$, so $x_1=0$ too. We do not prove LaSalle's principle in this lesson.
 
@@ -226,7 +226,7 @@ Before claiming anything from a candidate $V$, check:
 - $\dot V\le0$ at every point of $U$ (stability), or $\dot V<0$ at every point of $U$ except the origin (asymptotic stability); checking finitely many points does not establish either;
 - for a rate, constants $c_1,c_2,c_3$ valid on a region that trajectories cannot leave.
 
-The conclusions of Theorem \ref{thm-lyapunov} are local. They concern a neighborhood of the origin, and the certified region $\Omega_c$ may be small even when $U$ is large, because $c$ must stay below the minimum of $V$ on a sphere inside $U$.
+The conclusions of \ref{thm-lyapunov} are local. They concern a neighborhood of the origin, and the certified region $\Omega_c$ may be small even when $U$ is large, because $c$ must stay below the minimum of $V$ on a sphere inside $U$.
 
 A global conclusion needs the hypotheses on all of $\mathbb R^p$ plus one more property. $V$ is **radially unbounded** if $V(x)\to\infty$ as $\|x\|\to\infty$.
 
@@ -235,7 +235,7 @@ Let $f$ be continuously differentiable on $\mathbb R^p$ with $f(0)=0$. If $V:\ma
 :::
 
 ::: proof Proof idea
-Take any $\xi$ and let $c=V(\xi)$. Radial unboundedness gives a radius $r$ with $V(x)>c$ whenever $\|x\|\ge r$, so the whole set $\{V\le c\}$ lies inside the ball of radius $r$ and is compact. The trapping lemma and Steps 1–3 of the attraction proof then run unchanged with this set in place of $\Omega_c$, so $\phi_t(\xi)\to0$. Stability is part 1 of Theorem \ref{thm-lyapunov} with $U=\mathbb R^p$. Together these give global asymptotic stability.
+Take any $\xi$ and let $c=V(\xi)$. Radial unboundedness gives a radius $r$ with $V(x)>c$ whenever $\|x\|\ge r$, so the whole set $\{V\le c\}$ lies inside the ball of radius $r$ and is compact. The trapping lemma and Steps 1–3 of the attraction proof then run unchanged with this set in place of $\Omega_c$, so $\phi_t(\xi)\to0$. Stability is part 1 of \ref{thm-lyapunov} with $U=\mathbb R^p$. Together these give global asymptotic stability.
 :::
 
 This is Khalil's Theorem 4.2 (printed p. 124). The function $\frac{x_1^2}{1+x_1^2}+x_2^2$ shows why the extra property is needed: it is positive definite but stays below 1 along the $x_1$-axis, so its sublevel sets for $c\ge1$ are unbounded. Khalil's Exercise 4.8 (printed p. 182) builds a planar system for which this $V$ satisfies $\dot V<0$ away from the origin, yet the origin is not globally asymptotically stable. A quadratic $V=x^TPx$ with $P$ positive definite is radially unbounded because $V\ge c_1\|x\|^2$. That is why the conclusion for the nonnormal example holds for every initial state.
@@ -244,7 +244,7 @@ This is Khalil's Theorem 4.2 (printed p. 124). The function $\frac{x_1^2}{1+x_1^
 
 A discrete-time system updates by a map, $x_{j+1}=g(x_j)$ for steps $j=0,1,2,\dots$, with $g(0)=0$. There is no time derivative, so $\nabla V^Tf$ has no meaning here. Decrease is measured by the one-step change
 $$\Delta V(x)=V(g(x))-V(x).$$
-The analogue of Theorem \ref{thm-lyapunov} holds for continuous $g$ with $\Delta V$ in place of $\dot V$. We do not prove it here; its trapping step differs, because a single step can jump over a sphere instead of crossing it. [[time-dictionary]] collects the other continuous/discrete correspondences.
+The analogue of \ref{thm-lyapunov} holds for continuous $g$ with $\Delta V$ in place of $\dot V$. We do not prove it here; its trapping step differs, because a single step can jump over a sphere instead of crossing it. [[time-dictionary]] collects the other continuous/discrete correspondences.
 
 Take $g(x)=x/2$ and $V(x)=x^2$. Then $V(g(x))=x^2/4$, so $\Delta V(x)=-\tfrac34x^2<0$ for $x\ne0$, and $V$ shrinks by the factor $\tfrac14$ every step: $V(x_j)=4^{-j}V(x_0)$. The norm shrinks by $\sqrt{1/4}=\tfrac12$ per step, the discrete counterpart of the factor two between energy and norm rates. A common mistake is to evaluate the continuous formula with the map: $\nabla V(x)^Tg(x)=2x\cdot\tfrac x2=x^2>0$, which wrongly suggests growth. It computes the rate of change of $V$ for the different system $\dot x=g(x)$.
 
@@ -259,7 +259,7 @@ A quadratic certificate fitted to four sampled trajectories of the nonnormal sys
 
 ### What is and is not proven {#scope}
 
-Theorem \ref{thm-lyapunov} and Theorem \ref{thm-global} are proofs under their hypotheses. For the nonnormal example, the exact solution of the Lyapunov equation proves global exponential stability with the stated constants. Every state is covered, because $\dot V=-\|x\|^2$ is an identity in $x$.
+\ref{thm-lyapunov} and \ref{thm-global} are proofs under their hypotheses. For the nonnormal example, the exact solution of the Lyapunov equation proves global exponential stability with the stated constants. Every state is covered, because $\dot V=-\|x\|^2$ is an identity in $x$.
 
 Several things are not proven by the material here:
 
@@ -278,9 +278,9 @@ $\nabla V=2x$, so $\dot V=2x_1(-x_1+x_2)+2x_2(-x_1-x_2)=-2x_1^2-2x_2^2=-2V$. $V$
 :::
 
 ::: question
-For the damped oscillator $\dot x_1=x_2,\ \dot x_2=-x_1-x_2$ with $V=\|x\|^2$, what does Theorem \ref{thm-lyapunov} prove? Compare with the rotation.
+For the damped oscillator $\dot x_1=x_2,\ \dot x_2=-x_1-x_2$ with $V=\|x\|^2$, what does \ref{thm-lyapunov} prove? Compare with the rotation.
 ---
-$\dot V=-2x_2^2\le0$, so part 1 proves stability. Part 2 does not apply, because $\dot V=0$ at states such as $(1,0)$. The origin is in fact attractive (LaSalle's principle, or the eigenvalues $-\tfrac12\pm i\tfrac{\sqrt3}{2}$), but this $V$ and Theorem \ref{thm-lyapunov} alone do not prove it. For the rotation, $\dot V=0$ everywhere and attraction is actually false. The same "$\dot V\le0$" can come with or without convergence.
+$\dot V=-2x_2^2\le0$, so part 1 proves stability. Part 2 does not apply, because $\dot V=0$ at states such as $(1,0)$. The origin is in fact attractive (LaSalle's principle, or the eigenvalues $-\tfrac12\pm i\tfrac{\sqrt3}{2}$), but this $V$ and \ref{thm-lyapunov} alone do not prove it. For the rotation, $\dot V=0$ everywhere and attraction is actually false. The same "$\dot V\le0$" can come with or without convergence.
 :::
 
 ::: question
@@ -298,7 +298,7 @@ $\Delta V=(1-\Delta t)^2x^2-x^2=\Delta t\,(\Delta t-2)\,x^2$, which is negative 
 ::: question
 For $\dot x=-x^3$ and $V=x^2$, show that the origin is globally asymptotically stable. Does the exponential bound of \ref{rates} apply?
 ---
-$\dot V=2x(-x^3)=-2x^4<0$ for $x\ne0$, and $V$ is positive definite and radially unbounded, so Theorem \ref{thm-global} applies. The exponential bound needs $-2x^4\le-c_3x^2$, that is $2x^2\ge c_3$, near the origin. This fails as $x\to0$ for every $c_3>0$. Indeed the exact solution $x(t)=\xi/\sqrt{1+2\xi^2t}$ decays like $1/\sqrt{2t}$, slower than any exponential. Asymptotic stability does not imply an exponential rate.
+$\dot V=2x(-x^3)=-2x^4<0$ for $x\ne0$, and $V$ is positive definite and radially unbounded, so \ref{thm-global} applies. The exponential bound needs $-2x^4\le-c_3x^2$, that is $2x^2\ge c_3$, near the origin. This fails as $x\to0$ for every $c_3>0$. Indeed the exact solution $x(t)=\xi/\sqrt{1+2\xi^2t}$ decays like $1/\sqrt{2t}$, slower than any exponential. Asymptotic stability does not imply an exponential rate.
 :::
 
 ::: question

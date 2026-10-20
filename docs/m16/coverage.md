@@ -32,11 +32,35 @@ instructions. An agent beginner perspective does not measure student learning.
 | three-contractions | Identify each space, operator, norm and constant; explain why no physical guarantee follows from Bellman contraction | Pass B | Pass M | Pass |
 | imitation-deployment | Unroll the visited-state recurrence, compute e3=.175 and floor .2, reject an average-loss substitution | Pass B | Pass M | Pass |
 
+## Phase 4
+
+All twelve tasks below passed the final beginner (`reviewer-P4B`) and mathematical
+(`reviewer-P4M`) rechecks at the hashes in [beginner-phase4.md](beginner-phase4.md)
+and [math-phase4.md](math-phase4.md), with the one layout-only exception recorded in
+[phase4-review.md](phase4-review.md). Integration passes the build, Node tests,
+guarantees regression, the full desktop/mobile, both-theme Chrome/Edge sweep and
+screenshot inspection.
+
+| Station | Reader task / teaching target | Beginner | Mathematics | Integration |
+| --- | --- | --- | --- | --- |
+| risk-erm | Compute empirical/population loss on the two-state memorizer; derive the ERM 2ε decomposition | Pass B | Pass M | Pass |
+| concentration | Prove Hoeffding via the MGF lemma; apply it with the right range (n=100, ε=.2 gives 2e^{-8}) | Pass B | Pass M | Pass |
+| finite-classes | Derive (1−ε)^n, the union bound and both rates; H=2, δ=.05 gives log(40)/n | Pass B | Pass M | Pass |
+| uniform-convergence | Explain why one common event covers a data-selected model; two-model example | Pass B | Pass M | Pass |
+| rademacher-complexity (pilot) | Layout/consistency edits only; accepted argument unchanged | Pass B (diff) | Pass M (diff) | Pass |
+| rademacher-properties | Use the calculation rules in both conventions; reproduce a contraction-lemma coordinate step | Pass B | Pass M | Pass |
+| covering-dudley | Prove Massart; follow chaining with truncation; signed-to-absolute conversion, constant 24 versus 48 | Pass B | Pass M | Pass, layout fix after review |
+| margin-bounds | Ramp sandwich and slow bound; read the general-class Lemma 4.1 reading; fixed-margin failure | Pass B | Pass M | Pass |
+| trajectories-as-samples | Count 20 trajectories, not 12000 points; apply the Lipschitz grid bridge; scalar margin threshold | Pass B | Pass M | Pass |
+| covering-properties | Build image/product covers with explicit norms; internal versus external centers; Lemma 27.2 correction | Pass B | Pass M | Pass |
+| kernels-random-features | Explain why value approximation alone does not transfer a certificate; bounded-frequency features | Pass B | Pass M | Pass |
+| dual-sudakov | Compare d(d+1)/2 entry counting with structured dimension d, keeping logs and the normalization | Pass B | Pass M | Pass |
+
 ## Remaining rollout
 
-Part 17 (12 stations) and Part 18 (10 stations) remain Phases 4 and 5. Their
-`rademacher-complexity` and `boffi-thm-4-2` pilot lessons have the bounded acceptance
-scope and hashes in [pilot-review.md](pilot-review.md). The other twenty lessons
+Part 18 (10 stations) remains Phase 5. Its `boffi-thm-4-2` pilot lesson has the bounded
+acceptance scope in [pilot-review.md](pilot-review.md), plus the Phase 4 integration
+edits recorded in [phase4-review.md](phase4-review.md). The other nine Part 18 lessons
 remain unaccepted for M16. Phase 6 must reconcile all 37 lessons and every
 destination route, including matrix, kernel and adapted Figure 1 branches.
 Source records remain `located`; none of these agent reviews alone upgrades

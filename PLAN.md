@@ -743,10 +743,16 @@ animations and hover effects this guide relies on would not be smooth.
     findings closed. Build, 97 Node tests, Chrome/Edge guarantees checks and 128 changed-view checks per browser
     pass, with desktop/mobile and both-theme screenshot inspection. Scoped evidence and source-access limits are
     in `docs/m16/phase2-3-review.md`; source records remain `located`. Phases 4–6 remain pending.
-  - [ ] **Phase 4 · Part 17, learning theory**: rewrite all twelve stations, including the random-sign pilot.
+  - [x] **Phase 4 · Part 17, learning theory**: rewrite all twelve stations, including the random-sign pilot.
     Develop risk/ERM, uniform convergence, concentration, finite classes, Rademacher complexity/properties,
     covers/Dudley, margins, trajectories as samples, and the kernel/structured branches. Use small calculable
     classes before general bounds; explain consequential expectation, supremum and inequality steps.
+    Accepted 2026-10-20: all twelve lessons developed. Independent beginner and mathematical reviews pass at
+    the final hashes with every finding closed (critical B4-17, a broken macro; moderate B4-1 and B4-18; all
+    M4 findings minor). Massart and Dudley are now proved. The constant 24 holds with in-class cover centers
+    (48 otherwise), and Theorem 4.2 Step 5 is aligned. Build, 97 Node tests, the Chrome/Edge guarantees
+    checks and the full desktop/mobile, both-theme Chrome/Edge lesson sweep (308 views each) pass, and the
+    screenshots were inspected. Evidence and limits are in `docs/m16/phase4-review.md`. Phases 5–6 remain pending.
   - [ ] **Phase 5 · Part 18, learning certificates**: rewrite all ten stations, including the theorem pilot.
     Develop the formulation, derivative-aware class norm, Lemma 4.1 and Theorems 4.2–4.4/5.1–5.2 with explicit
     proof dependencies and where each assumption enters. Connect practice and the adapted Van der Pol experiment.

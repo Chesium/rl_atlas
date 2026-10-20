@@ -103,7 +103,7 @@ The definition is useful because of the following inequality. It replaces the un
 ::: theorem {#thm-sym} Symmetrization
 Let $Z_1,\dots,Z_n$ be independent draws and let $F$ be a class whose means $Pf$ exist and whose suprema below are well-defined random variables (true, for example, for a countable class or a class continuously indexed by parameters in $\mathbb R^k$). Then
 
-$$\mathbb E_Z\Bigl[\sup_{f\in F}\bigl(Pf-P_nf\bigr)\Bigr]\le2\,\mathbb E_Z\,\widehat{\mathfrak R}_n(F;Z_{1:n}). \label{sym}$$
+$$\begin{aligned}&\mathbb E_Z\Bigl[\sup_{f\in F}\bigl(Pf-P_nf\bigr)\Bigr]\\&\qquad\le2\,\mathbb E_Z\,\widehat{\mathfrak R}_n(F;Z_{1:n}).\end{aligned} \label{sym}$$
 :::
 
 The proof is short enough to give in full. Its one idea is to compare the sample with an imaginary second sample.
@@ -132,7 +132,7 @@ Three consequences matter for what follows.
 
 - *The other direction.* Applying \ref{sym} to the class $-F=\{-f:f\in F\}$ bounds $\mathbb E\sup_f(P_nf-Pf)$. Flipping every sign is again a fair sign vector, so $\widehat{\mathfrak R}_n(-F)=\widehat{\mathfrak R}_n(F)$ and the same bound holds.
 - *Absolute values.* Run the four steps with $|\cdot|$ around each average. Step 2 now also uses $|\mathbb E X|\le\mathbb E|X|$ (the size of an average is at most the average of the sizes), and Step 4 uses the triangle inequality $|a_f+b_f|\le|a_f|+|b_f|$ before taking suprema. The result is $\mathbb E_Z\sup_f|Pf-P_nf|\le2\,\mathbb E_Z\widehat{\mathfrak R}^{\,|\cdot|}_n(F)$, a bound on the expected uniform deviation \ref{unif-dev} itself.
-- *High probability.* \ref{sym} controls an average over samples. Shalev-Shwartz and Ben-David's Theorem 26.5 (2014, §26.1, p. 328) converts it into a statement about the actual sample. If $|f(z)|\le c$ for all $f$ and $z$, then for $0<\delta<1$, with probability at least $1-\delta$ over the sample, every $f\in F$ satisfies $Pf-P_nf\le2\,\mathbb E_Z\widehat{\mathfrak R}_n(F)+c\sqrt{2\ln(2/\delta)/n}$. Here $\delta$ is a failure probability and $\ln$ is the natural logarithm. We recall only Theorem 26.5's statement. Its proof applies McDiarmid's inequality, which is stated in [[concentration]], to the uniform deviation.
+- *High probability.* \ref{sym} controls an average over samples. Shalev-Shwartz and Ben-David's Theorem 26.5 (2014, §26.1, p. 328) converts it into a statement about the actual sample. If $|f(z)|\le c$ for all $f$ and $z$, then for $0<\delta<1$, with probability at least $1-\delta$ over the sample, every $f\in F$ satisfies $Pf-P_nf\le2\,\mathbb E_Z\widehat{\mathfrak R}_n(F)+c\sqrt{2\ln(2/\delta)/n}$. Here $\delta$ is a failure probability and $\ln$ is the natural logarithm. We recall only Theorem 26.5's statement. Its proof applies McDiarmid's inequality, which is stated in [[concentration]], to the uniform deviation; [[rademacher-properties]] carries out that step.
 
 So a class with small Rademacher complexity cannot fit noise, and a class that cannot fit noise has a small uniform deviation. The next section computes the complexity for the class used most often.
 
@@ -147,7 +147,7 @@ Each weight vector $w$ in the ball of radius $B$ gives one function. The norm is
 ::: theorem {#thm-linear} Linear-ball bound
 For any fixed points $z_1,\dots,z_n\in\mathbb R^d$,
 
-$$\widehat{\mathfrak R}_n(F_B;z_{1:n})=\frac Bn\,\mathbb E_\sigma\Bigl\lVert\sum_{i=1}^n\sigma_iz_i\Bigr\rVert_2\le\frac Bn\sqrt{\sum_{i=1}^n\lVert z_i\rVert_2^2}. \label{lin-mid}$$
+$$\begin{aligned}\widehat{\mathfrak R}_n(F_B;z_{1:n})&=\frac Bn\,\mathbb E_\sigma\Bigl\lVert\sum_{i=1}^n\sigma_iz_i\Bigr\rVert_2\\&\le\frac Bn\sqrt{\sum_{i=1}^n\lVert z_i\rVert_2^2}.\end{aligned} \label{lin-mid}$$
 
 If, in addition, every point satisfies $\lVert z_i\rVert_2\le R$, then
 
@@ -175,7 +175,7 @@ This is Jensen's inequality for the concave function $\sqrt{\cdot}$: the square 
 
 *Step 4: the cross terms cancel.* Expand the square:
 
-$$\lVert v_\sigma\rVert_2^2=\Bigl(\sum_i\sigma_iz_i\Bigr)^{\mathsf T}\Bigl(\sum_j\sigma_jz_j\Bigr)=\sum_{i=1}^n\sigma_i^2\lVert z_i\rVert_2^2+\sum_{i\neq j}\sigma_i\sigma_j\,z_i^{\mathsf T}z_j.$$
+$$\begin{aligned}\lVert v_\sigma\rVert_2^2&=\Bigl(\sum_i\sigma_iz_i\Bigr)^{\mathsf T}\Bigl(\sum_j\sigma_jz_j\Bigr)\\&=\sum_{i=1}^n\sigma_i^2\lVert z_i\rVert_2^2+\sum_{i\neq j}\sigma_i\sigma_j\,z_i^{\mathsf T}z_j.\end{aligned}$$
 
 For $i\neq j$ the signs are independent with mean zero, so $\mathbb E[\sigma_i\sigma_j]=\mathbb E\sigma_i\,\mathbb E\sigma_j=0$, and every cross term averages to zero. Since $\sigma_i^2=1$, $\mathbb E_\sigma\lVert v_\sigma\rVert_2^2=\sum_i\lVert z_i\rVert_2^2$. Combining with Steps 2 and 3 gives the inequality in \ref{lin-mid}.
 
@@ -201,7 +201,7 @@ Different sources attach the name "Rademacher complexity" to different quantitie
 
 Convention (c) is the one used by Boffi, Tu, Matni, Slotine and Sindhwani, *Learning Stability Certificates from Data*, arXiv:2008.05952v2, p. 6, where it is defined inside the statement of their Lemma 4.1. In our notation,
 
-$$\mathfrak R_n(F)=\sup_{z_1,\dots,z_n\in\mathcal Z}\ \mathbb E_\sigma\Bigl[\,\sup_{f\in F}\Bigl|\frac1n\sum_{i=1}^n\sigma_if(z_i)\Bigr|\Bigr]. \label{rad-wc}$$
+$$\begin{aligned}\mathfrak R_n(F)={}&\sup_{z_1,\dots,z_n\in\mathcal Z}\ \mathbb E_\sigma\Bigl[\,\sup_{f\in F}\\&\qquad\Bigl|\frac1n\sum_{i=1}^n\sigma_if(z_i)\Bigr|\Bigr].\end{aligned} \label{rad-wc}$$
 
 They write $\varepsilon$ for the signs and index the class by a certificate $V$; their data points are initial states $\xi$ and their functions are trajectory residuals $\xi\mapsto h(\xi,V)$. In this atlas the plain symbol $\mathfrak R_n$ is reserved for \ref{rad-wc}, as in [[boffi-lemma-4-1]].
 
@@ -211,7 +211,7 @@ They write $\varepsilon$ for the signs and index the class by a certificate $V$;
 - (a′) $\le$ (c), because the observed sample is one of the samples over which \ref{rad-wc} takes its supremum.
 - (b) $\le$ (c), because (b) averages (a) over samples, and an average is at most the largest value: (a) $\le$ (a′) $\le$ (c) for every sample.
 
-So \ref{rad-wc} upper-bounds the other conventions for the same class. The reverse fails: the single function of §\ref{toy} has (a) $=0$ but (a′) $=\tfrac12$.
+So \ref{rad-wc} upper-bounds the other conventions for the same class. The reverse fails: the single function of \ref{toy} has (a) $=0$ but (a′) $=\tfrac12$.
 
 **When signed and absolute agree.** If the class is symmetric, meaning $-f\in F$ whenever $f\in F$, then (a) $=$ (a′). Indeed, for each sign vector, $\bigl|\sum_i\sigma_if(Z_i)\bigr|$ equals either $\sum_i\sigma_if(Z_i)$ or $\sum_i\sigma_i(-f)(Z_i)$, and both members are in the class. The diagonal class and every linear ball $F_B$ are symmetric.
 

@@ -79,7 +79,7 @@ The return is an **unbiased** target: its expected value, given the state, is th
 If the step sizes shrink so that $\sum_t \alpha_t = \infty$ and $\sum_t \alpha_t^2 < \infty$, gradient Monte Carlo converges with probability 1 to a local minimum of $\overline{\text{VE}}$. With linear features the minimum is global: the weights settle at the best fit the features allow, in the sense of the value error.
 :::
 
-The states are drawn by the agent's own experience, so they come up as often as $\mu$ says, and the updates descend exactly the error weighted by $\mu$. On the 1000-state walk with ten groups, this means each group's weight converges to the $\mu$-weighted average of its states' true values (Figure \ref{fig-alpha} shows how fast).
+The states are drawn by the agent's own experience, so they come up as often as $\mu$ says, and the updates descend exactly the error weighted by $\mu$. On the 1000-state walk with ten groups, this means each group's weight converges to the $\mu$-weighted average of its states' true values (\ref{fig-alpha} shows how fast).
 
 ### Choosing the step size {#stepsize}
 
